@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ poem.poem_name if poem.poem_name else 'Interactive Poem' }} - Boony</title>
+    <style>
+        :root {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #fff;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --accent-color: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 50%, #ff6b9d 100%);
+            --border-color: #ddd;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg-primary);
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--text-primary);
+        }
+
+        .stars-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(2px 2px at 160px 30px, #fff, transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: twinkle 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 90vw;
+            width: 100%;
+            margin: 20px auto;
+            box-sizing: border-box;
+        }
+
+        .title {
+             font-size: 3rem;
+             background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+             -webkit-background-clip: text;
+             -webkit-text-fill-color: transparent;
+             background-clip: text;
+             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+             margin-bottom: 30px;
+             animation: titleRainbow 3s ease-in-out infinite, titleBounce 2s ease-in-out infinite;
+         }
+
+         @keyframes titleRainbow {
+             0% { filter: hue-rotate(0deg) drop-shadow(0 0 10px rgba(255, 107, 107, 0.8)); }
+             25% { filter: hue-rotate(90deg) drop-shadow(0 0 15px rgba(78, 205, 196, 0.8)); }
+             50% { filter: hue-rotate(180deg) drop-shadow(0 0 20px rgba(69, 183, 209, 0.8)); }
+             75% { filter: hue-rotate(270deg) drop-shadow(0 0 15px rgba(150, 206, 180, 0.8)); }
+             100% { filter: hue-rotate(360deg) drop-shadow(0 0 10px rgba(254, 202, 87, 0.8)); }
+         }
+         
+         @keyframes titleBounce {
+             0%, 100% { transform: translateY(0px); }
+             50% { transform: translateY(-5px); }
+         }
+
+        @keyframes rainbowText {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 100% 50%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes glow {
+            from { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px #FFD700; }
+            to { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px #FFD700, 0 0 30px #FFD700; }
+        }
+
+        .poem-container {
+            margin: 30px 0;
+            line-height: 1.8;
+        }
+
+        .poem-line {
+            font-size: 2.5rem;
+            color: var(--text-primary);
+            margin: 15px 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+        }
+
+        .word {
+            display: inline-block;
+            margin: 0 8px;
+            padding: 5px 10px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .word.highlight {
+            background: var(--accent-color);
+            color: #000;
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .word.word-singing {
+            background: var(--accent-color);
+            background-size: 200% 200%;
+            animation: singing-glow 1.5s ease-in-out infinite;
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .word.word-rainbow {
+            animation: word-rainbow 1.5s ease-in-out infinite;
+        }
+
+        .word.word-fade-out {
+            opacity: 0.7;
+            transform: scale(0.95);
+            transition: all 0.3s ease-out;
+        }
+
+        @keyframes singing-glow {
+            0% {
+                background-position: 0% 50%;
+                box-shadow: 0 4px 20px rgba(255, 107, 107, 0.8), 0 0 30px rgba(255, 142, 83, 0.6);
+            }
+            50% {
+                background-position: 100% 50%;
+                box-shadow: 0 6px 25px rgba(255, 142, 83, 0.9), 0 0 40px rgba(255, 107, 107, 0.7);
+            }
+            100% {
+                background-position: 0% 50%;
+                box-shadow: 0 4px 20px rgba(255, 107, 107, 0.8), 0 0 30px rgba(255, 142, 83, 0.6);
+            }
+        }
+
+        @keyframes word-rainbow {
+            0% {
+                background: var(--accent-color);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                transform: rotateY(0deg) scale(1.2);
+                text-shadow: 0 0 15px rgba(255, 107, 107, 0.7);
+                filter: hue-rotate(0deg) brightness(1.2);
+            }
+            25% {
+                background: var(--accent-color);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                transform: rotateY(90deg) scale(1.3);
+                text-shadow: 0 0 20px rgba(78, 205, 196, 0.8);
+                filter: hue-rotate(90deg) brightness(1.4);
+            }
+            50% {
+                background: var(--accent-color);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                transform: rotateY(180deg) scale(1.4);
+                text-shadow: 0 0 25px rgba(69, 183, 209, 0.9);
+                filter: hue-rotate(180deg) brightness(1.6);
+            }
+            75% {
+                background: var(--accent-color);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                transform: rotateY(270deg) scale(1.3);
+                text-shadow: 0 0 20px rgba(150, 206, 180, 0.8);
+                filter: hue-rotate(270deg) brightness(1.4);
+            }
+            100% {
+                background: var(--accent-color);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                transform: rotateY(360deg) scale(1.2);
+                text-shadow: 0 0 15px rgba(254, 202, 87, 0.7);
+                filter: hue-rotate(360deg) brightness(1.2);
+            }
+        }
+
+        .word.word-bounce {
+            animation: word-bounce 0.6s ease-in-out;
+        }
+
+        .word.word-glow {
+            box-shadow: 0 0 20px #FFD700, 0 0 40px #FFD700, 0 0 60px #FFD700;
+            animation: glow-pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes word-bounce {
+            0% { transform: translateY(0) scale(1); }
+            30% { transform: translateY(-10px) scale(1.1); }
+            50% { transform: translateY(-15px) scale(1.15); }
+            70% { transform: translateY(-10px) scale(1.1); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        @keyframes glow-pulse {
+            0% { 
+                box-shadow: 0 0 20px #FFD700, 0 0 40px #FFD700, 0 0 60px #FFD700;
+                filter: brightness(1.2);
+            }
+            100% { 
+                box-shadow: 0 0 30px #FFD700, 0 0 60px #FFD700, 0 0 90px #FFD700;
+                filter: brightness(1.5);
+            }
+        }
+
+        @keyframes sparkleAnimation {
+            0% {
+                opacity: 1;
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1) rotate(180deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0) rotate(360deg) translateY(-20px);
+            }
+        }
+
+        .word:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Score Display Styles */
+        .score-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #45b7d1 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 0 20px rgba(255, 107, 107, 0.4);
+            z-index: 1000;
+            min-width: 140px;
+            text-align: center;
+            animation: scoreGlow 2s ease-in-out infinite, scoreBounce 3s ease-in-out infinite;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .score-display .score-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            animation: labelPulse 1.5s ease-in-out infinite;
+        }
+
+        .score-display .score-value {
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: valueShine 2s ease-in-out infinite;
+        }
+
+        @keyframes scoreGlow {
+            0%, 100% { 
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 0 20px rgba(255, 107, 107, 0.4);
+            }
+            50% { 
+                box-shadow: 0 15px 40px rgba(0,0,0,0.4), 0 0 30px rgba(78, 205, 196, 0.6);
+            }
+        }
+
+        @keyframes scoreBounce {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-3px) scale(1.05); }
+        }
+
+        @keyframes labelPulse {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes valueShine {
+            0%, 100% { 
+                color: white;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            }
+            50% { 
+                color: #fff700;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.5), 0 0 10px rgba(255, 247, 0, 0.8);
+            }
+        }
+
+        /* Floating Hearts Animation */
+        .floating-heart {
+            position: fixed;
+            font-size: 24px;
+            pointer-events: none;
+            z-index: 999;
+            animation: floatUp 3s ease-out forwards;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0.5) rotate(0deg);
+                filter: hue-rotate(0deg) brightness(1.2);
+            }
+            25% {
+                opacity: 1;
+                transform: translateY(-25px) scale(1) rotate(90deg);
+                filter: hue-rotate(90deg) brightness(1.4);
+            }
+            50% {
+                opacity: 1;
+                transform: translateY(-50px) scale(1.2) rotate(180deg);
+                filter: hue-rotate(180deg) brightness(1.6);
+            }
+            75% {
+                opacity: 0.8;
+                transform: translateY(-75px) scale(1.4) rotate(270deg);
+                filter: hue-rotate(270deg) brightness(1.4);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-120px) scale(1.8) rotate(360deg);
+                filter: hue-rotate(360deg) brightness(1.2);
+            }
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+            background-size: 300% 300%;
+            animation: gradientShift 3s ease infinite;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+            animation: pulse 0.6s infinite alternate, gradientShift 3s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: translateY(-3px) scale(1.05); }
+            100% { transform: translateY(-3px) scale(1.1); }
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin: 20px 0;
+            font-size: 1.3rem;
+            color: var(--accent-color);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            min-height: 30px;
+            font-weight: 600;
+        }
+
+        .recording-indicator {
+            display: none;
+            color: #ff4444;
+            font-size: 1.1rem;
+            margin: 10px 0;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-btn:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-level-1 {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #8e2de2;
+        }
+        .difficulty-level-2 {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #2193b0;
+        }
+        .difficulty-level-3 {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #ff8a80;
+        }
+        .difficulty-nursery {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #8e2de2;
+        }
+        .difficulty-beginner {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #2193b0;
+        }
+        .difficulty-intermediate {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #ff8a80;
+        }
+
+        /* Large screens */
+        @media (min-width: 1200px) {
+            .container { max-width: 1000px; padding: 30px; }
+            .title { font-size: 3.5rem; }
+            .poem-line { font-size: 2.8rem; }
+        }
+
+        /* Medium screens */
+        @media (max-width: 1024px) {
+            .container { max-width: 85vw; padding: 25px; }
+            .title { font-size: 2.8rem; }
+            .poem-line { font-size: 2.2rem; }
+            .word { margin: 0 6px; padding: 4px 8px; }
+        }
+
+        /* Tablets */
+        @media (max-width: 768px) {
+            .container { max-width: 95vw; padding: 20px; margin: 15px auto; }
+            .title { font-size: 2.2rem; }
+            .poem-line { font-size: 1.8rem; }
+            .word { margin: 0 4px; padding: 3px 6px; font-size: 0.9rem; }
+            .btn { padding: 12px 20px; font-size: 0.95rem; }
+            .controls { gap: 12px; flex-wrap: wrap; }
+        }
+
+        /* Mobile phones */
+        @media (max-width: 480px) {
+            .container { max-width: 98vw; padding: 15px; margin: 10px auto; }
+            .title { font-size: 1.8rem; margin-bottom: 20px; }
+            .poem-line { font-size: 1.4rem; margin: 10px 0; }
+            .word { margin: 0 2px; padding: 2px 4px; font-size: 0.85rem; }
+            .btn { padding: 10px 16px; font-size: 0.9rem; }
+            .controls { gap: 8px; justify-content: center; }
+            .credit-display { padding: 10px; margin-bottom: 15px; }
+        }
+
+        /* Very small screens */
+        @media (max-width: 320px) {
+            .container { padding: 10px; }
+            .title { font-size: 1.5rem; }
+            .poem-line { font-size: 1.2rem; line-height: 1.6; }
+            .word { margin: 0 1px; padding: 1px 3px; font-size: 0.8rem; }
+            .btn { padding: 8px 12px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars-background"></div>
+    
+    <button class="back-btn" onclick="window.history.back()">← Back</button>
+    
+    <!-- Score Display -->
+    <div class="score-display" id="scoreDisplay" style="display: none;">
+        <div class="score-label">🎵 Karaoke Score</div>
+        <div class="score-value" id="scoreValue">0</div>
+    </div>
+    
+    <div class="container">
+        <h1 class="title">🌟 {{ poem.poem_name if poem.poem_name else 'Interactive Poem' }} 🌟</h1>
+        
+        {% if poem.difficulty_level %}
+        <div class="difficulty-badge difficulty-{{ poem.difficulty_level }}">
+                    {{ poem.difficulty_level.title() }} - Day {{ poem.day if poem.day else 1 }}
+        </div>
+        {% endif %}
+        
+        <div class="poem-container" id="poemContainer">
+            <!-- Dynamic poem content will be generated here -->
+        </div>
+        
+        <!-- Credit Display -->
+        <div class="credit-display" style="background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:10px; padding:15px; margin-bottom:20px; text-align:center;">
+            <h4 style="color:var(--accent-color); margin:0 0 5px 0; font-size:16px;">💰 Karaoke Credits</h4>
+            <div id="karaoke-credits" style="font-size:24px; font-weight:bold; color:var(--text-primary);">0</div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" id="singBtn" onclick="togglePoem()">🎵 Play Poem</button>
+            <button class="btn" id="playBtn" onclick="toggleTune()">🎼 Play Tune</button>
+            <button class="btn" id="recordBtn" onclick="toggleRecording()">🎤 Record</button>
+        </div>
+        
+        <div class="status" id="status">Click 'Play Poem' to hear the poem with music! 🎵</div>
+        <div class="recording-indicator" id="recordingIndicator">🔴 Recording...</div>
+        
+        <audio id="backgroundMusic" loop>
+            <source src="{{ url_for('static', filename='audio/twinkle_star_tune.mp3') }}" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <script>
+        // Global variables
+        let audioContext;
+        let mediaRecorder;
+        let recordedChunks = [];
+        let isRecording = false;
+        let isPlaying = false;
+        let isSinging = false;
+        let currentTTSAudio = null;
+        let backgroundMusic = document.getElementById('backgroundMusic');
+        let words = [];
+        let highlightInterval;
+        let tuneTimeouts = []; // Track tune timeouts
+        let activeOscillators = []; // Track active oscillators
+        let karaokeScore = 0;
+        let wordsHit = 0;
+        let totalWords = 0;
+        
+        // Poem data from server
+        const poemData = {
+            name: {{ poem.poem_name|tojson if poem.poem_name else '"Interactive Poem"'|safe }},
+            content: {{ poem.poem_content|tojson if poem.poem_content else '"Sample poem content"'|safe }},
+            difficulty: {{ poem.difficulty_level|tojson if poem.difficulty_level else '"nursery"'|safe }}
+        };
+        
+        // Initialize audio context
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            generatePoemHTML();
+            words = document.querySelectorAll('.word');
+            totalWords = words.length;
+            
+            // Enable record button on page load
+            document.getElementById('recordBtn').disabled = false;
+            
+            // Load karaoke credits
+            loadKaraokeCredits();
+            
+            // Initialize score display
+            updateScoreDisplay();
+            
+            // Add click listeners to words for pronunciation
+            words.forEach(word => {
+                word.addEventListener('click', () => {
+                    playWordPronunciation(word.textContent);
+                });
+            });
+            
+            // Auto-play tune when poem frame opens
+            setTimeout(() => {
+                document.getElementById('status').textContent = 'Auto-starting the magical poem tune! 🎵✨';
+                togglePoem();
+            }, 1500); // Small delay to let page fully load
+        });
+        
+        function generatePoemHTML() {
+            const container = document.getElementById('poemContainer');
+            const sentences = poemData.content.split(/[.!?]+/).filter(s => s.trim());
+            
+            let wordIndex = 0;
+            let timeOffset = 0;
+            
+            sentences.forEach((sentence, sentenceIndex) => {
+                const words = sentence.trim().split(/\s+/);
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'poem-line';
+                
+                words.forEach((word, wordIndexInSentence) => {
+                    if (word.trim()) {
+                        const wordSpan = document.createElement('span');
+                        wordSpan.className = 'word';
+                        wordSpan.textContent = word.replace(/[,;:]/g, '') + (word.match(/[,;:]/) ? word.match(/[,;:]/)[0] : '');
+                        
+                        // Better timing calculation for 2.5x faster karaoke transitions
+                        const wordLength = word.length;
+                        const baseTime = 0.24; // Reduced base time for 2.5x faster karaoke
+                        const lengthMultiplier = wordLength > 6 ? 0.04 : 0.02; // Reduced time for longer words
+                        const calculatedTime = baseTime + (wordLength * lengthMultiplier);
+                        
+                        wordSpan.setAttribute('data-time', timeOffset.toString());
+                        wordSpan.setAttribute('data-duration', calculatedTime.toString());
+                        lineDiv.appendChild(wordSpan);
+                        
+                        timeOffset += calculatedTime;
+                        wordIndex++;
+                    }
+                });
+                
+                container.appendChild(lineDiv);
+                timeOffset += 0.16; // Reduced pause between sentences for 2.5x faster karaoke
+            });
+        }
+        
+        async function playWordPronunciation(word) {
+            try {
+                const cleanWord = word.replace(/[^a-zA-Z]/g, '');
+                if (!cleanWord) return;
+                
+                const ttsParams = new URLSearchParams({
+                    text: cleanWord,
+                    voice: 'Female',
+                    accent: 'en-US',
+                    lang: 'english',
+                    voice_name: 'en-US-AriaNeural',
+                    mode: 'online'
+                });
+                
+                const response = await fetch(`/tts?${ttsParams.toString()}`);
+                if (!response.ok) return;
+                
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                audio.volume = 0.8;
+                audio.play();
+                
+            } catch (error) {
+                console.error('Error playing word pronunciation:', error);
+            }
+        }
+        
+        // Load existing karaoke credits from database
+        function loadKaraokeCredits() {
+            const currentDay = window.location.pathname.includes('/poem/') ? 
+                window.location.pathname.split('/')[2] : '1';
+            
+            fetch(`/api/get_progress?day=Day-${currentDay}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.progress) {
+                        const credits = data.progress.karaoke || 0;
+                        document.getElementById('karaoke-credits').innerText = credits;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading karaoke credits:', error);
+                });
+        }
+        
+        // Add karaoke credits when poem is played
+        function addKaraokeCredits() {
+            const creditsToAdd = 10;
+            const currentDay = window.location.pathname.includes('/poem/') ? 
+                window.location.pathname.split('/')[2] : '1';
+            
+            // Update UI immediately
+            const currentCredits = parseInt(document.getElementById('karaoke-credits').innerText) || 0;
+            const newCredits = currentCredits + creditsToAdd;
+            document.getElementById('karaoke-credits').innerText = newCredits;
+            
+            fetch('/api/add_credits', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    day: `Day-${currentDay}`,
+                    credits: creditsToAdd,
+                    statement_index: 0,
+                    activity_type: 'karaoke'
+                })
+            }).then(response => response.json())
+            .then(data => {
+                console.log('Karaoke credits added:', data);
+                // Show success message
+                document.getElementById('status').textContent = `🎉 Poem completed! +${creditsToAdd} credits earned!`;
+            })
+            .catch(error => {
+                console.error('Error adding karaoke credits:', error);
+                // Revert UI on error
+                document.getElementById('karaoke-credits').innerText = currentCredits;
+            });
+        }
+        
+        function toggleTune() {
+            if (isPlaying) {
+                // Stop tune
+                isPlaying = false;
+                
+                // Stop tune timeouts
+                tuneTimeouts.forEach(timeout => clearTimeout(timeout));
+                tuneTimeouts = [];
+                
+                // Stop active oscillators
+                activeOscillators.forEach(oscillator => {
+                    try {
+                        oscillator.stop();
+                    } catch (e) {
+                        // Oscillator might already be stopped
+                    }
+                });
+                activeOscillators = [];
+                
+                document.getElementById('playBtn').textContent = '🎼 Play Tune';
+                document.getElementById('status').textContent = 'Tune stopped.';
+                return;
+            }
+            
+            initAudioContext();
+            isPlaying = true;
+            document.getElementById('playBtn').textContent = '⏹️ Stop Tune';
+            document.getElementById('status').textContent = 'Playing tune... Listen and sing along!';
+            
+            playDynamicMelody();
+            
+            // Re-enable play button after melody finishes
+            setTimeout(() => {
+                if (isPlaying) {
+                    isPlaying = false;
+                    document.getElementById('playBtn').disabled = false;
+                    document.getElementById('playBtn').textContent = '🎼 Play Tune';
+                    document.getElementById('stopBtn').disabled = true;
+                    document.getElementById('status').textContent = 'Tune finished! Click Play Poem to hear it with words.';
+                }
+            }, 25000); // Approximate duration of the melody
+        }
+        
+        function generateDynamicMelody() {
+            if (!poemData || !poemData.content) return [];
+            
+            // Analyze poem structure for dynamic melody generation
+            const lines = poemData.content.split('\n').filter(line => line.trim());
+            const melody = [];
+            
+            // Musical scales for children (pentatonic - sounds good always)
+            const scales = {
+                happy: [261.63, 293.66, 329.63, 392.00, 440.00], // C Major Pentatonic
+                playful: [277.18, 311.13, 369.99, 415.30, 466.16], // C# Major Pentatonic  
+                gentle: [246.94, 277.18, 311.13, 369.99, 415.30], // B Major Pentatonic
+            };
+            
+            // Choose scale based on poem mood (can be enhanced with AI analysis)
+            const currentScale = scales.happy;
+            
+            lines.forEach((line, lineIndex) => {
+                const words = line.split(' ').filter(word => word.trim());
+                const linePattern = [];
+                
+                words.forEach((word, wordIndex) => {
+                    const syllableCount = countSyllables(word);
+                    const wordLength = word.length;
+                    
+                    // Create melody based on word characteristics
+                    for (let i = 0; i < syllableCount; i++) {
+                        let noteIndex;
+                        
+                        // Melody patterns for children
+                        if (lineIndex % 2 === 0) {
+                            // Ascending pattern for even lines
+                            noteIndex = (wordIndex + i) % currentScale.length;
+                        } else {
+                            // Descending pattern for odd lines
+                            noteIndex = (currentScale.length - 1 - (wordIndex + i)) % currentScale.length;
+                        }
+                        
+                        // Add rhythm variation
+                        const duration = syllableCount > 2 ? 0.4 : 0.6;
+                        const frequency = currentScale[noteIndex];
+                        
+                        linePattern.push({
+                            frequency: frequency,
+                            duration: duration,
+                            syllable: i + 1,
+                            word: word
+                        });
+                    }
+                    
+                    // Add small pause between words
+                    if (wordIndex < words.length - 1) {
+                        linePattern.push({ frequency: 0, duration: 0.1, pause: true });
+                    }
+                });
+                
+                // Add longer pause between lines
+                linePattern.push({ frequency: 0, duration: 0.3, pause: true });
+                melody.push(...linePattern);
+            });
+            
+            return melody;
+        }
+        
+        function countSyllables(word) {
+            // Simple syllable counting for melody generation
+            word = word.toLowerCase().replace(/[^a-z]/g, '');
+            if (word.length <= 3) return 1;
+            
+            const vowels = 'aeiouy';
+            let count = 0;
+            let previousWasVowel = false;
+            
+            for (let i = 0; i < word.length; i++) {
+                const isVowel = vowels.includes(word[i]);
+                if (isVowel && !previousWasVowel) {
+                    count++;
+                }
+                previousWasVowel = isVowel;
+            }
+            
+            // Handle silent e
+            if (word.endsWith('e') && count > 1) {
+                count--;
+            }
+            
+            return Math.max(1, count);
+        }
+        
+        function playDynamicMelody() {
+            if (!audioContext) return;
+            
+            // Clear any existing timeouts
+            tuneTimeouts.forEach(timeout => clearTimeout(timeout));
+            tuneTimeouts = [];
+            
+            const melody = generateDynamicMelody();
+            let currentTime = 0;
+            
+            melody.forEach((note, index) => {
+                if (note.pause) {
+                    currentTime += note.duration;
+                    return;
+                }
+                
+                const timeout = setTimeout(() => {
+                    if (isPlaying) {
+                        playEnhancedTone(note.frequency, note.duration, 'melody');
+                    }
+                }, currentTime * 1000);
+                
+                tuneTimeouts.push(timeout);
+                currentTime += note.duration;
+            });
+            
+            // Update the melody duration for the timeout
+            setTimeout(() => {
+                if (isPlaying) {
+                    isPlaying = false;
+                    document.getElementById('playBtn').disabled = false;
+                    document.getElementById('playBtn').textContent = '🎼 Play Tune';
+                    document.getElementById('status').textContent = 'Tune finished! Click Play Poem to hear it with words.';
+                }
+            }, (currentTime + 1) * 1000);
+        }
+        
+        function playEnhancedTone(frequency, duration, type = 'melody', destination = null) {
+            if (!audioContext || frequency === 0) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            const filterNode = audioContext.createBiquadFilter();
+            const reverbNode = audioContext.createConvolver();
+            
+            // Create reverb impulse response for professional sound
+            const impulseLength = audioContext.sampleRate * 0.5; // 0.5 second reverb
+            const impulse = audioContext.createBuffer(2, impulseLength, audioContext.sampleRate);
+            
+            for (let channel = 0; channel < 2; channel++) {
+                const channelData = impulse.getChannelData(channel);
+                for (let i = 0; i < impulseLength; i++) {
+                    channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / impulseLength, 2);
+                }
+            }
+            reverbNode.buffer = impulse;
+            
+            // Audio routing with effects
+            oscillator.connect(filterNode);
+            filterNode.connect(gainNode);
+            
+            // Add reverb for professional sound
+            gainNode.connect(reverbNode);
+            reverbNode.connect(audioContext.destination);
+            
+            // Also connect dry signal
+            gainNode.connect(audioContext.destination);
+            
+            if (destination) {
+                gainNode.connect(destination);
+            }
+            
+            // Enhanced oscillator settings
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            
+            // Different instrument sounds for variety
+            switch (type) {
+                case 'melody':
+                    oscillator.type = 'triangle'; // Warmer sound for melody
+                    filterNode.type = 'lowpass';
+                    filterNode.frequency.setValueAtTime(2000, audioContext.currentTime);
+                    break;
+                case 'harmony':
+                    oscillator.type = 'sawtooth'; // Richer harmonics
+                    filterNode.type = 'bandpass';
+                    filterNode.frequency.setValueAtTime(1000, audioContext.currentTime);
+                    break;
+                case 'bass':
+                    oscillator.type = 'square'; // Strong fundamental
+                    filterNode.type = 'lowpass';
+                    filterNode.frequency.setValueAtTime(500, audioContext.currentTime);
+                    break;
+                default:
+                    oscillator.type = 'sine';
+                    filterNode.type = 'allpass';
+            }
+            
+            // Professional envelope (ADSR)
+            const attackTime = 0.05;
+            const decayTime = 0.1;
+            const sustainLevel = 0.6;
+            const releaseTime = 0.2;
+            
+            const startTime = audioContext.currentTime;
+            const attackEnd = startTime + attackTime;
+            const decayEnd = attackEnd + decayTime;
+            const releaseStart = startTime + duration - releaseTime;
+            
+            gainNode.gain.setValueAtTime(0, startTime);
+            gainNode.gain.linearRampToValueAtTime(0.3, attackEnd); // Attack
+            gainNode.gain.linearRampToValueAtTime(sustainLevel * 0.3, decayEnd); // Decay
+            gainNode.gain.setValueAtTime(sustainLevel * 0.3, releaseStart); // Sustain
+            gainNode.gain.linearRampToValueAtTime(0, startTime + duration); // Release
+            
+            oscillator.start(startTime);
+            oscillator.stop(startTime + duration);
+            
+            // Track active oscillators
+            activeOscillators.push(oscillator);
+            
+            // Remove from tracking when it ends
+            oscillator.onended = () => {
+                const index = activeOscillators.indexOf(oscillator);
+                if (index > -1) {
+                    activeOscillators.splice(index, 1);
+                }
+            };
+        }
+        
+        async function toggleRecording() {
+            if (isRecording) {
+                // Stop recording
+                isRecording = false;
+                
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
+                
+                document.getElementById('recordBtn').textContent = '🎤 Record';
+                document.getElementById('recordingIndicator').style.display = 'none';
+                document.getElementById('status').textContent = 'Recording stopped. Processing...';
+                return;
+            }
+            
+            try {
+                initAudioContext();
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                recordedChunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+                    const url = URL.createObjectURL(blob);
+                    const audio = new Audio(url);
+                    
+                    document.getElementById('status').textContent = 'Recording saved!';
+                    
+                    // Remove existing play recording button if any
+                    const existingBtn = document.getElementById('playRecordingBtn');
+                    if (existingBtn) {
+                        existingBtn.remove();
+                    }
+                    
+                    const playRecordingBtn = document.createElement('button');
+                    playRecordingBtn.textContent = '▶️ Play Recording';
+                    playRecordingBtn.className = 'btn';
+                    playRecordingBtn.id = 'playRecordingBtn';
+                    playRecordingBtn.onclick = () => {
+                        if (audio.paused) {
+                            audio.play();
+                            playRecordingBtn.textContent = '⏸️ Pause Recording';
+                        } else {
+                            audio.pause();
+                            playRecordingBtn.textContent = '▶️ Play Recording';
+                        }
+                    };
+                    
+                    audio.onended = () => {
+                        playRecordingBtn.textContent = '▶️ Play Recording';
+                    };
+                    
+                    const controls = document.querySelector('.controls');
+                    controls.appendChild(playRecordingBtn);
+                };
+                
+                isRecording = true;
+                mediaRecorder.start();
+                
+                document.getElementById('recordBtn').textContent = '⏹️ Stop Recording';
+                document.getElementById('recordingIndicator').style.display = 'block';
+                document.getElementById('status').textContent = 'Recording... Sing along with the tune!';
+                
+                // Start background melody for recording
+                const destination = audioContext.createMediaStreamDestination();
+                playSimpleMelodyForRecording(destination);
+                
+            } catch (error) {
+                console.error('Error starting recording:', error);
+                document.getElementById('status').textContent = 'Error: Could not start recording. Please check microphone permissions.';
+            }
+        }
+        
+        function stopAll() {
+            // Stop all audio activities
+            isRecording = false;
+            isPlaying = false;
+            isSinging = false;
+            
+            // Stop recording if active
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            
+            // Stop TTS audio
+            if (currentTTSAudio) {
+                currentTTSAudio.pause();
+                currentTTSAudio = null;
+            }
+            
+            // Stop background music
+            if (backgroundMusic && !backgroundMusic.paused) {
+                backgroundMusic.pause();
+            }
+            
+            // Stop tune timeouts
+            tuneTimeouts.forEach(timeout => clearTimeout(timeout));
+            tuneTimeouts = [];
+            
+            // Stop active oscillators
+            activeOscillators.forEach(oscillator => {
+                try {
+                    oscillator.stop();
+                } catch (e) {
+                    // Oscillator might already be stopped
+                }
+            });
+            activeOscillators = [];
+            
+            // Stop word highlighting
+            if (highlightInterval) {
+                clearInterval(highlightInterval);
+                words.forEach(word => word.classList.remove('highlight'));
+            }
+            
+            // Reset button states
+            document.getElementById('recordBtn').textContent = '🎤 Record';
+            document.getElementById('playBtn').textContent = '🎼 Play Tune';
+            document.getElementById('singBtn').textContent = '🎵 Play Poem';
+            document.getElementById('recordingIndicator').style.display = 'none';
+            
+            document.getElementById('status').textContent = 'All audio stopped.';
+        }
+        
+        function playSimpleMelodyForRecording(destination) {
+            if (!audioContext) return;
+            
+            const notes = [
+                261.63, 261.63, 391.95, 391.95, 440, 440, 391.95,
+                349.23, 349.23, 329.63, 329.63, 293.66, 293.66, 261.63,
+                391.95, 391.95, 349.23, 349.23, 329.63, 329.63, 293.66,
+                391.95, 391.95, 349.23, 349.23, 329.63, 329.63, 293.66,
+                261.63, 261.63, 391.95, 391.95, 440, 440, 391.95,
+                349.23, 349.23, 329.63, 329.63, 293.66, 293.66, 261.63
+            ];
+            
+            const noteDuration = 0.6;
+            
+            notes.forEach((frequency, index) => {
+                const timeout = setTimeout(() => {
+                    if (isRecording) { // Only play if still recording
+                        playToneForRecording(frequency, noteDuration, destination);
+                    }
+                }, index * noteDuration * 1000);
+                tuneTimeouts.push(timeout);
+            });
+        }
+        
+        function playToneForRecording(frequency, duration, destination) {
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(destination);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+            
+            // Track active oscillators
+            activeOscillators.push(oscillator);
+            
+            // Remove from tracking when it ends
+            oscillator.onended = () => {
+                const index = activeOscillators.indexOf(oscillator);
+                if (index > -1) {
+                    activeOscillators.splice(index, 1);
+                }
+            };
+        }
+        
+        // Enhanced word highlighting with visual effects and scoring
+        function syncWordHighlighting(audioCurrentTime) {
+            const words = document.querySelectorAll('.word');
+            let activeWordFound = false;
+            
+            words.forEach((word, index) => {
+                const wordTime = parseFloat(word.getAttribute('data-time'));
+                const wordDuration = parseFloat(word.getAttribute('data-duration')) || 0.42;
+                const wordEndTime = wordTime + wordDuration;
+                
+                // Remove all classes first
+                word.classList.remove('highlight', 'word-singing', 'word-rainbow', 'word-fade-out', 'word-bounce', 'word-glow');
+                
+                if (audioCurrentTime >= wordTime && audioCurrentTime < wordEndTime && !activeWordFound) {
+                    // Current word being sung - add multiple effects
+                    word.classList.add('highlight', 'word-singing', 'word-rainbow', 'word-bounce', 'word-glow');
+                    activeWordFound = true;
+                    
+                    // Create sparkle effect
+                    createSparkleEffect(word);
+                    
+                    // Update score for word hit
+                    if (!word.hasAttribute('data-scored')) {
+                        wordsHit++;
+                        word.setAttribute('data-scored', 'true');
+                        updateScore();
+                        showFloatingHearts(word);
+                    }
+                    
+                } else if (audioCurrentTime >= wordEndTime) {
+                    // Word already sung
+                    word.classList.add('word-fade-out');
+                }
+            });
+        }
+        
+        function createSparkleEffect(element) {
+            // Create sparkle particles around the word
+            const rect = element.getBoundingClientRect();
+            const sparkleCount = 3;
+            
+            for (let i = 0; i < sparkleCount; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.position = 'fixed';
+                sparkle.style.left = (rect.left + Math.random() * rect.width) + 'px';
+                sparkle.style.top = (rect.top + Math.random() * rect.height) + 'px';
+                sparkle.style.width = '4px';
+                sparkle.style.height = '4px';
+                sparkle.style.backgroundColor = '#FFD700';
+                sparkle.style.borderRadius = '50%';
+                sparkle.style.pointerEvents = 'none';
+                sparkle.style.zIndex = '1000';
+                sparkle.style.animation = 'sparkleAnimation 0.8s ease-out forwards';
+                
+                document.body.appendChild(sparkle);
+                
+                // Remove sparkle after animation
+                setTimeout(() => {
+                    if (sparkle.parentNode) {
+                        sparkle.parentNode.removeChild(sparkle);
+                    }
+                }, 800);
+            }
+        }
+        
+        function startWordHighlighting() {
+            const startTime = Date.now();
+            let previousWord = null;
+            
+            highlightInterval = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                
+                // Remove highlight from previous word with smooth transition
+                if (previousWord) {
+                    previousWord.classList.remove('highlight');
+                    previousWord.classList.add('word-fade-out');
+                    setTimeout(() => {
+                        previousWord.classList.remove('word-fade-out');
+                    }, 300);
+                }
+                
+                let currentWord = null;
+                for (let i = 0; i < words.length; i++) {
+                    const wordTime = parseFloat(words[i].dataset.time);
+                    const nextWordTime = i < words.length - 1 ? parseFloat(words[i + 1].dataset.time) : wordTime + 2;
+                    
+                    if (elapsed >= wordTime && elapsed < nextWordTime) {
+                        currentWord = words[i];
+                        break;
+                    }
+                }
+                
+                if (currentWord && currentWord !== previousWord) {
+                    // Add professional singing highlight effect
+                    currentWord.classList.add('highlight', 'word-singing');
+                    
+                    // Add rainbow effect for emphasis
+                    setTimeout(() => {
+                        currentWord.classList.add('word-rainbow');
+                    }, 200);
+                    
+                    setTimeout(() => {
+                        currentWord.classList.remove('word-rainbow');
+                    }, 1400);
+                    
+                    previousWord = currentWord;
+                }
+                
+                // End highlighting when poem finishes
+                if (elapsed > parseFloat(words[words.length - 1].dataset.time) + 8.0) {
+                    clearInterval(highlightInterval);
+                    words.forEach(word => {
+                        word.classList.remove('highlight', 'word-singing', 'word-fade-out', 'word-rainbow');
+                    });
+                }
+            }, 50); // Faster update rate for smoother highlighting
+        }
+        
+        function stopAll() {
+            isPlaying = false;
+            isSinging = false;
+            
+            if (currentTTSAudio) {
+                currentTTSAudio.pause();
+                currentTTSAudio = null;
+            }
+            
+            if (backgroundMusic && !backgroundMusic.paused) {
+                backgroundMusic.pause();
+            }
+            
+            if (highlightInterval) {
+                clearInterval(highlightInterval);
+                words.forEach(word => word.classList.remove('highlight'));
+            }
+            
+            document.getElementById('singBtn').textContent = '🎵 Play Poem';
+            document.getElementById('status').textContent = 'Playback stopped.';
+        }
+        
+        async function togglePoem() {
+            if (isSinging) {
+                // Stop poem
+                if (currentTTSAudio) {
+                    currentTTSAudio.pause();
+                    currentTTSAudio = null;
+                }
+                stopAll();
+                isSinging = false;
+                document.getElementById('singBtn').textContent = '🎵 Play Poem';
+                document.getElementById('status').textContent = 'Poem stopped.';
+                resetScore(); // Reset score when stopping
+                return;
+            }
+            
+            try {
+                resetScore(); // Reset score when starting new session
+                isSinging = true;
+                document.getElementById('singBtn').textContent = '⏹️ Stop Poem';
+                document.getElementById('status').textContent = 'Starting poem playback... 🎵';
+                
+                // Create more melodic text with better pauses for singing
+                const melodicText = poemData.content
+                    .replace(/[.!?]/g, '... ') // Longer pauses at sentence ends
+                    .replace(/,/g, ', ') // Short pauses at commas
+                    .replace(/;/g, '; ') // Medium pauses at semicolons
+                    .replace(/:/g, ': '); // Medium pauses at colons
+                
+                const ttsParams = new URLSearchParams({
+                    text: melodicText,
+                    voice: 'Female',
+                    accent: 'en-US',
+                    lang: 'english',
+                    voice_name: 'en-US-JennyNeural', // Child-friendly cartoon voice
+                    mode: 'online',
+                    rate: '0.7', // Much slower for childish singing style
+                    pitch: '+5Hz' // Higher pitch for cartoon/childish effect
+                });
+                
+                document.getElementById('status').textContent = 'Loading audio... ⏳';
+                const response = await fetch(`/tts?${ttsParams.toString()}`);
+                
+                if (!response.ok) {
+                    throw new Error('TTS request failed');
+                }
+                
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                currentTTSAudio = new Audio(audioUrl);
+                
+                document.getElementById('status').textContent = 'Ready to play! 🎵';
+                
+                if (backgroundMusic) {
+                    backgroundMusic.currentTime = 0;
+                    backgroundMusic.volume = 0.2;
+                    backgroundMusic.play();
+                }
+                
+                currentTTSAudio.volume = 0.8;
+                
+                // Start highlighting with audio sync
+                currentTTSAudio.addEventListener('loadeddata', () => {
+                    console.log('Audio loaded, starting synchronized playback');
+                });
+                
+                currentTTSAudio.addEventListener('timeupdate', () => {
+                    // Real-time sync with audio playback
+                    const currentTime = currentTTSAudio.currentTime;
+                    syncWordHighlighting(currentTime);
+                });
+                
+                currentTTSAudio.play();
+                
+                // Fallback highlighting in case timeupdate doesn't work perfectly
+                setTimeout(() => {
+                    startWordHighlighting();
+                }, 200);
+                
+                document.getElementById('status').textContent = 'Playing the poem! 🎵';
+                
+                currentTTSAudio.onended = () => {
+                    isSinging = false;
+                    document.getElementById('singBtn').textContent = '🎵 Play Poem';
+                    stopAll();
+                    
+                    // Calculate final score and show results
+                    calculateFinalScore();
+                    
+                    document.getElementById('status').textContent = 'Poem playback completed! 🌟';
+                    
+                    // Add 10 credits for karaoke when poem finishes playing
+                    addKaraokeCredits();
+                };
+                
+                currentTTSAudio.onerror = () => {
+                    isSinging = false;
+                    document.getElementById('singBtn').textContent = '🎵 Play Poem';
+                    document.getElementById('status').textContent = 'Error playing poem.';
+                };
+                
+            } catch (error) {
+                console.error('Error with TTS:', error);
+                isSinging = false;
+                document.getElementById('singBtn').textContent = '🎵 Play Poem';
+                document.getElementById('status').textContent = 'Error: Could not load poem audio.';
+            }
+        }
+        
+        // Scoring System Functions
+        function updateScore() {
+            karaokeScore = Math.round((wordsHit / totalWords) * 100);
+            updateScoreDisplay();
+        }
+        
+        function updateScoreDisplay() {
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const scoreValue = document.getElementById('scoreValue');
+            
+            if (scoreDisplay && scoreValue) {
+                scoreValue.textContent = karaokeScore + '%';
+                
+                // Show score display when karaoke starts
+                if (isSinging && karaokeScore > 0) {
+                    scoreDisplay.style.display = 'block';
+                }
+            }
+        }
+        
+        function calculateFinalScore() {
+            const finalScore = Math.round((wordsHit / totalWords) * 100);
+            karaokeScore = finalScore;
+            updateScoreDisplay();
+            
+            // Show celebration based on score
+            let message = '';
+            let emoji = '';
+            
+            if (finalScore >= 90) {
+                message = 'Amazing! Perfect karaoke performance!';
+                emoji = '🌟⭐🎉';
+            } else if (finalScore >= 70) {
+                message = 'Great job! You\'re a karaoke star!';
+                emoji = '🎵🌟';
+            } else if (finalScore >= 50) {
+                message = 'Good effort! Keep practicing!';
+                emoji = '👏🎤';
+            } else {
+                message = 'Nice try! Practice makes perfect!';
+                emoji = '💪🎵';
+            }
+            
+            // Show final score message
+            setTimeout(() => {
+                document.getElementById('status').innerHTML = `${emoji} ${message} Score: ${finalScore}%`;
+            }, 1000);
+        }
+        
+        function showFloatingHearts(element) {
+            const rect = element.getBoundingClientRect();
+            const emojis = ['💖', '💝', '🌟', '⭐', '✨', '🎉', '🎊', '🌈', '🦄', '🎵', '🎶', '💫'];
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+            
+            // Create multiple floating elements for more excitement
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    heart.innerHTML = randomEmoji;
+                    heart.className = 'floating-heart';
+                    heart.style.left = (rect.left + rect.width/2 + (Math.random() - 0.5) * 60) + 'px';
+                    heart.style.top = rect.top + 'px';
+                    heart.style.color = randomColor;
+                    heart.style.filter = `drop-shadow(0 0 8px ${randomColor})`;
+                    
+                    document.body.appendChild(heart);
+                    
+                    // Remove heart after animation
+                    setTimeout(() => {
+                        if (heart.parentNode) {
+                            heart.parentNode.removeChild(heart);
+                        }
+                    }, 3000);
+                }, i * 200); // Stagger the animations
+            }
+        }
+        
+        function resetScore() {
+            karaokeScore = 0;
+            wordsHit = 0;
+            
+            // Reset all word scoring attributes
+            const words = document.querySelectorAll('.word');
+            words.forEach(word => {
+                word.removeAttribute('data-scored');
+            });
+            
+            updateScoreDisplay();
+            
+            // Hide score display
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            if (scoreDisplay) {
+                scoreDisplay.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

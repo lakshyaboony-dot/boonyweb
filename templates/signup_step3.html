@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width: 700px; margin: 40px auto; padding: 40px; text-align: center; background: var(--bg-secondary); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+
+    <h2 style="font-size: 28px; margin-bottom: 15px; color: var(--text-primary);" id="stepTitle">Step 3️⃣ – Quick Survey</h2>
+<p style="font-size: 18px; color: var(--text-secondary); margin-bottom: 25px;" id="stepDescription">
+        Please answer a few quick questions to help us personalize your learning experience.
+    </p>
+
+    <form method="POST" class="signup-form" style="text-align: left; max-width: 500px; margin: 0 auto;">
+        <!-- Question 1: English Level -->
+        <div style="margin-bottom: 20px;">
+            <label style="color: var(--text-primary); font-size: 16px; display: block; margin-bottom: 8px;" id="q1Label">What is your current English level?</label>
+<select name="english_level" required style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 16px; background: var(--bg-secondary); color: var(--text-primary);">
+                <option value="" id="q1Placeholder">Select your level</option>
+                <option value="beginner" id="q1Option1">Beginner</option>
+                <option value="intermediate" id="q1Option2">Intermediate</option>
+                <option value="advanced" id="q1Option3">Advanced</option>
+            </select>
+        </div>
+
+        <!-- Question 2: Learning Goal -->
+        <div style="margin-bottom: 20px;">
+            <label style="color: var(--text-primary); font-size: 16px; display: block; margin-bottom: 8px;" id="q2Label">What is your main learning goal?</label>
+<select name="learning_goal" required style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 16px; background: var(--bg-secondary); color: var(--text-primary);">
+                <option value="" id="q2Placeholder">Select your goal</option>
+                <option value="conversation" id="q2Option1">Improve conversation skills</option>
+                <option value="business" id="q2Option2">Business English</option>
+                <option value="exam" id="q2Option3">Exam preparation</option>
+                <option value="general" id="q2Option4">General improvement</option>
+            </select>
+        </div>
+
+        <!-- Question 3: Daily Practice Time -->
+        <div style="margin-bottom: 20px;">
+            <label style="color: var(--text-primary); font-size: 16px; display: block; margin-bottom: 8px;" id="q3Label">How much time can you dedicate daily?</label>
+<select name="practice_time" required style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 16px; background: var(--bg-secondary); color: var(--text-primary);">
+                <option value="" id="q3Placeholder">Select time</option>
+                <option value="15min" id="q3Option1">15 minutes</option>
+                <option value="30min" id="q3Option2">30 minutes</option>
+                <option value="1hour" id="q3Option3">1 hour</option>
+                <option value="2hours" id="q3Option4">2+ hours</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-astra" id="nextButton" style="width: 100%; margin-top: 20px;">Next →</button>
+    </form>
+
+    {% if voice_file %}
+    <audio autoplay>
+        <source src="{{ url_for('static', filename=voice_file.split('static/')[-1]) }}" type="audio/mpeg">
+    </audio>
+    {% endif %}
+</div>
+
+<style>
+    .btn-astra {
+        background: var(--accent-color);
+        color: var(--text-primary);
+        font-size: 20px;
+        font-weight: bold;
+        padding: 14px 30px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background 0.3s;
+    }
+
+        .btn-astra:hover {
+            background: var(--accent-color);
+        }
+
+    .option-label {
+        transition: background-color 0.3s ease;
+    }
+
+    .option-label:hover {
+        background-color: var(--bg-secondary);
+    }
+</style>
+
+<script>
+    // Bilingual text content for Step 3 with avatar-based hints
+    const step3Texts = {
+        hinglish: {
+            title: "Step 3️⃣ – Quick Survey",
+            description: "Apne learning experience ko personalize karne ke liye kuch quick questions ka jawab dijiye.",
+            q1Label: "Aapka current English level kya hai?",
+            q1Placeholder: {
+                male: "Bhai, apna level select kariye",
+                female: "Didi, apna level select kariye"
+            },
+            q1Option1: "Beginner",
+            q1Option2: "Intermediate",
+            q1Option3: "Advanced",
+            q2Label: "Aapka main learning goal kya hai?",
+            q2Placeholder: {
+                male: "Sir, apna goal select kariye",
+                female: "Madam, apna goal select kariye"
+            },
+            q2Option1: "Conversation skills improve karna",
+            q2Option2: "Business English",
+            q2Option3: "Exam preparation",
+            q2Option4: "General improvement",
+            q3Label: "Daily kitna time dedicate kar sakte hain?",
+            q3Placeholder: {
+                male: "Bhai, time select kariye",
+                female: "Didi, time select kariye"
+            },
+            q3Option1: "15 minutes",
+            q3Option2: "30 minutes",
+            q3Option3: "1 hour",
+            q3Option4: "2+ hours",
+            nextButton: "Next →"
+        },
+        english: {
+            title: "Step 3️⃣ – Quick Survey",
+            description: "Please answer a few quick questions to help us personalize your learning experience.",
+            q1Label: "What is your current English level?",
+            q1Placeholder: {
+                male: "Sir, please select your level",
+                female: "Ma'am, please select your level"
+            },
+            q1Option1: "Beginner",
+            q1Option2: "Intermediate",
+            q1Option3: "Advanced",
+            q2Label: "What is your main learning goal?",
+            q2Placeholder: {
+                male: "Sir, please select your goal",
+                female: "Ma'am, please select your goal"
+            },
+            q2Option1: "Improve conversation skills",
+            q2Option2: "Business English",
+            q2Option3: "Exam preparation",
+            q2Option4: "General improvement",
+            q3Label: "How much time can you dedicate daily?",
+            q3Placeholder: {
+                male: "Sir, please select time",
+                female: "Ma'am, please select time"
+            },
+            q3Option1: "15 minutes",
+            q3Option2: "30 minutes",
+            q3Option3: "1 hour",
+            q3Option4: "2+ hours",
+            nextButton: "Next →"
+        }
+    };
+
+    // TTS and audio handling
+    const currentAudios = new Set();
+    let isMuted = (localStorage.getItem('boony.muted') === 'true');
+    
+    window.addEventListener('boony:mute', (e) => { 
+        isMuted = !!(e.detail && e.detail.muted); 
+        if (isMuted) stopAllAudio(); 
+    });
+
+    // Use global getPrefs function from base.html
+    // window.getPrefs is available globally
+
+    function mapToMsVoice(p) { 
+        if (p.accent === 'en-US') return p.voice === 'female' ? 'en-US-JennyNeural' : 'en-US-GuyNeural'; 
+        return p.voice === 'female' ? 'en-IN-KavyaNeural' : 'hi-IN-PrabhatNeural'; 
+    }
+
+    function TTS_ENDPOINT(text) { 
+        const p = window.getPrefs && window.getPrefs() || {}; 
+        const qs = new URLSearchParams({
+            text, 
+            voice: p.voice, 
+            accent: p.accent, 
+            lang: p.lang, 
+            voice_name: mapToMsVoice(p), 
+            mode: p.mode
+        }); 
+        return `/tts?${qs.toString()}`; 
+    }
+
+    function stopAllAudio() { 
+        currentAudios.forEach(a => {
+            try { a.pause(); a.src = ''; } catch (e) {} 
+            currentAudios.delete(a); 
+        }); 
+        try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: false } })); } catch (e) {} 
+    }
+
+    async function speak(text) { 
+        if (!text || isMuted) return; 
+        stopAllAudio(); 
+        try { 
+            const a = new Audio(TTS_ENDPOINT(text)); 
+            currentAudios.add(a); 
+            a.addEventListener('ended', () => currentAudios.delete(a), { once: true }); 
+            a.addEventListener('error', () => currentAudios.delete(a), { once: true }); 
+            try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: true } })); } catch (e) {} 
+            await a.play(); 
+        } catch (e) {} 
+    }
+
+    // Update UI based on language preference and avatar
+    function updateStep3UI() {
+        const prefs = window.getPrefs && window.getPrefs() || {};
+        const lang = prefs.lang || 'hinglish';
+        const voice = prefs.voice || 'male';
+        const texts = step3Texts[lang] || step3Texts.hinglish;
+        
+        const titleEl = document.getElementById('stepTitle');
+        const descriptionEl = document.getElementById('stepDescription');
+        const nextButton = document.getElementById('nextButton');
+        
+        // Update main elements
+        if (titleEl) titleEl.textContent = texts.title;
+        if (descriptionEl) descriptionEl.textContent = texts.description;
+        if (nextButton) nextButton.textContent = texts.nextButton;
+        
+        // Update survey questions and options with avatar-based placeholders
+        const q1Label = document.getElementById('q1Label');
+        const q1Placeholder = document.getElementById('q1Placeholder');
+        const q1Option1 = document.getElementById('q1Option1');
+        const q1Option2 = document.getElementById('q1Option2');
+        const q1Option3 = document.getElementById('q1Option3');
+        
+        if (q1Label) q1Label.textContent = texts.q1Label;
+        if (q1Placeholder) q1Placeholder.textContent = texts.q1Placeholder[voice] || texts.q1Placeholder.male;
+        if (q1Option1) q1Option1.textContent = texts.q1Option1;
+        if (q1Option2) q1Option2.textContent = texts.q1Option2;
+        if (q1Option3) q1Option3.textContent = texts.q1Option3;
+        
+        const q2Label = document.getElementById('q2Label');
+        const q2Placeholder = document.getElementById('q2Placeholder');
+        const q2Option1 = document.getElementById('q2Option1');
+        const q2Option2 = document.getElementById('q2Option2');
+        const q2Option3 = document.getElementById('q2Option3');
+        const q2Option4 = document.getElementById('q2Option4');
+        
+        if (q2Label) q2Label.textContent = texts.q2Label;
+        if (q2Placeholder) q2Placeholder.textContent = texts.q2Placeholder[voice] || texts.q2Placeholder.male;
+        if (q2Option1) q2Option1.textContent = texts.q2Option1;
+        if (q2Option2) q2Option2.textContent = texts.q2Option2;
+        if (q2Option3) q2Option3.textContent = texts.q2Option3;
+        if (q2Option4) q2Option4.textContent = texts.q2Option4;
+        
+        const q3Label = document.getElementById('q3Label');
+        const q3Placeholder = document.getElementById('q3Placeholder');
+        const q3Option1 = document.getElementById('q3Option1');
+        const q3Option2 = document.getElementById('q3Option2');
+        const q3Option3 = document.getElementById('q3Option3');
+        const q3Option4 = document.getElementById('q3Option4');
+        
+        if (q3Label) q3Label.textContent = texts.q3Label;
+        if (q3Placeholder) q3Placeholder.textContent = texts.q3Placeholder[voice] || texts.q3Placeholder.male;
+        if (q3Option1) q3Option1.textContent = texts.q3Option1;
+        if (q3Option2) q3Option2.textContent = texts.q3Option2;
+        if (q3Option3) q3Option3.textContent = texts.q3Option3;
+        if (q3Option4) q3Option4.textContent = texts.q3Option4;
+    }
+
+
+
+    // Add click handlers for TTS
+    function addTTSHandlers() {
+        const titleEl = document.getElementById('stepTitle');
+        const descriptionEl = document.getElementById('stepDescription');
+        const nextButton = document.getElementById('nextButton');
+        const guideMessage = document.querySelector('.guide-message');
+        
+        if (titleEl) {
+            titleEl.style.cursor = 'pointer';
+            titleEl.addEventListener('click', () => speak(titleEl.textContent));
+        }
+        
+        if (descriptionEl) {
+            descriptionEl.style.cursor = 'pointer';
+            descriptionEl.addEventListener('click', () => speak(descriptionEl.textContent));
+        }
+        
+        if (nextButton) {
+            nextButton.addEventListener('click', () => speak(nextButton.textContent));
+        }
+        
+        // Add TTS for guide message
+        if (guideMessage) {
+            guideMessage.style.cursor = 'pointer';
+            guideMessage.addEventListener('click', () => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            });
+            
+            // Auto-speak guide message on page load
+            setTimeout(() => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            }, 1500);
+        }
+    }
+    
+    // Survey form functionality
+    function initSurveyForm() {
+        const form = document.querySelector('.signup-form');
+        const nextButton = document.getElementById('nextButton');
+        
+        if (nextButton) {
+            nextButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Get form values using correct names
+                const englishLevel = document.querySelector('select[name="english_level"]').value;
+                const learningGoal = document.querySelector('select[name="learning_goal"]').value;
+                const practiceTime = document.querySelector('select[name="practice_time"]').value;
+                
+                // Validate form
+                if (!englishLevel || !learningGoal || !practiceTime) {
+                    const prefs = window.getPrefs && window.getPrefs() || {};
+                    const lang = prefs.lang || 'hinglish';
+                    const errorMsg = lang === 'english' ? 
+                        'Please answer all questions before proceeding.' : 
+                        'Aage badhne se pehle sabhi sawalon ka jawab dein.';
+                    alert(errorMsg);
+                    return;
+                }
+                
+                // Store survey data
+                const surveyData = {
+                    englishLevel: englishLevel,
+                    learningGoal: learningGoal,
+                    practiceTime: practiceTime
+                };
+                
+                localStorage.setItem('boony.surveyData', JSON.stringify(surveyData));
+                
+                // Submit the form normally to let Flask handle it
+                form.submit();
+            });
+        }
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', () => {
+        updateStep3UI();
+        addTTSHandlers();
+        initSurveyForm();
+    });
+
+    // React to preference changes from base template
+    window.addEventListener('boony:prefs', (e) => {
+        updateStep3UI();
+    });
+    
+    // React to language changes
+    window.addEventListener('boony:language-update', (e) => {
+        updateStep3UI();
+    });
+</script>
+
+{% endblock %}

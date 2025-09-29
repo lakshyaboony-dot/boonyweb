@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vocab Test</title>
+</head>
+<body>
+    <h1>Vocabulary Test Page</h1>
+    <div id="content">Loading...</div>
+    
+    <script>
+        console.log('Test script loading...');
+        let currentDay = '{{ current_day or "Day-1" }}';
+        console.log('Current day:', currentDay);
+        
+        document.getElementById('content').innerHTML = 'Current day: ' + currentDay;
+    </script>
+</body>
+</html>

@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pandora Box - Grammar & Vocabulary</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .magical-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        
+        .magical-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .gift-box-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001;
+            display: none;
+        }
+
+        .gift-box {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: giftBoxAppear 2s ease-out;
+        }
+
+        .gift-box::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 220px;
+            height: 20px;
+            background: #ffd700;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .gift-box::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 220px;
+            background: #ffd700;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .gift-bow {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 40px;
+            background: #ff1744;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: bowFloat 3s ease-in-out infinite;
+        }
+
+        .gift-sparkles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #ffd700;
+            border-radius: 50%;
+            animation: sparkleFloat 2s ease-in-out infinite;
+        }
+
+        .magical-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1002;
+            text-align: center;
+            display: none;
+        }
+
+        .boony-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            animation: avatarPulse 2s ease-in-out infinite;
+        }
+
+        .magical-topic {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #FFFFFF;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.9), 0 0 25px rgba(255,255,255,0.4), 2px 2px 4px rgba(0,0,0,0.7);
+            filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.6));
+            -webkit-text-stroke: 1px rgba(0,0,0,0.3);
+            margin: 20px 0;
+            opacity: 0;
+            animation: topicAppear 1s ease-out forwards;
+        }
+
+        .magical-explanation {
+            font-size: 1.8em;
+            color: #FFFFFF;
+            text-align: center;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            opacity: 0;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.3), 1px 1px 3px rgba(0,0,0,0.6);
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+            font-weight: 600;
+        }
+
+        .word-animation {
+            display: inline-block;
+            margin: 0 5px;
+            opacity: 0;
+            transform: translateY(50px) scale(0.5);
+            animation: wordAppear 0.8s ease-out forwards;
+        }
+        
+        .enhanced-text {
+            display: inline-block;
+            font-size: 1.8em !important;
+            font-weight: bold !important;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.3) !important;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5)) !important;
+            -webkit-text-stroke: 0.5px rgba(0,0,0,0.2);
+            margin-right: 10px;
+            animation: wordAppear 0.8s ease-out forwards, textGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes textGlow {
+            0% { text-shadow: 3px 3px 6px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.3); }
+            100% { text-shadow: 3px 3px 6px rgba(0,0,0,0.8), 0 0 30px rgba(255,255,255,0.5), 0 0 40px rgba(255,255,255,0.2); }
+        }
+
+        @keyframes giftBoxAppear {
+            0% {
+                transform: scale(0) rotate(180deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2) rotate(0deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        @keyframes bowFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+        }
+
+        @keyframes sparkleFloat {
+            0%, 100% {
+                opacity: 0;
+                transform: translateY(0px) scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: translateY(-30px) scale(1);
+            }
+        }
+
+        @keyframes avatarPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes topicAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) scale(0.5);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes wordAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) scale(0.5);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+        }
+        .title {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        .card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .card-topic {
+            color: #333;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        .card-day {
+            background: #ff6b35;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+        }
+        .section-content {
+            color: #555;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        .access-denied {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            border-radius: 15px;
+            border: 2px solid #feb2b2;
+            margin: 20px 0;
+        }
+
+        .denied-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        .access-denied h2 {
+            color: #c53030;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .access-denied p {
+            color: #744210;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .timer-info {
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 8px;
+        }
+
+        .timer-info small {
+            color: #666;
+            font-style: italic;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Navigation Styles */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1002;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 30px;
+        }
+
+        .nav-menu li {
+            position: relative;
+        }
+
+        .nav-link {
+            color: #333;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-link:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 10px 0;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-link {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-link:hover {
+            background: #f8f9fa;
+            color: #667eea;
+        }
+
+        body {
+            padding-top: 80px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('dashboard') }}" class="nav-brand">🤖 Boony</a>
+            
+            <ul class="nav-menu">
+                <li><a href="#" onclick="closePandoraBox()" class="nav-link">❌ Close Pandora</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Magical Overlay -->
+    <div class="magical-overlay" id="magicalOverlay">
+        <!-- Gift Box Animation -->
+        <div class="gift-box-container" id="giftBoxContainer">
+            <div class="gift-box">
+                <div class="gift-bow"></div>
+                <div class="gift-sparkles">
+                    <div class="sparkle" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+                    <div class="sparkle" style="top: 30%; right: 15%; animation-delay: 0.5s;"></div>
+                    <div class="sparkle" style="bottom: 25%; left: 20%; animation-delay: 1s;"></div>
+                    <div class="sparkle" style="bottom: 35%; right: 10%; animation-delay: 1.5s;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Magical Content Display -->
+        <div class="magical-content" id="magicalContent">
+            <div class="boony-avatar" id="boonyAvatar">🤖</div>
+            <div class="magical-topic" id="magicalTopic"></div>
+            <div class="magical-explanation" id="magicalExplanation"></div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <div class="header">
+            <h1 class="title">🎁 Pandora Box</h1>
+            <p class="subtitle">Unlock the magic of grammar and vocabulary learning</p>
+            <button id="testAnimationBtn" style="background: #ff6b6b; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px;">Test Animation</button>
+
+        </div>
+
+
+
+        {% if access_denied %}
+        <div class="access-denied">
+            <div class="denied-icon">⏰</div>
+            <h2>Access Restricted</h2>
+            <p>Pandora Box can only be opened once per hour.</p>
+            <p>Please wait <strong>{{ remaining_minutes }} minutes</strong> before accessing again.</p>
+            <div class="timer-info">
+                <small>This helps maintain focused learning sessions!</small>
+            </div>
+        </div>
+        {% else %}
+        <div class="grid">
+            {% for item in pandora_items %}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-topic">{{ item.topic }}</h3>
+                        <span class="card-day">{{ item.day }}</span>
+                    </div>
+
+                    {% if user_language == 'hinglish' and item.hinglish_explanation %}
+                        <div class="section">
+                            <div class="section-content">{{ item.hinglish_explanation }}</div>
+                        </div>
+                    {% elif user_language == 'english' and item.english_explanation %}
+                        <div class="section">
+                            <div class="section-content">{{ item.english_explanation }}</div>
+                        </div>
+                    {% elif item.hinglish_explanation %}
+                        <div class="section">
+                            <div class="section-content">{{ item.hinglish_explanation }}</div>
+                        </div>
+                    {% endif %}
+
+
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        let currentItemIndex = 0;
+        let pandoraItems = {% if not access_denied %}{{ pandora_items | tojson }}{% else %}[]{% endif %};
+        let userLanguage = '{{ user_language }}';
+        
+        // Listen for language changes from base.html preferences
+        window.addEventListener('boony:language', function(e) {
+            if (e.detail && e.detail.lang) {
+                console.log('Language preference changed to:', e.detail.lang);
+                userLanguage = e.detail.lang;
+                console.log('Updated userLanguage to:', userLanguage);
+            }
+        });
+        
+        // Also listen for language updates
+         window.addEventListener('boony:language-update', function(e) {
+             if (e.detail && e.detail.language) {
+                 console.log('Language update received:', e.detail.language);
+                 userLanguage = e.detail.language;
+                 console.log('Updated userLanguage to:', userLanguage);
+                 
+                 // Update any visible content if needed
+                 updatePandoraLanguage(userLanguage);
+             }
+         });
+         
+         // Function to update pandora content based on language preference
+         function updatePandoraLanguage(newLanguage) {
+             console.log('Updating Pandora language to:', newLanguage);
+             
+             // Update any visible explanations
+             const magicalExplanation = document.getElementById('magicalExplanation');
+             if (magicalExplanation && pandoraItems && pandoraItems.length > 0) {
+                 const currentItem = pandoraItems[currentItemIndex] || pandoraItems[0];
+                 if (currentItem) {
+                     const explanation = (newLanguage === 'hinglish' && currentItem.hinglish_explanation) ?
+                         currentItem.hinglish_explanation : currentItem.english_explanation;
+                     
+                     if (explanation && magicalExplanation.textContent.trim()) {
+                         magicalExplanation.textContent = explanation;
+                     }
+                 }
+             }
+         }
+        let isAnimationRunning = false;
+        let accessDenied = {{ access_denied | tojson }};
+        
+        // Debug: Log initial values
+        console.log('=== PANDORA DEBUG ===');
+        console.log('pandoraItems:', pandoraItems);
+        console.log('pandoraItems length:', pandoraItems ? pandoraItems.length : 'null/undefined');
+        console.log('accessDenied:', accessDenied);
+        console.log('userLanguage:', userLanguage);
+        console.log('==================');
+        
+        // Enhanced Text-to-Speech function with avatar animation and callback support
+        function speak(text, lang = 'en-US', onEndCallback = null) {
+            console.log('Speaking:', text);
+            
+            // Trigger avatar speaking animation
+            window.dispatchEvent(new CustomEvent('boony:audio', { 
+                detail: { playing: true } 
+            }));
+            
+            // Use TTS system from base.html if available
+            if (window.getPrefs && typeof window.Audio !== 'undefined') {
+                const currentAudios = new Set();
+                let isMuted = (localStorage.getItem('boony.muted') === 'true');
+                
+                // Use global mapToMsVoice function from base.html
+                
+                function getTTSEndpoint(text) { 
+                    const p = window.getPrefs(); 
+                    const qs = new URLSearchParams({
+                        text, 
+                        voice: p.voice, 
+                        accent: p.accent, 
+                        lang: lang === 'hinglish' ? 'hinglish' : (lang === 'english' ? 'english' : p.lang), 
+                        voice_name: window.mapToMsVoice(p), 
+                        mode: p.mode
+                    }); 
+                    return `/tts?${qs.toString()}`; 
+                }
+                
+                if (!isMuted) {
+                    try {
+                        const audio = new Audio(getTTSEndpoint(text));
+                        audio.onended = () => {
+                            // Stop avatar speaking animation
+                            window.dispatchEvent(new CustomEvent('boony:audio', { 
+                                detail: { playing: false } 
+                            }));
+                            // Call callback if provided
+                            if (onEndCallback) onEndCallback();
+                        };
+                        audio.play().catch(e => {
+                            console.log('TTS Error:', e);
+                            // Fallback to browser TTS
+                            fallbackSpeak(text, lang, onEndCallback);
+                        });
+                    } catch (e) {
+                        console.log('TTS Error:', e);
+                        fallbackSpeak(text, lang, onEndCallback);
+                    }
+                } else {
+                    // Stop avatar animation if muted and call callback
+                    setTimeout(() => {
+                        window.dispatchEvent(new CustomEvent('boony:audio', { 
+                            detail: { playing: false } 
+                        }));
+                        if (onEndCallback) onEndCallback();
+                    }, 100);
+                }
+            } else {
+                // Fallback to browser TTS
+                fallbackSpeak(text, lang, onEndCallback);
+            }
+        }
+        
+        // Fallback browser TTS function with callback support
+        function fallbackSpeak(text, lang = 'en-US', onEndCallback = null) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = lang === 'hinglish' ? 'hi-IN' : 'en-US';
+                utterance.rate = 0.8;
+                utterance.onend = () => {
+                    // Stop avatar speaking animation
+                    window.dispatchEvent(new CustomEvent('boony:audio', { 
+                        detail: { playing: false } 
+                    }));
+                    // Call callback if provided
+                    if (onEndCallback) onEndCallback();
+                };
+                speechSynthesis.speak(utterance);
+            } else if (onEndCallback) {
+                // If no speech synthesis available, still call callback
+                setTimeout(onEndCallback, 1000);
+            }
+        }
+        
+        // Start magical animation sequence
+        function startMagicalSequence() {
+            console.log('=== STARTING MAGICAL SEQUENCE ===');
+            console.log('Function called at:', new Date().toISOString());
+            console.log('isAnimationRunning:', isAnimationRunning);
+            console.log('pandoraItems exists:', !!pandoraItems);
+            console.log('pandoraItems length:', pandoraItems ? pandoraItems.length : 'null/undefined');
+            console.log('currentItemIndex:', currentItemIndex);
+            
+            if (isAnimationRunning) {
+                console.log('BLOCKED: Animation already running');
+                return;
+            }
+            
+            if (!pandoraItems) {
+                console.log('BLOCKED: pandoraItems is null/undefined');
+                return;
+            }
+            
+            if (pandoraItems.length === 0) {
+                console.log('BLOCKED: pandoraItems is empty array');
+                return;
+            }
+            
+            console.log('Setting isAnimationRunning to true');
+            isAnimationRunning = true;
+            const item = pandoraItems[currentItemIndex];
+            console.log('Selected item:', item);
+            console.log('Current index:', currentItemIndex);
+            
+            console.log('Animation starting with item:', item ? item.topic : 'No item');
+            
+            // Step 1: Show overlay and disable background
+            const overlay = document.getElementById('magicalOverlay');
+            const container = document.getElementById('mainContainer');
+            
+            console.log('Overlay element found:', !!overlay);
+            if (overlay) {
+                overlay.style.display = 'block';
+                overlay.classList.add('show');
+                console.log('Overlay display set to block and show class added');
+            } else {
+                console.log('ERROR: Overlay element not found!');
+            }
+            
+            if (container) {
+                container.style.pointerEvents = 'none';
+                container.style.filter = 'blur(5px)';
+            }
+            
+            // Step 2: Show gift box with animation
+            setTimeout(() => {
+                document.getElementById('giftBoxContainer').style.display = 'block';
+            }, 500);
+            
+            // Step 3: Hide gift box and show Boony with speech
+            setTimeout(() => {
+                document.getElementById('giftBoxContainer').style.display = 'none';
+                document.getElementById('magicalContent').style.display = 'block';
+                
+                // Interactive speech sequence as requested
+                const openingGreeting = userLanguage === 'hinglish' 
+                    ? 'मैं आपके लिए लाया हूँ Magic of Vocabulary and Pronunciation!'
+                    : 'I have brought for you the Magic of Vocabulary and Pronunciation!';
+                
+                // Step 4: Show topic after opening greeting speech ends
+                speak(openingGreeting, userLanguage, () => {
+                    showTopicWithIntroduction(item);
+                });
+            }, 3000);
+        }
+        
+        // Show topic with introduction speech as requested
+        function showTopicWithIntroduction(item) {
+            const topicElement = document.getElementById('magicalTopic');
+            topicElement.textContent = item.topic;
+            topicElement.style.display = 'block';
+            
+            // Generate random colors for background
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            document.getElementById('magicalOverlay').style.background = `${randomColor}80`;
+            
+            // Interactive speech: "Today's topic is..."
+            const topicIntroduction = userLanguage === 'hinglish' 
+                ? `आज का topic है: ${item.topic}`
+                : `Today's topic is: ${item.topic}`;
+            
+            // Step 5: Show explanation with introduction after topic speech ends
+            speak(topicIntroduction, userLanguage, () => {
+                showExplanationWithIntroduction(item);
+            });
+        }
+        
+        // Keep original function for backward compatibility
+        function showTopic(item) {
+            showTopicWithIntroduction(item);
+        }
+        
+        // Show explanation with introduction speech and enhanced styling
+        function showExplanationWithIntroduction(item) {
+            // Interactive speech: "Full Explanation" introduction
+            const explanationIntro = userLanguage === 'hinglish' 
+                ? 'अब सुनिए full explanation:'
+                : 'Now listen to the full explanation:';
+            
+            // Wait for intro speech, then show and speak both explanations
+            speak(explanationIntro, userLanguage, () => {
+                const explanationElement = document.getElementById('magicalExplanation');
+                
+                // First speak English explanation
+                const englishExplanation = item.english_explanation || 'No English explanation available';
+                
+                // Display the combined explanation text
+                const hinglishExplanation = item.hinglish_explanation || '';
+                const explanation = englishExplanation + ' ' + hinglishExplanation;
+                
+                const words = explanation.split(' ');
+                explanationElement.innerHTML = '';
+                explanationElement.style.opacity = '1';
+                
+                // Animate each word with enhanced styling
+                words.forEach((word, index) => {
+                    setTimeout(() => {
+                        const wordSpan = document.createElement('span');
+                        wordSpan.className = 'word-animation enhanced-text';
+                        wordSpan.textContent = word + ' ';
+                        wordSpan.style.animationDelay = `${index * 0.1}s`;
+                        wordSpan.style.color = getEnhancedColor();
+                        wordSpan.style.fontSize = '1.8em';
+                        wordSpan.style.fontWeight = 'bold';
+                        wordSpan.style.textShadow = '3px 3px 6px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.3)';
+                        wordSpan.style.filter = 'drop-shadow(2px 2px 4px rgba(0,0,0,0.5))';
+                        explanationElement.appendChild(wordSpan);
+                    }, index * 200);
+                });
+                
+                // Speak English explanation and then Hinglish
+                speak(englishExplanation, 'english', () => {
+                    // Then speak Hinglish explanation after English is done
+                    if (hinglishExplanation.trim()) {
+                        speak(hinglishExplanation, 'hinglish', () => {
+                            // Step 6: Start reverse animation after all explanations
+                            setTimeout(() => {
+                                startReverseAnimation();
+                            }, 1000);
+                        });
+                    } else {
+                        // Step 6: Start reverse animation after English explanation only
+                        setTimeout(() => {
+                            startReverseAnimation();
+                        }, 1000);
+                    }
+                });
+            });
+        }
+        
+        // Keep original function for backward compatibility
+        function showExplanation(item) {
+            showExplanationWithIntroduction(item);
+        }
+        
+        // Get random color for words
+        function getRandomColor() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#fd79a8', '#fdcb6e'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        // Get enhanced colors with better visibility and sharp contrast
+        function getEnhancedColor() {
+            const enhancedColors = [
+                '#FFFFFF', // Pure white for maximum contrast
+                '#FFD700', // Bright gold
+                '#FF4500', // Bright orange-red
+                '#00FFFF', // Bright cyan
+                '#FF1493', // Deep pink
+                '#32CD32', // Lime green
+                '#FF6347', // Tomato red
+                '#1E90FF', // Dodger blue
+                '#FFFF00', // Bright yellow
+                '#FF69B4'  // Hot pink
+            ];
+            return enhancedColors[Math.floor(Math.random() * enhancedColors.length)];
+        }
+        
+        // Reverse animation - everything goes back to box
+        function startReverseAnimation() {
+            const goodbyeText = userLanguage === 'hinglish' 
+                ? 'फिर मिलेंगे! Bye bye!'
+                : 'See you again! Bye bye!';
+            
+            // Speak goodbye and then start reverse animation
+            speak(goodbyeText, userLanguage, () => {
+                // Fade out content after goodbye speech ends
+                document.getElementById('magicalContent').style.animation = 'fadeOut 2s ease-out forwards';
+                
+                setTimeout(() => {
+                    // Show gift box again
+                    document.getElementById('magicalContent').style.display = 'none';
+                    document.getElementById('giftBoxContainer').style.display = 'block';
+                    
+                    setTimeout(() => {
+                        // Hide everything and restore background
+                        document.getElementById('giftBoxContainer').style.display = 'none';
+                        document.getElementById('magicalOverlay').style.display = 'none';
+                        document.getElementById('mainContainer').style.pointerEvents = 'auto';
+                        document.getElementById('mainContainer').style.filter = 'none';
+                        
+                        // Reset for next item
+                        currentItemIndex = (currentItemIndex + 1) % pandoraItems.length;
+                        isAnimationRunning = false;
+                        
+                        // Reset magical content
+                        document.getElementById('magicalContent').style.animation = '';
+                        document.getElementById('magicalTopic').style.opacity = '0';
+                        document.getElementById('magicalExplanation').style.opacity = '0';
+                    }, 2000);
+                }, 1000);
+            });
+        }
+        
+        // Auto-start magical sequence when page loads (if items available)
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== PANDORA DEBUG START ===');
+            console.log('DOM loaded at:', new Date().toISOString());
+            
+            // Check if variables are defined
+            console.log('pandoraItems defined:', typeof pandoraItems !== 'undefined');
+            console.log('pandoraItems type:', typeof pandoraItems);
+            console.log('pandoraItems value:', pandoraItems);
+            console.log('pandoraItems length:', pandoraItems ? pandoraItems.length : 'null/undefined');
+            
+            console.log('userLanguage:', userLanguage);
+            console.log('accessDenied:', accessDenied);
+            console.log('isAnimationRunning:', isAnimationRunning);
+            
+            // Check DOM elements
+            console.log('magicalOverlay element:', document.getElementById('magicalOverlay'));
+            console.log('magicalContent element:', document.getElementById('magicalContent'));
+            console.log('magicalTopic element:', document.getElementById('magicalTopic'));
+            console.log('magicalExplanation element:', document.getElementById('magicalExplanation'));
+            
+            // Check speech synthesis
+            console.log('speechSynthesis available:', 'speechSynthesis' in window);
+            console.log('SpeechSynthesisUtterance available:', 'SpeechSynthesisUtterance' in window);
+            
+            console.log('=== AUTO START CHECK ===');
+            console.log('pandoraItems type:', typeof pandoraItems);
+            console.log('pandoraItems value:', pandoraItems);
+            console.log('pandoraItems length:', pandoraItems ? pandoraItems.length : 'N/A');
+            console.log('accessDenied:', accessDenied);
+            
+            if (typeof pandoraItems !== 'undefined' && pandoraItems && pandoraItems.length > 0) {
+                console.log('✅ pandoraItems available, length:', pandoraItems.length);
+                console.log('First item:', pandoraItems[0]);
+                
+                if (!accessDenied) {
+                    console.log('✅ Access granted - Starting animation sequence in 1 second...');
+                    setTimeout(() => {
+                        console.log('⏰ Timeout fired, calling startMagicalSequence');
+                        startMagicalSequence();
+                    }, 1000);
+                } else {
+                    console.log('❌ Access denied - animation blocked');
+                }
+            } else {
+                console.log('❌ No items available or pandoraItems is null/undefined/empty');
+                console.log('Showing manual trigger message');
+                
+                // Show day content directly if available
+                const magicalContent = document.querySelector('.magical-content');
+                if (magicalContent && pandoraItems && pandoraItems.length > 0) {
+                    const firstItem = pandoraItems[0];
+                    const explanation = (userLanguage === 'hinglish' && firstItem.hinglish_explanation) ? 
+                    firstItem.hinglish_explanation : firstItem.english_explanation;
+                    
+                    magicalContent.innerHTML = `
+                        <div style="color: white; text-align: center; padding: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #ffd700;">${firstItem.topic}</h3>
+                            <p style="line-height: 1.6; font-size: 16px;">${explanation}</p>
+                            <div style="margin-top: 15px; font-size: 14px; opacity: 0.8;">Click anywhere for magical animation!</div>
+                        </div>
+                    `;
+                    magicalContent.style.display = 'block';
+                } else {
+                    // Fallback message if no data
+                    magicalContent.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Loading Pandora Box content...</div>';
+                    magicalContent.style.display = 'block';
+                }
+            }
+            
+            // Add click handler to manually trigger animation
+            document.addEventListener('click', function(e) {
+                console.log('Click detected');
+                if (typeof pandoraItems !== 'undefined' && pandoraItems && pandoraItems.length > 0 && !accessDenied) {
+                    if (!isAnimationRunning) {
+                        console.log('Calling startMagicalSequence on click');
+                        startMagicalSequence();
+                    } else {
+                        console.log('Animation already running');
+                    }
+                } else {
+                    console.log('Cannot start animation - missing data or access denied');
+                }
+            });
+            
+            console.log('=== PANDORA DEBUG END ===');
+            
+            // Add test button event listener
+            const testBtn = document.getElementById('testAnimationBtn');
+            if (testBtn) {
+                testBtn.addEventListener('click', function() {
+                    console.log('Test button clicked');
+                    if (typeof testAnimation === 'function') {
+                        testAnimation();
+                    } else {
+                        console.log('testAnimation function not found');
+                    }
+                });
+                console.log('Test button event listener added');
+            } else {
+                console.log('Test button not found');
+            }
+        });
+        
+        // Test function to manually trigger animation
+        window.testAnimation = function() {
+            console.log('=== TEST ANIMATION TRIGGERED ===');
+            console.log('pandoraItems:', typeof pandoraItems !== 'undefined' ? pandoraItems : 'undefined');
+            console.log('accessDenied:', typeof accessDenied !== 'undefined' ? accessDenied : 'undefined');
+            console.log('isAnimationRunning:', typeof isAnimationRunning !== 'undefined' ? isAnimationRunning : 'undefined');
+            
+            // Force start animation with test data if needed
+            if (typeof pandoraItems === 'undefined' || !pandoraItems || pandoraItems.length === 0) {
+                console.log('Creating test pandora items');
+                pandoraItems = [{
+                    topic: 'Test Topic',
+                    english_explanation: 'This is a test explanation in English.',
+                    hinglish_explanation: 'Ye ek test explanation hai Hinglish mein.'
+                }];
+                window.pandoraItems = pandoraItems;
+            }
+            
+            if (typeof accessDenied === 'undefined') {
+                accessDenied = false;
+                window.accessDenied = false;
+            }
+            
+            if (typeof isAnimationRunning === 'undefined') {
+                isAnimationRunning = false;
+                window.isAnimationRunning = false;
+            }
+            
+            console.log('Final pandoraItems:', pandoraItems);
+            console.log('Final accessDenied:', accessDenied);
+            console.log('Final isAnimationRunning:', isAnimationRunning);
+            
+            console.log('Calling startMagicalSequence from test function');
+            console.log('About to call startMagicalSequence...');
+            try {
+                startMagicalSequence();
+                console.log('startMagicalSequence called successfully');
+            } catch (error) {
+                console.error('Error calling startMagicalSequence:', error);
+            }
+        }
+        
+        // Function to close Pandora Box and return to dashboard
+        function closePandoraBox() {
+            // Stop any ongoing speech synthesis
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+            
+            // Stop any audio elements
+            const audioElements = document.querySelectorAll('audio');
+            audioElements.forEach(audio => {
+                audio.pause();
+                audio.currentTime = 0;
+            });
+            
+            // Clear any timeouts or intervals
+            if (window.pandoraTimeouts) {
+                window.pandoraTimeouts.forEach(timeout => clearTimeout(timeout));
+                window.pandoraTimeouts = [];
+            }
+            
+            if (window.pandoraIntervals) {
+                window.pandoraIntervals.forEach(interval => clearInterval(interval));
+                window.pandoraIntervals = [];
+            }
+            
+            // Redirect to dashboard
+            window.location.href = '{{ url_for("dashboard") }}';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,752 @@
+{% extends "base.html" %}
+
+{% block title %}Vocabulary - {{ current_day or "Day-1" }}{% endblock %}
+
+{% block styles %}
+<style>
+body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+        transform: scale(1);
+    }
+    100% {
+        box-shadow: 0 12px 30px rgba(0, 123, 255, 0.6);
+        transform: scale(1.02);
+    }
+}
+.vocab-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 30px;
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    border: 1px solid var(--border-color);
+}
+.vocab-title {
+    text-align: center;
+    color: var(--text-primary);
+    margin-bottom: 30px;
+}
+.word-display {
+    text-align: center;
+    padding: 30px;
+    background: var(--bg-primary);
+    border-radius: 15px;
+    margin: 30px auto;
+    max-width: 600px;
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    position: relative;
+    backdrop-filter: blur(10px);
+}
+.word-text {
+    font-size: 4rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    margin-bottom: 20px;
+    text-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-glow));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding: 15px 25px;
+    border: 3px solid var(--accent-color);
+    border-radius: 15px;
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+    display: inline-block;
+    min-width: 300px;
+    text-align: center;
+}
+.word-meaning {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-weight: 500;
+    background: var(--surface-secondary);
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: inline-block;
+}
+.word-synonyms {
+    font-size: 1.1rem;
+    color: var(--success-color);
+    margin: 15px 0;
+    padding: 8px 12px;
+    background: rgba(40, 167, 69, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid var(--success-color);
+    display: none;
+}
+.word-antonyms {
+    font-size: 1.1rem;
+    color: var(--error-color);
+    margin: 15px 0;
+    padding: 8px 12px;
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid var(--error-color);
+    display: none;
+}
+.word-example {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 15px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    border-left: 3px solid var(--accent-color);
+    display: none;
+}
+.progress-indicator {
+    text-align: center;
+    margin-top: 20px;
+}
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--surface-secondary);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    position: relative;
+}
+.progress-bar .progress-fill {
+    height: 100%;
+    background: var(--accent-color);
+    width: 0%;
+    transition: width 0.5s ease;
+    border-radius: 3px;
+}
+.progress-text {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+.practice-section {
+    margin: 30px 0;
+    padding: 20px;
+    background: var(--surface-primary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+.practice-prompt h3 {
+    color: var(--accent-color);
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+}
+.practice-prompt p {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+.practice-word {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+.recording-controls {
+    margin: 20px 0;
+}
+.recording-status {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+.practice-result {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+}
+.transcribed-text {
+    background: var(--surface-secondary);
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-style: italic;
+    color: var(--text-primary);
+}
+.ai-feedback {
+    background: rgba(40, 167, 69, 0.1);
+    border-left: 3px solid var(--success-color);
+    padding: 10px;
+    margin-bottom: 15px;
+    color: var(--text-secondary);
+}
+.score-display {
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 6px;
+}
+.score-excellent {
+    background: rgba(40, 167, 69, 0.2);
+    color: var(--success-color);
+}
+.score-good {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+}
+.score-needs-improvement {
+    background: rgba(220, 53, 69, 0.2);
+    color: var(--error-color);
+}
+.btn {
+    padding: 12px 24px;
+    margin: 8px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.btn-primary {
+    background: var(--accent-color);
+    color: white;
+}
+.btn-primary:hover {
+    background: var(--accent-glow);
+}
+.btn-success {
+    background: var(--success-color);
+    color: white;
+}
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="vocab-container">
+    <h1 class="vocab-title">Vocabulary Learning - {{ current_day or "Day-1" }}</h1>
+    
+    <div class="word-display">
+        <div class="word-text" id="current-word">Loading...</div>
+        <div class="word-meaning" id="word-meaning"></div>
+        <div class="word-synonyms" id="word-synonyms"></div>
+        <div class="word-antonyms" id="word-antonyms"></div>
+        <div class="word-example" id="word-example"></div>
+        <button id="load-new-words-btn" onclick="loadNewWords()" style="display: none; margin-top: 10px; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Load New Words</button>
+    </div>
+    
+    <div class="practice-section" id="practice-section" style="display: none;">
+        <div class="practice-prompt">
+            <h3>Practice Time!</h3>
+            <p id="practice-instruction">Now create your own sentence using the word "<span id="practice-word"></span>"</p>
+        </div>
+        
+        <div class="recording-controls">
+            <button id="record-btn" class="btn btn-primary">🎤 Start Recording</button>
+            <button id="stop-record-btn" class="btn btn-danger" style="display: none;">⏹️ Stop Recording</button>
+            <div class="recording-status" id="recording-status"></div>
+        </div>
+        
+        <div class="practice-result" id="practice-result" style="display: none;">
+            <div class="transcribed-text" id="transcribed-text"></div>
+            <div class="ai-feedback" id="ai-feedback"></div>
+            <div class="score-display" id="score-display"></div>
+            <button id="next-word-btn" class="btn btn-success" style="display: none; margin-top: 15px;" onclick="nextStep()">➡️ Next Word</button>
+        </div>
+    </div>
+    
+    <div class="progress-indicator">
+        <div class="progress-bar" id="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-text" id="progress-text">Preparing lesson...</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Automatic vocabulary teaching system
+var currentDay = '{{ current_day or "Day-1" }}';
+var vocabularyWords = [];
+var currentWordIndex = 0;
+var currentStep = 0; // 0: word, 1: meaning, 2: synonyms, 3: antonyms, 4: example
+var isTeaching = false;
+var teachingTimer;
+
+// Teaching steps configuration
+var teachingSteps = [
+    { name: 'word', duration: 3000, element: 'current-word' },
+    { name: 'meaning', duration: 4000, element: 'word-meaning' },
+    { name: 'synonyms', duration: 4000, element: 'word-synonyms' },
+    { name: 'antonyms', duration: 4000, element: 'word-antonyms' },
+    { name: 'example', duration: 5000, element: 'word-example' },
+    { name: 'practice', duration: 0, element: 'practice-section' }
+];
+
+// Practice system variables
+var mediaRecorder;
+var audioChunks = [];
+var isRecording = false;
+var practiceCompleted = false;
+
+function loadVocabularyWords() {
+    console.log('Loading vocabulary for:', currentDay);
+    fetch('/api/vocabulary/random-words/' + currentDay)
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            vocabularyWords = data.words || [];
+            currentWordIndex = 0; // Reset to first word
+            currentStep = 0; // Reset to first step
+            console.log('Loaded vocabulary:', vocabularyWords);
+            console.log('Loaded vocabulary words:', vocabularyWords.length);
+            console.log('Words:', vocabularyWords.map(function(w) { return w.word; }));
+            console.log('Reset currentWordIndex to:', currentWordIndex);
+            startAutomaticTeaching();
+        })
+        .catch(function(error) {
+            console.error('Error loading vocabulary:', error);
+            vocabularyWords = [
+                {
+                    word: 'Amazing',
+                    meaning: 'Very impressive or surprising',
+                    synonyms: ['Wonderful', 'Incredible', 'Fantastic'],
+                    antonyms: ['Boring', 'Ordinary', 'Terrible'],
+                    example: 'The view from the mountain was amazing.'
+                }
+            ];
+            currentWordIndex = 0;
+            currentStep = 0;
+            startAutomaticTeaching();
+        });
+}
+
+function loadNewWords() {
+    console.log('Loading new words...');
+    // Stop current teaching
+    if (teachingTimer) {
+        clearTimeout(teachingTimer);
+    }
+    
+    // Hide practice section and move to next word
+    document.getElementById('practice-section').style.display = 'none';
+    resetPracticeSection();
+    
+    currentStep = 0;
+    var oldIndex = currentWordIndex;
+    currentWordIndex = (currentWordIndex + 1) % vocabularyWords.length;
+    
+    console.log('Moving from word', oldIndex, 'to word', currentWordIndex);
+    console.log('Total words available:', vocabularyWords.length);
+    console.log('Current word:', vocabularyWords[currentWordIndex] ? vocabularyWords[currentWordIndex].word : 'undefined');
+    
+    // Start teaching the new word
+    document.getElementById('progress-text').textContent = 'Loading new word...';
+    isTeaching = true;
+    teachingTimer = setTimeout(function() {
+        showCurrentStep();
+        scheduleNextStep();
+    }, 1000);
+}
+
+function updateProgressBar(step, totalSteps) {
+     var progress = ((step + 1) / totalSteps) * 100;
+     var progressFill = document.getElementById('progress-fill');
+     progressFill.style.width = progress + '%';
+ }
+
+function hideAllElements() {
+    document.getElementById('word-meaning').style.display = 'none';
+    document.getElementById('word-synonyms').style.display = 'none';
+    document.getElementById('word-antonyms').style.display = 'none';
+    document.getElementById('word-example').style.display = 'none';
+}
+
+function showCurrentStep() {
+    if (vocabularyWords.length === 0) return;
+    
+    var word = vocabularyWords[currentWordIndex];
+    var step = teachingSteps[currentStep];
+    
+    // Update progress
+    updateProgressBar(currentStep, teachingSteps.length);
+    
+    switch(step.name) {
+        case 'word':
+            hideAllElements();
+            document.getElementById('current-word').textContent = word.word;
+            document.getElementById('progress-text').textContent = 'Learning: ' + word.word;
+            speakText(word.word + '. This word is ' + word.word);
+            break;
+            
+        case 'meaning':
+            document.getElementById('word-meaning').textContent = 'Meaning: ' + word.meaning;
+            document.getElementById('word-meaning').style.display = 'block';
+            document.getElementById('progress-text').textContent = 'Understanding meaning...';
+            speakText('The meaning of ' + word.word + ' is: ' + word.meaning);
+            break;
+            
+        case 'synonyms':
+            if (word.synonyms && word.synonyms.length > 0) {
+                document.getElementById('word-synonyms').textContent = 'Synonyms: ' + word.synonyms.join(', ');
+                document.getElementById('word-synonyms').style.display = 'block';
+                document.getElementById('progress-text').textContent = 'Learning synonyms...';
+                speakText('Synonyms of ' + word.word + ' are: ' + word.synonyms.join(', '));
+            } else {
+                // Skip if no synonyms
+                nextStep();
+                return;
+            }
+            break;
+            
+        case 'antonyms':
+            if (word.antonyms && word.antonyms.length > 0) {
+                document.getElementById('word-antonyms').textContent = 'Antonyms: ' + word.antonyms.join(', ');
+                document.getElementById('word-antonyms').style.display = 'block';
+                document.getElementById('progress-text').textContent = 'Learning antonyms...';
+                speakText('Antonyms of ' + word.word + ' are: ' + word.antonyms.join(', '));
+            } else {
+                // Skip if no antonyms
+                nextStep();
+                return;
+            }
+            break;
+            
+        case 'example':
+            document.getElementById('word-example').textContent = 'Example: ' + word.example;
+            document.getElementById('word-example').style.display = 'block';
+            document.getElementById('progress-text').textContent = 'Example usage...';
+            speakText('Here is an example: ' + word.example);
+            break;
+            
+        case 'practice':
+            document.getElementById('practice-section').style.display = 'block';
+            document.getElementById('practice-word').textContent = word.word;
+            document.getElementById('progress-text').textContent = 'Practice time - Create your sentence!';
+            speakText('Now it is your turn. Please create your own sentence using the word ' + word.word);
+            practiceCompleted = false;
+            break;
+    }
+}
+
+function speakText(text) {
+    if ('speechSynthesis' in window) {
+        // Stop any ongoing speech
+        speechSynthesis.cancel();
+        
+        var utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.7;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+        
+        // Get global voice preferences from base.html
+        const prefs = window.getPrefs ? window.getPrefs() : { voice: 'male', accent: 'hi-IN' };
+        
+        // Try to use voice based on global preferences
+        var voices = speechSynthesis.getVoices();
+        var selectedVoice = null;
+        
+        // Filter voices based on global voice preference (male/female)
+        if (prefs.voice === 'female') {
+            // Look for female voices
+            selectedVoice = voices.find(function(voice) {
+                const voiceName = voice.name.toLowerCase();
+                return voice.lang.includes('en') && 
+                       (voiceName.includes('female') || 
+                        voiceName.includes('zira') || 
+                        voiceName.includes('hazel') || 
+                        voiceName.includes('susan') || 
+                        voiceName.includes('helen') || 
+                        voiceName.includes('aria') || 
+                        voiceName.includes('jenny') || 
+                        voiceName.includes('michelle') || 
+                        voiceName.includes('eva') ||
+                        (voiceName.includes('google') && !voiceName.includes('male')) ||
+                        (voiceName.includes('microsoft') && !voiceName.includes('male')));
+            });
+        } else {
+            // Look for male voices
+            selectedVoice = voices.find(function(voice) {
+                const voiceName = voice.name.toLowerCase();
+                return voice.lang.includes('en') && 
+                       (voiceName.includes('male') || 
+                        voiceName.includes('david') || 
+                        voiceName.includes('mark') || 
+                        voiceName.includes('guy') || 
+                        voiceName.includes('james') ||
+                        (voiceName.includes('google') && voiceName.includes('male')) ||
+                        (voiceName.includes('microsoft') && voiceName.includes('male')));
+            });
+        }
+        
+        // Fallback to any good quality voice if gender-specific not found
+        if (!selectedVoice) {
+            selectedVoice = voices.find(function(voice) {
+                return voice.lang.includes('en') && (voice.name.includes('Google') || voice.name.includes('Microsoft'));
+            });
+        }
+        
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+            console.log('Using voice:', selectedVoice.name, 'for preference:', prefs.voice);
+        }
+        
+        speechSynthesis.speak(utterance);
+    }
+}
+
+function nextStep() {
+    clearTimeout(teachingTimer);
+    
+    // If we're on practice step, wait for completion
+    if (teachingSteps[currentStep] && teachingSteps[currentStep].name === 'practice' && !practiceCompleted) {
+        return; // Don't proceed until practice is completed
+    }
+    
+    currentStep++;
+    
+    if (currentStep >= teachingSteps.length) {
+        // Hide practice section and move to next word
+        document.getElementById('practice-section').style.display = 'none';
+        resetPracticeSection();
+        
+        currentStep = 0;
+        var oldIndex = currentWordIndex;
+        currentWordIndex = (currentWordIndex + 1) % vocabularyWords.length;
+        
+        console.log('Moving from word', oldIndex, 'to word', currentWordIndex);
+        console.log('Total words available:', vocabularyWords.length);
+        console.log('Current word:', vocabularyWords[currentWordIndex] ? vocabularyWords[currentWordIndex].word : 'undefined');
+        
+        // Pause between words
+        document.getElementById('progress-text').textContent = 'Moving to next word...';
+        teachingTimer = setTimeout(function() {
+            showCurrentStep();
+            scheduleNextStep();
+        }, 2000);
+    } else {
+        showCurrentStep();
+        scheduleNextStep();
+    }
+}
+
+function scheduleNextStep() {
+    var step = teachingSteps[currentStep];
+    if (step.name === 'practice') {
+        // Don't auto-advance on practice step
+        return;
+    }
+    teachingTimer = setTimeout(nextStep, step.duration);
+}
+
+function resetPracticeSection() {
+    document.getElementById('practice-result').style.display = 'none';
+    document.getElementById('record-btn').style.display = 'inline-block';
+    document.getElementById('stop-record-btn').style.display = 'none';
+    document.getElementById('next-word-btn').style.display = 'none';
+    document.getElementById('load-new-words-btn').style.display = 'none';
+    document.getElementById('recording-status').textContent = '';
+    document.getElementById('transcribed-text').textContent = '';
+    document.getElementById('ai-feedback').textContent = '';
+    document.getElementById('score-display').textContent = '';
+    practiceCompleted = false;
+    isRecording = false;
+}
+
+function startRecording() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Recording not supported in this browser');
+        return;
+    }
+    
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+            audioChunks = [];
+            mediaRecorder = new MediaRecorder(stream);
+            
+            mediaRecorder.ondataavailable = function(event) {
+                audioChunks.push(event.data);
+            };
+            
+            mediaRecorder.onstop = function() {
+                var audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                transcribeAudio(audioBlob);
+                stream.getTracks().forEach(function(track) {
+                    track.stop();
+                });
+            };
+            
+            mediaRecorder.start();
+            isRecording = true;
+            
+            document.getElementById('record-btn').style.display = 'none';
+            document.getElementById('stop-record-btn').style.display = 'inline-block';
+            document.getElementById('recording-status').textContent = 'Recording... Speak your sentence now!';
+        })
+        .catch(function(error) {
+            console.error('Error accessing microphone:', error);
+            alert('Could not access microphone. Please check permissions.');
+        });
+}
+
+function stopRecording() {
+    if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        
+        document.getElementById('record-btn').style.display = 'inline-block';
+        document.getElementById('stop-record-btn').style.display = 'none';
+        document.getElementById('recording-status').textContent = 'Processing your recording...';
+    }
+}
+
+function transcribeAudio(audioBlob) {
+    var formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.wav');
+    
+    fetch('/api/transcribe', {
+        method: 'POST',
+        body: formData
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            var transcribedText = data.transcription;
+            document.getElementById('transcribed-text').textContent = 'You said: "' + transcribedText + '"';
+            document.getElementById('practice-result').style.display = 'block';
+            
+            // Analyze the sentence
+            analyzeSentence(transcribedText, vocabularyWords[currentWordIndex].word);
+        } else {
+            document.getElementById('recording-status').textContent = 'Error: Could not transcribe audio. Please try again.';
+        }
+    })
+    .catch(function(error) {
+        console.error('Transcription error:', error);
+        document.getElementById('recording-status').textContent = 'Error: Could not process recording. Please try again.';
+    });
+}
+
+function analyzeSentence(sentence, targetWord) {
+    var analysisData = {
+        sentence: sentence,
+        word: targetWord,
+        word_data: vocabularyWords[currentWordIndex]
+    };
+    
+    console.log('DEBUG: Sending analysis data:', analysisData);
+    
+    fetch('/api/analyze-sentence', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(analysisData)
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            document.getElementById('ai-feedback').textContent = data.analysis.feedback;
+            
+            var scoreElement = document.getElementById('score-display');
+            scoreElement.textContent = 'Score: ' + data.analysis.score + '/10';
+            
+            // Apply score styling
+            scoreElement.className = 'score-display';
+            if (data.analysis.score >= 8) {
+                scoreElement.classList.add('score-excellent');
+            } else if (data.analysis.score >= 6) {
+                scoreElement.classList.add('score-good');
+            } else {
+                scoreElement.classList.add('score-needs-improvement');
+            }
+            
+            // Mark practice as completed - no auto-advance
+            practiceCompleted = true;
+            document.getElementById('recording-status').textContent = 'Great job! Click "Next Word" to continue or practice again.';
+            
+            // Show next word button and load new words button
+            document.getElementById('next-word-btn').style.display = 'inline-block';
+            document.getElementById('load-new-words-btn').style.display = 'inline-block';
+        } else {
+            document.getElementById('ai-feedback').textContent = 'Error analyzing sentence. Please try again.';
+        }
+    })
+    .catch(function(error) {
+        console.error('Analysis error:', error);
+        document.getElementById('ai-feedback').textContent = 'Error analyzing sentence. Please try again.';
+    });
+}
+
+function startAutomaticTeaching() {
+    if (vocabularyWords.length === 0) return;
+    
+    isTeaching = true;
+    currentWordIndex = 0;
+    currentStep = 0;
+    
+    document.getElementById('progress-text').textContent = 'Starting automatic teaching...';
+    
+    // Start teaching after a short delay
+    setTimeout(function() {
+        showCurrentStep();
+        scheduleNextStep();
+    }, 1000);
+}
+
+// Load vocabulary and start teaching on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadVocabularyWords();
+    
+    // Add event listeners for recording buttons
+    document.getElementById('record-btn').addEventListener('click', startRecording);
+    document.getElementById('stop-record-btn').addEventListener('click', stopRecording);
+});
+
+// Ensure voices are loaded
+if ('speechSynthesis' in window) {
+    speechSynthesis.onvoiceschanged = function() {
+        console.log('Voices loaded:', speechSynthesis.getVoices().length);
+    };
+}
+
+// Listen for voice preference changes from base.html
+window.addEventListener('boony:prefs', function(event) {
+    const newPrefs = event.detail;
+    console.log('Voice preferences updated in vocabulary page:', newPrefs);
+    // Voice will be automatically used in next speakText call
+});
+
+// Listen for mute changes from base.html
+window.addEventListener('boony:mute', function(event) {
+    const isMuted = event.detail.muted;
+    if (isMuted) {
+        // Stop any ongoing speech when muted
+        if ('speechSynthesis' in window) {
+            speechSynthesis.cancel();
+        }
+    }
+    console.log('Mute status updated in vocabulary page:', isMuted);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,552 @@
+{% extends "base.html" %}
+{% block title %}Speaking Practice – {{ day }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/speak.css') }}?v=10">
+
+<div class="speak-page">
+
+    <!-- Top header inside page (centered, large) -->
+    <header class="speak-top centered">
+        <div class="top-left">
+            <h1 class="main-heading">Day {{ day }} — Improve Pronunciation</h1>
+            <div class="topic-line">{{ statements[0].topic if statements|length>0 else "" }}</div>
+        </div>
+
+        <!-- Credits: oval emboss box -->
+        <div class="top-right">
+            <div class="credits" id="credits-box" title="Your available credits">
+                <i class="fas fa-coins" aria-hidden="true"></i>
+                <span id="speak-credits">{{ initial_credits|default(0) }}</span>
+                <span class="credits-label">Credits</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="speak-main-grid">
+        <!-- LEFT: list of sentences -->
+        <aside class="sentence-list" id="sentence-list">
+            <div class="list-header">
+                <strong>Sentences</strong>
+                <span class="count">{{ statements|length }}</span>
+            </div>
+            <ul>
+                {% for sentence in statements %}
+                <li class="sentence-item {% if loop.index0 == 0 %}active{% endif %}"
+                    data-index="{{ loop.index0 }}"
+                    data-enabled="{% if loop.index0 == 0 %}true{% else %}false{% endif %}"
+                    id="list-item-{{ loop.index0 }}"
+                    onclick="selectSentence({{ loop.index0 }})">
+                    <div class="item-left">
+                        <div class="item-no">#{{ loop.index }}</div>
+                    </div>
+                    <div class="item-body">
+                        <div class="item-text">{{ sentence.text|truncate(80) }}</div>
+                        <div class="item-hindi">{{ sentence.hindi|truncate(80) }}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="icon-btn play-small" onclick="playSentence({{ loop.index0 }}); event.stopPropagation();" title="Play">▶</button>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </aside>
+
+        <!-- RIGHT: active card -->
+        <section class="active-card" id="active-card">
+            <div class="card-header">
+                <div class="card-meta">
+                    <div class="card-no" id="card-no">Sentence 1 / {{ statements|length }}</div>
+                    <div class="card-topic" id="card-topic">{{ statements[0].topic if statements|length>0 else "" }}</div>
+                </div>
+                <div class="card-progress">
+                    <div class="progress-label">Progress</div>
+                    <div class="progress-bar-outer" aria-hidden="true">
+                        <div class="progress-bar-inner" id="progress-fill" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="sentence-media-row">
+                    <div class="sentence-area">
+                        <h2 id="sentence-english">{{ statements[0].text if statements|length>0 else "No sentence" }}</h2>
+                        <p id="sentence-hindi" class="muted">{{ statements[0].hindi if statements|length>0 else "" }}</p>
+                    </div>
+
+                    <div class="media-area" aria-hidden="true">
+                        <img src="{{ url_for('static', filename='gifs/speaking.svg') }}" alt="Practice" class="side-gif">
+                    </div>
+                </div>
+
+                <div class="controls-area">
+                    <div class="controls-row">
+                        <button class="btn primary large ripple" id="play-btn" onclick="playSentence(selectedIndex)">▶ Play</button>
+                        <button class="btn accent large ripple" id="record-btn" onclick="toggleRecording(selectedIndex)">
+                            <span id="record-label">🎙 Start Recording</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="analysis-area" id="analysis-area" role="region" aria-label="Analysis">
+                    <div class="score-row">
+                        <div class="score">Accuracy: <strong id="score-value">—</strong></div>
+                        <div class="feedback" id="feedback-text">Record to get feedback</div>
+                    </div>
+
+                    <div class="transcript">
+                        <div class="transcript-label">Your Speech</div>
+                        <div class="transcript-box" id="transcription">Click record and speak...</div>
+                    </div>
+
+                    <div class="mispronounced" id="mispronounced-chips" aria-live="polite"></div>
+
+                    <div class="final-actions">
+                        <button class="btn success large ripple" id="try-again" onclick="tryAgain()">🔄 Try Again</button>
+                        <button class="btn outline large ripple" id="go-next" onclick="goNext()" disabled>➡ Next Sentence</button>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Pass data -->
+<script>
+  const SPEAK_STATEMENTS = {{ statements|tojson }};
+  // CURRENT_DAY should be set by server-side or earlier JS. Fallback below is used in functions.
+  const CURRENT_DAY = "{{ day }}" || "Day-1";
+</script>
+<script src="{{ url_for('static', filename='js/speak.js') }}?v=10"></script>
+
+<!-- Page-specific styles (theme-aware) -->
+<style>
+    /* Use theme variables defined in base theme */
+    :root {
+        /* fallback values (will be overridden by base theme) */
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8fafc;
+        --text-primary: #111827;
+        --accent-color: #2563eb;
+        --accent-glow: rgba(37,99,235,0.9);
+        --border-color: #e5e7eb;
+        --muted: #6b7280;
+    }
+
+    /* Header */
+    .speak-top.centered {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 18px;
+    }
+
+    .main-heading {
+        font-size: 28px; /* Larger heading */
+        font-weight: 800;
+        margin: 0;
+        text-align: center;
+    }
+
+    .topic-line {
+        font-size: 15px;
+        color: var(--muted);
+        margin-top: 6px;
+        text-align: center;
+    }
+
+    /* Credits: oval emboss */
+    .credits {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 18px;
+        border-radius: 999px; /* oval */
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+        border: 1px solid var(--border-color);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06), inset 0 2px 8px rgba(255,255,255,0.02);
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-primary);
+        backdrop-filter: blur(6px);
+    }
+
+        .credits i {
+            color: #fbbf24;
+            font-size: 18px;
+        }
+        /* gold coin (icon) */
+        .credits #speak-credits {
+            font-weight: 900;
+            font-size: 16px;
+        }
+
+        .credits .credits-label {
+            margin-left: 4px;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+    /* Grid */
+    .speak-main-grid {
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        gap: 22px;
+    }
+
+    /* Sentence list */
+    .sentence-list {
+        background: var(--bg-secondary);
+        padding: 14px;
+        border-radius: 12px;
+        max-height: 75vh;
+        overflow-y: auto; /* vertical scroll */
+    }
+
+    .sentence-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(0,0,0,0.08); /* line between sentences */
+        transition: background 0.18s, transform 0.12s;
+        cursor: pointer;
+    }
+        .sentence-item:last-child {
+            border-bottom: none; /* remove line for last item */
+        }
+
+    .item-left {
+        flex-shrink: 0;
+        width: 35px; /* fixed width for statement number */
+        font-weight: 700;
+        color: var(--muted);
+        text-align: center;
+    }
+
+    .item-body {
+        flex: 1;
+        padding: 0 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .item-text {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-primary);
+        line-height: 1.4;
+    }
+
+    .item-hindi {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 2px;
+    }
+
+    .item-actions {
+        flex-shrink: 0;
+    }
+        .sentence-item:hover {
+            background: rgba(0,0,0,0.02);
+            transform: translateY(-2px);
+        }
+
+        .sentence-item.active {
+            background: rgba(0,0,0,0.04);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        }
+        .sentence-item[data-enabled="false"] {
+            pointer-events: none; /* cannot click */
+            opacity: 0.5;
+        }
+
+    /* Card */
+    .active-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 8px 26px rgba(0,0,0,0.04);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        gap: 12px;
+    }
+
+    .card-meta {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-no {
+        font-weight: 700;
+        color: var(--muted);
+    }
+
+    .card-topic {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 6px;
+    }
+
+    /* Progress */
+    .progress-bar-outer {
+        height: 10px;
+        background: var(--bg-secondary);
+        border-radius: 6px;
+        overflow: hidden;
+        width: 220px;
+    }
+
+    .progress-bar-inner {
+        background: var(--accent-color);
+        height: 100%;
+        transition: width 0.3s;
+    }
+
+    /* Sentence + gif row */
+    .sentence-media-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .sentence-area {
+        flex: 1;
+    }
+
+        .sentence-area h2 {
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+
+        .sentence-area p {
+            font-size: 15px;
+            color: var(--muted);
+        }
+
+    /* Side gif */
+    .media-area {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .side-gif {
+        width: 72px;
+        height: auto;
+        opacity: 0.95;
+        transform: translateY(0);
+    }
+
+    /* Controls */
+    .controls-area {
+        margin-top: 18px;
+    }
+
+    .controls-row {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    /* Buttons (ripple + press effect) */
+    .btn {
+        position: relative;
+        overflow: hidden;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
+        box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+    }
+
+        .btn.large {
+            padding: 12px 20px;
+            font-size: 15px;
+        }
+
+        .btn:active {
+            transform: translateY(1px) scale(0.998);
+            box-shadow: 0 4px 12px rgba(15,23,42,0.05);
+        }
+        .btn::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255,255,255,0.5);
+            opacity: 0;
+            border-radius: 50%;
+            transform: scale(1) translate(-50%, -50%);
+            transform-origin: center;
+        }
+
+        .btn:active::after {
+            opacity: 1;
+            transform: scale(40) translate(-50%, -50%);
+            transition: transform 0.5s ease, opacity 1s ease;
+        }
+        /* Colors */
+        .btn.primary {
+            background: linear-gradient(180deg,var(--accent-color), #1f4ed8);
+            color: #fff;
+        }
+
+        .btn.accent {
+            background: linear-gradient(180deg,#fb923c,#f97316);
+            color: #fff;
+        }
+
+        .btn.success {
+            background: linear-gradient(180deg,#34d399,#10b981);
+            color: #fff;
+        }
+
+        .btn.outline {
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            background: transparent;
+        }
+
+    /* Ripple helper */
+    .ripple::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        transform: scale(0);
+        background: rgba(255,255,255,0.35);
+        width: 120px;
+        height: 120px;
+        opacity: 0;
+        transition: transform 0.6s, opacity 0.8s;
+        pointer-events: none;
+    }
+
+    .ripple:active::after {
+        transform: scale(1);
+        opacity: 1;
+        transition: transform 0s, opacity 0.6s;
+    }
+
+    /* Analysis area (theme-aware separation) */
+    .analysis-area {
+        margin-top: 26px;
+        padding: 18px;
+        border-top: 1px solid var(--border-color);
+        background: var(--bg-secondary);
+        border-radius: 12px;
+    }
+
+    .score-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        font-size: 15px;
+        color: var(--text-primary);
+    }
+
+    /* Transcript */
+    .transcript {
+        margin-top: 16px;
+    }
+
+    .transcript-label {
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+    }
+
+    .transcript-box {
+        margin-top: 4px;
+        padding: 16px;
+        border-radius: 10px;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 80px;
+        font-size: 18px; /* larger text as requested */
+        line-height: 1.6;
+        border: 1px solid var(--border-color);
+    }
+
+    /* Mispronounced chips (accented) */
+    .mispronounced {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+        .mispronounced .chip {
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            background: var(--accent-color);
+            color: #fff;
+            box-shadow: 0 6px 14px rgba(37,99,235,0.08);
+        }
+
+    /* Final actions */
+    .final-actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        justify-content: flex-start; /* <- updated from flex-end to flex-start */
+    }
+
+
+    /* Responsive tweaks */
+    @media (max-width: 900px) {
+        .speak-main-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .top-right {
+            margin-top: 12px;
+        }
+
+        .main-heading {
+            font-size: 22px;
+        }
+
+        .side-gif {
+            width: 56px;
+        }
+    }
+</style>
+
+<!-- Small JS: ripple click position (optional enhancement) -->
+<script>
+    // Add ripple effect position for nicer feel
+    document.addEventListener('pointerdown', function (e) {
+        const el = e.target.closest('.ripple');
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const rx = e.clientX - rect.left - 60; // offset for ::after center (half of 120)
+        const ry = e.clientY - rect.top - 60;
+        el.style.setProperty('--ripple-x', rx + 'px');
+        el.style.setProperty('--ripple-y', ry + 'px');
+        // position the pseudo element by setting background-position (works with improvements in CSS if needed)
+    });
+</script>
+
+{% endblock %}

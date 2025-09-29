@@ -1,0 +1,981 @@
+/* Theme Variables */
+:root {
+    /* Light Theme (Default) */
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #ffffff;
+    --text-primary: #2c3e50;
+    --text-secondary: #6c757d;
+    --accent-color: #667eea;
+    --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --border-color: #dee2e6;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --text-primary: #ffffff;
+    --text-secondary: #b8c5d6;
+    --accent-color: #667eea;
+    --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --border-color: #2d3748;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Global Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Background */
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: var(--bg-primary); /* Theme-aware background */
+    color: var(--text-primary); /* Theme-aware text */
+    margin: 0;
+    padding: 0;
+    font-size: 20px; /* Bigger base font */
+    line-height: 1.6;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Astra Background for full pages */
+.astra-bg {
+    background: var(--bg-primary);  /* Theme-aware background */
+    min-height: 100vh;
+    padding: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.card.info-card {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 800px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    transition: background-color 0.3s ease;
+}
+
+/* Cards */
+/* Base card styling */
+.card {
+    border-radius: 12px;
+    padding: 20px;
+    color: #ffffff;
+    transition: all 0.35s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+
+    /* Better background for text visibility */
+    background: var(--bg-secondary); /* Theme-aware background */
+    backdrop-filter: blur(10px);       /* frosted glass effect */
+
+    /* Animation */
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeUp 0.8s forwards;
+}
+
+/* Specific styling for paragraph content in revision page */
+#para {
+    background: rgba(255, 255, 255, 0.95) !important; /* white background with high opacity */
+    color: #2c3e50 !important; /* dark text for better readability */
+    font-size: 20px;
+    line-height: 1.8;
+    font-weight: 500;
+    border: 2px solid rgba(161, 34, 224, 0.3);
+}
+
+/* Keyframes fix */
+@keyframes cardFadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+/* Staggered animation for each card */
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.3s; }
+.card:nth-child(3) { animation-delay: 0.5s; }
+
+/* Hover effect */
+.card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+}
+
+/* Keyframes for entry */
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ✅ Astra Gradient Button */
+.btn-astra {
+    position: relative;
+    padding: 14px 22px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #a122e08a, #46125fa8);
+    color: white;
+    font-weight: 600;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    overflow: hidden; /* Needed for shine effect */
+}
+
+/* Shine / wipe effect */
+.btn-astra::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.5),
+        transparent
+    );
+    transform: skewX(-25deg);
+}
+
+/* Hover effects */
+.btn-astra:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.btn-astra:hover::before {
+    animation: shine 0.9s forwards;
+}
+
+@keyframes shine {
+    0% {
+        left: -50%;
+    }
+    100% {
+        left: 125%;
+    }
+}
+
+/* Disabled state */
+.btn-astra:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* Inputs & Select */
+.input, select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    font-size: 18px; /* 🔥 input me bada text */
+}
+
+/* Notice / Error */
+.notice {
+    background: #ffe6e6;
+    color: #b30000;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 18px;
+}
+
+/* Statement Box (Listen Page) */
+.statement-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 30px auto;
+    width: 70%;
+    font-size: 18px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    transition: transform 0.3s, border 0.3s;
+}
+
+    .statement-box.active {
+        border: 3px solid #8e44ad;
+        transform: scale(1.03);
+        background: #E6E6FA;
+    }
+
+.stmt-number {
+    font-size: 18px;
+    color: #555;
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.english {
+    font-size: 28px; /* 🔥 bada English text */
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.pronunciation {
+    font-size: 22px;
+    color: #27ae60;
+    margin-bottom: 8px;
+}
+
+.hindi {
+    font-size: 24px; /* 🔥 bada Hindi text */
+    color: #8e44ad;
+}
+
+/* Congrats Message */
+.congrats {
+    display: none;
+    text-align: center;
+    font-size: 32px; /* bada congrat text */
+    color: #27ae60;
+    margin: 40px 0;
+    font-weight: bold;
+}
+
+/* Progress Bar */
+.progress-container {
+    flex: 1;
+    margin: 0 20px;
+}
+
+.progress-bar {
+    background: #e0e0e0;
+    border-radius: 10px;
+    height: 16px; /* thoda mota progress bar */
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg,#42a5f5,#1e88e5);
+    transition: width 0.5s ease;
+}
+
+/* Top Bar */
+.top-bar {
+    position: sticky;
+    top: 0;
+    background: #4B0082;
+    color: #2a003f;
+    padding: 14px 22px;
+    font-size: 20px; /* bada top bar text */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+}
+
+/* Hero Section */
+.hero-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    margin: 40px auto;
+    max-width: 1000px;
+    padding: 20px;
+}
+
+.hero-left {
+    flex: 1;
+}
+
+.hero-right {
+    flex: 1;
+    text-align: right;
+}
+
+.hero-title {
+    animation: fadeInDown 1.2s ease forwards;
+}
+.hero-sub {
+    animation: fadeInUp 1.4s ease forwards;
+}
+.hero-buttons {
+    animation: fadeInUp 1.8s ease forwards;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+.hero-img {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+/* Info Card */
+.info-card {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 24px;
+    font-size: 18px;
+}
+/* Navigation Bar */
+.nav {
+    background: var(--bg-secondary);
+    padding: 12px 0;
+    font-size: 20px; /* ✅ Font bada kiya */
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1000; /* हमेशा सबसे ऊपर रहे */
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+    .nav .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .nav-right {
+        margin-right: 30px; /* adjust px as you like */
+    }
+    .nav-left {
+        margin-left: 30px; /* adjust px as you like */
+    }
+    
+
+/* Left side (Home button) */
+/* Navbar Buttons Astra Theme */
+.nav-left a,
+.nav-right a {
+    position: relative;
+    padding: 14px 22px;   /* smaller padding */
+    font-size: 18px;     /* smaller font size */
+    border-radius: 8px;
+    font-weight: 600;    /* slightly lighter */
+    text-transform: none; /* remove full caps, looks cleaner */
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    color: white !important;
+    background: var(--bg-secondary);
+    transition: transform 0.3s ease, background 0.3s ease;
+    display: inline-block;
+    overflow: hidden;
+}
+
+
+/* Hover: simple lift, no glow */
+.nav-left a:hover,
+.nav-right a:hover {
+    transform: translateY(-3px);
+    background: var(--hover-bg); /* Theme-aware hover */
+}
+
+/* Shine effect */
+.nav-left a::before,
+.nav-right a::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255,255,255,0.5),
+        transparent
+    );
+    transform: skewX(-25deg);
+}
+
+/* Animate shine on hover */
+.nav-left a:hover::before,
+.nav-right a:hover::before {
+    animation: valorantShine 0.8s forwards;
+}
+
+@keyframes valorantShine {
+    0% { left: -50%; }
+    100% { left: 125%; }
+}
+
+
+
+/* Info Card (Landing page ke boxes ke liye special color) */
+/* Info Card (Landing Page ke boxes) */
+/* Info Card (Landing Page ke boxes) */
+.card.info-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Statement Box (Listen Page) */
+.statement-box {
+    background: var(--bg-secondary) !important; /* Theme-aware background */
+    color: var(--text-primary) !important; /* Theme-aware text */
+}
+.card.info-card h2,
+.card.info-card p,
+.card.info-card li,
+.statement-box .english,
+.statement-box .pronunciation,
+.statement-box .hindi {
+    color: var(--text-primary) !important;
+}
+.topbar {
+    background: var(--accent-color);
+    color: var(--text-primary);
+    padding: 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: background-color 0.3s ease;
+}
+
+    .topbar span {
+        display: inline-block;
+        padding-left: 100%;
+        animation: marquee 15s linear infinite;
+    }
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+.bottombar {
+    position: fixed;      /* stick to viewport */
+    bottom: 12px;         /* space from bottom */
+    left: 20px;           /* 👈 move to left */
+    background: rgba(255, 255, 255, 0.1); /* subtle background */
+    backdrop-filter: blur(8px);           /* glassy premium look */
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    z-index: 2000;        /* stay above everything */
+}
+
+
+.floating {
+    animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0px); }
+}
+/* 🔹 Fade animations */
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(25px);
+    animation: fadeInUp 1s ease forwards;
+}
+.fade-in-down {
+    opacity: 0;
+    transform: translateY(-25px);
+    animation: fadeInDown 1s ease forwards;
+}
+.fade-in-right {
+    opacity: 0;
+    transform: translateX(25px);
+    animation: fadeInRight 1s ease forwards;
+}
+
+@keyframes fadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInDown {
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInRight {
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Gradient Button (Purple Glow Style) */
+.btn-gradient {
+    display: inline-block;
+    outline: 0;
+    border: none;
+    cursor: pointer;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 8px;
+    font-size: 14px;
+    padding: 8px 18px;
+    text-decoration: none;
+    background: var(--bg-secondary);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    margin-left: 10px;
+    margin-right: 10px;
+    overflow: hidden;
+}
+
+/* Hover lift like other buttons */
+.btn-gradient:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Shine effect */
+.btn-gradient::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.5),
+        transparent
+    );
+    transform: skewX(-25deg);
+}
+
+.btn-gradient:hover::before {
+    animation: shine 0.9s forwards;
+}
+
+@keyframes shine {
+    0% { left: -50%; }
+    100% { left: 125%; }
+}
+
+.center-box {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+}
+/* Statement Box */
+/* Base Statement Box */
+.statement-box {
+    background: #f3e8ff;
+    color: #4B0082;
+    border-radius: 12px;
+    padding: 20px;
+    min-width: 320px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: transform 0.3s, border 0.3s;
+    
+}
+
+/* Layout variations */
+/* Layout variations */
+.statement-box.single {
+    width: 55%;   /* ⬅️ was 65%, now smaller */
+    margin: 25px auto;
+}
+
+.statement-box.grid {
+    width: 40%;   /* ⬅️ was 45%, now smaller */
+}
+
+
+/* States */
+.statement-box.active {
+    border: 3px solid #a855f7;
+    transform: scale(1.05);
+    background: #fff8f0;
+}
+.statement-box.completed {
+    border: 3px solid #22c55e;
+    background: #f0fff4;
+}
+.statement-box.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+
+/* Old vocab styles removed - now using updated styles below */
+
+.btn-astra.small {
+    font-size: 14px;
+    padding: 6px 12px;
+}
+
+/* Container for statement boxes */
+.statement-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;  /* ✅ center align horizontally */
+    gap: 20px; /* ✅ space between boxes */
+    margin-top: 20px;
+}
+
+
+.listen-header {
+    position: sticky;       /* ✅ stick to top inside parent */
+    top: 0;                 /* top par chipka rahe */
+    z-index: 1000;          /* upar rahe */
+    background: var(--bg-primary);    /* Theme-aware background */
+    padding: 12px 0;
+    display: flex;
+    flex-direction: column; /* credits niche rakhne ke liye */
+    align-items: center;    /* ✅ center align */
+    gap: 10px;
+}
+
+.listen-header .nav-buttons {
+    display: flex;
+    gap: 20px;              /* buttons ke beech spacing */
+    justify-content: center;
+}
+
+.listen-header .credits {
+    font-size: 18px;
+    color: #fff;
+}
+
+/* ===== VOCABULARY PAGE STYLES ===== */
+
+.vocab-section {
+    padding: 20px;
+}
+
+.vocab-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg-primary);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.vocab-header .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.vocab-header .vocab-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.vocab-header .vocab-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+}
+
+.vocab-header .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.vocab-header .credits-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface-secondary);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.vocab-header .credits-display i {
+    color: var(--accent-color);
+}
+
+.vocab-header .nav-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.vocab-header .nav-buttons button {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+/* Progress Section */
+.progress-section {
+    max-width: 1200px;
+    margin: 0 auto 30px auto;
+    padding: 0 20px;
+}
+
+.progress-info {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.progress-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.progress-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.progress-label i {
+    color: var(--accent-color);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent-color);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.vocab-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.vocab-card {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.vocab-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.vocab-card.active {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.vocab-card.completed {
+    border-color: #22c55e;
+    background: var(--bg-primary);
+}
+
+.vocab-card.locked {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.vocab-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.vocab-text {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    flex: 1;
+}
+
+.vocab-number {
+    width: 40px;
+    height: 40px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.vocab-main {
+    flex: 1;
+}
+
+.vocab-main .word {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.vocab-main .meaning {
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+
+.vocab-main .example {
+    font-style: italic;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.vocab-main .synonyms {
+    color: var(--accent-color);
+    margin-bottom: 8px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.practice-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.control-btn {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    min-width: 100px;
+    justify-content: center;
+}
+
+.control-btn:hover {
+    background: var(--hover-bg);
+    transform: translateY(-1px);
+}
+
+.control-btn:active {
+    transform: translateY(0);
+}
+
+.control-btn i {
+    font-size: 16px;
+}
+
+.highlight {
+    font-weight: bold;
+    color: var(--accent-color);
+    background: var(--bg-primary);
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+/* Animated Completion Message Style with Sparkling */
+#completion-msg {
+    display: none;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text-primary);
+    background: var(--accent-color);
+    padding: 30px;
+    margin: 20px auto;
+    border-radius: 15px;
+    width: 85%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    animation: fadeInUp 1s ease-out, sparkle 2s infinite;
+    z-index: 50;
+    margin-top: 10px;
+}
+
+#completion-msg::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: sparkleMove 3s infinite;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.8); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes sparkle {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes sparkleMove {
+    0% { transform: rotate(0deg) translate(-50%, -50%); }
+    100% { transform: rotate(360deg) translate(-50%, -50%); }
+}
+

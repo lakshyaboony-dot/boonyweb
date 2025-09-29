@@ -1,0 +1,2321 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🌟 Vocabulary Forest - Professional Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Animated Background Particles */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        #gameArea {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 200px);
+            margin-top: 150px;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -150px;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.9));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: rise linear forwards;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bubble:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .bubble-word {
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            color: #2c3e50;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .pop {
+            animation: popAnim 0.8s forwards !important;
+        }
+
+        @keyframes rise {
+            from {
+                transform: translateY(0) scale(0.8);
+                opacity: 0.8;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(-10vh) scale(1);
+            }
+            to {
+                transform: translateY(-110vh) scale(0.9);
+                opacity: 0;
+            }
+        }
+
+        @keyframes popAnim {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.9));
+                border: 3px solid rgba(255, 255, 255, 0.3);
+            }
+            15% {
+                transform: scale(1.3);
+                opacity: 1;
+                background: linear-gradient(135deg, #FFD700, #FFA500);
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 
+                           0 0 60px rgba(255, 165, 0, 0.6);
+                border: 4px solid #FFD700;
+            }
+            35% {
+                transform: scale(1.6);
+                opacity: 0.95;
+                background: linear-gradient(135deg, #00FF7F, #32CD32);
+                box-shadow: 0 0 50px rgba(0, 255, 127, 1), 
+                           0 0 100px rgba(50, 205, 50, 0.8);
+                border: 5px solid #00FF7F;
+            }
+            60% {
+                transform: scale(2.0);
+                opacity: 0.7;
+                background: linear-gradient(135deg, #FF69B4, #FF1493);
+                box-shadow: 0 0 70px rgba(255, 105, 180, 0.9), 
+                           0 0 140px rgba(255, 20, 147, 0.7);
+                border: 6px solid #FF69B4;
+            }
+            85% {
+                transform: scale(2.5);
+                opacity: 0.4;
+                background: linear-gradient(135deg, #9370DB, #8A2BE2);
+                box-shadow: 0 0 90px rgba(147, 112, 219, 0.8), 
+                           0 0 180px rgba(138, 43, 226, 0.6);
+            }
+            100% {
+                transform: scale(3.0);
+                opacity: 0;
+                background: linear-gradient(135deg, #FF4500, #DC143C);
+                box-shadow: 0 0 120px rgba(255, 69, 0, 0.5), 
+                           0 0 240px rgba(220, 20, 60, 0.3);
+            }
+        }
+        
+        @keyframes scoreFlash {
+            0% { 
+                color: white; 
+                transform: scale(1); 
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            }
+            50% { 
+                color: #FFD700; 
+                transform: scale(1.3); 
+                text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            }
+            100% { 
+                color: white; 
+                transform: scale(1); 
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            }
+        }
+        
+        .score-flash {
+            animation: scoreFlash 0.6s ease-in-out;
+        }
+
+        /* Professional Game Header */
+        .game-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
+            backdrop-filter: blur(20px);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-logo h1 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFD700, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-logo .logo-icon {
+            font-size: 36px;
+            background: linear-gradient(135deg, #FFD700, #FF6B6B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .game-stats-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .score-display {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            min-width: 150px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .score-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .stats-display {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: white;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 200px;
+        }
+        
+        .stats-item {
+            margin: 3px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stats-item i {
+            margin-right: 8px;
+            color: #FFD700;
+        }
+        
+        /* Professional Message System */
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.9));
+            backdrop-filter: blur(20px);
+            padding: 25px 35px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            text-align: center;
+            min-width: 300px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: messageSlideIn 0.5s ease-out;
+        }
+
+        @keyframes messageSlideIn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+        
+        .message.info {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: 2px solid rgba(52, 152, 219, 0.5);
+        }
+        
+        .message.error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: 2px solid rgba(231, 76, 60, 0.5);
+        }
+        
+        .message.success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: 2px solid rgba(46, 204, 113, 0.5);
+        }
+
+        /* Professional HUD */
+        #hud {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 20px 25px;
+            border-radius: 20px;
+            z-index: 1000;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            min-width: 200px;
+            display: none; /* Initially hidden */
+        }
+
+        #scoreBoard {
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        #startGameBtn {
+            padding: 12px 24px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        #startGameBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.6);
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+
+        #startGameBtn:active {
+            transform: translateY(0);
+        }
+
+        /* Professional Level Selection */
+        .level-selection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .level-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.9));
+            backdrop-filter: blur(20px);
+            padding: 50px;
+            border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 700px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: levelContainerSlide 0.8s ease-out;
+        }
+
+        @keyframes levelContainerSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .level-container h2 {
+            color: #2c3e50;
+            margin-bottom: 40px;
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .level-options {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .level-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 40px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            min-width: 280px;
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .level-card:hover::before {
+            left: 100%;
+        }
+
+        .level-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 25px 60px rgba(102, 126, 234, 0.5);
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+
+        .level-card h3 {
+            margin: 0 0 15px 0;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .level-card p {
+            margin: 0 0 20px 0;
+            opacity: 0.9;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .level-badge {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+            backdrop-filter: blur(10px);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Category Selection Styles */
+        .category-selection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .category-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .category-container h2 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .category-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .category-card h4 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+        }
+
+        .category-card p {
+            margin: 0;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 1500;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, #4CAF50, #81C784);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .sidebar-header h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+
+        .category-info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .matched-words-list {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .matched-word-item {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+            font-weight: 500;
+        }
+
+        .sidebar-stats {
+            background: #f8f9fa;
+            padding: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stat-item span {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        /* Professional Game Container */
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .game-area {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 200px);
+            margin-top: 150px;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        /* Enhanced Responsive Design */
+        @media (max-width: 1200px) {
+            .level-card {
+                width: calc(50% - 20px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .level-options {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                margin-bottom: 20px;
+                backdrop-filter: blur(10px);
+                border-radius: 15px;
+                padding: 15px;
+            }
+            
+            .game-container {
+                margin-left: 0;
+                width: 100%;
+                padding: 10px;
+            }
+            
+            .back-button {
+                top: 10px;
+                left: 10px;
+                font-size: 14px;
+                padding: 8px 12px;
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+            }
+            
+            .level-card {
+                width: 100%;
+                margin: 10px 0;
+                padding: 20px;
+                font-size: 16px;
+            }
+            
+            .level-card h3 {
+                font-size: 20px;
+            }
+            
+            .game-header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .game-logo {
+                font-size: 20px;
+            }
+            
+            .score-display {
+                font-size: 16px;
+                padding: 8px 15px;
+            }
+            
+            .hud {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .score-board {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .start-button {
+                padding: 12px 25px;
+                font-size: 16px;
+            }
+            
+            .bubble {
+                min-width: 80px;
+                min-height: 80px;
+                font-size: 14px;
+            }
+            
+            .message {
+                font-size: 14px;
+                padding: 10px 15px;
+                margin: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .level-selection h2 {
+                font-size: 24px;
+            }
+            
+            .level-card {
+                padding: 15px;
+            }
+            
+            .level-card h3 {
+                font-size: 18px;
+            }
+            
+            .game-area {
+                min-height: 300px;
+            }
+            
+            .bubble {
+                min-width: 70px;
+                min-height: 70px;
+                font-size: 12px;
+            }
+            
+            .hud {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .score-board {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background Particles -->
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <!-- Level Selection Screen -->
+    <div id="levelSelection" class="level-selection">
+        <div class="level-container">
+            <h2><i class="fas fa-trophy"></i> Select Game Level</h2>
+            <div class="level-options">
+                <div class="level-card" onclick="selectLevel(1)">
+                    <h3><i class="fas fa-play-circle"></i> Level 1: Basic Game</h3>
+                    <p>Practice with all vocabulary words and improve your pronunciation skills</p>
+                    <div class="level-badge"><i class="fas fa-seedling"></i> Beginner</div>
+                </div>
+                <div class="level-card" onclick="selectLevel(2)">
+                    <h3><i class="fas fa-bullseye"></i> Level 2: Category Game</h3>
+                    <p>Choose specific word categories and master them one by one</p>
+                    <div class="level-badge"><i class="fas fa-star"></i> Advanced</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Selection Screen -->
+    <div id="categorySelection" class="category-selection" style="display: none;">
+        <div class="category-container">
+            <h2><i class="fas fa-book-open"></i> Select Word Category</h2>
+            <div class="category-grid" id="categoryGrid">
+                <!-- Categories will be loaded dynamically -->
+            </div>
+            <button class="back-btn" onclick="showLevelSelection()"><i class="fas fa-arrow-left"></i> Back to Levels</button>
+        </div>
+    </div>
+
+    <!-- Matched Words Sidebar -->
+    <div id="matchedWordsSidebar" class="sidebar" style="display: none;">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-check-circle"></i> Matched Words</h3>
+            <div class="category-info" id="currentCategoryInfo"></div>
+        </div>
+        <div class="matched-words-list" id="matchedWordsList">
+            <!-- Matched words will appear here -->
+        </div>
+        <div class="sidebar-stats" id="sidebarStats">
+            <div class="stat-item">Total: <span id="totalWords">0</span></div>
+            <div class="stat-item">Matched: <span id="matchedCount">0</span></div>
+            <div class="stat-item">Progress: <span id="progressPercent">0%</span></div>
+        </div>
+    </div>
+
+    <!-- Main Game Container -->
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <div class="game-header">
+            <div class="game-logo">
+                <i class="fas fa-leaf"></i> Vocabulary Forest
+            </div>
+            <div class="game-stats-container">
+                <div class="score-display">
+                    <i class="fas fa-star"></i> Score: <span id="score">0</span>
+                </div>
+                <div id="game-stats" class="stats-display">
+                    <div class="stats-item"><i class="fas fa-chart-line"></i> Loading stats...</div>
+                </div>
+            </div>
+        </div>
+        <div id="game-message" class="message" style="display: none;"></div>
+        <div class="game-area" id="gameArea"></div>
+    </div>
+
+    <!-- Enhanced HUD -->
+    <div id="hud">
+        <div id="scoreBoard">
+            <i class="fas fa-trophy"></i> Score: <span id="hudScore">0</span>
+        </div>
+        <button id="startGameBtn">
+            <i class="fas fa-play"></i> Start Game
+        </button>
+    </div>
+
+    <script>
+        // IMMEDIATE DEBUG LOG - Page loaded successfully
+        console.log("🚀 VOCABULARY FOREST PAGE LOADED SUCCESSFULLY!");
+        console.log("📍 JavaScript is executing properly");
+        
+        // Professional Game Features
+        class GameSoundManager {
+            constructor() {
+                this.sounds = {};
+                this.enabled = true;
+                this.initializeSounds();
+            }
+            
+            initializeSounds() {
+                // Create audio contexts for different sound effects
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Sound effect frequencies and patterns
+                this.soundPatterns = {
+                    pop: { frequency: 800, duration: 0.1, type: 'sine' },
+                    score: { frequency: 1200, duration: 0.2, type: 'triangle' },
+                    levelUp: { frequency: 600, duration: 0.3, type: 'sawtooth' },
+                    gameStart: { frequency: 440, duration: 0.5, type: 'square' },
+                    gameEnd: { frequency: 330, duration: 1, type: 'sine' }
+                };
+            }
+            
+            playSound(soundType) {
+                if (!this.enabled || !this.audioContext) return;
+                
+                const pattern = this.soundPatterns[soundType];
+                if (!pattern) return;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(pattern.frequency, this.audioContext.currentTime);
+                oscillator.type = pattern.type;
+                
+                gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + pattern.duration);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + pattern.duration);
+            }
+        }
+        
+        // Particle System for Visual Effects
+        class ParticleSystem {
+            constructor() {
+                this.particles = [];
+                this.canvas = null;
+                this.ctx = null;
+                this.initializeCanvas();
+                this.animate();
+            }
+            
+            initializeCanvas() {
+                this.canvas = document.createElement('canvas');
+                this.canvas.style.position = 'fixed';
+                this.canvas.style.top = '0';
+                this.canvas.style.left = '0';
+                this.canvas.style.width = '100%';
+                this.canvas.style.height = '100%';
+                this.canvas.style.pointerEvents = 'none';
+                this.canvas.style.zIndex = '1000';
+                document.body.appendChild(this.canvas);
+                
+                this.ctx = this.canvas.getContext('2d');
+                this.resizeCanvas();
+                
+                window.addEventListener('resize', () => this.resizeCanvas());
+            }
+            
+            resizeCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+            
+            createExplosion(x, y, color = '#4CAF50') {
+                for (let i = 0; i < 15; i++) {
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 10,
+                        vy: (Math.random() - 0.5) * 10,
+                        life: 1,
+                        decay: 0.02,
+                        size: Math.random() * 4 + 2,
+                        color: color
+                    });
+                }
+            }
+            
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const particle = this.particles[i];
+                    
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.life -= particle.decay;
+                    particle.vy += 0.2; // gravity
+                    
+                    if (particle.life <= 0) {
+                        this.particles.splice(i, 1);
+                        continue;
+                    }
+                    
+                    this.ctx.save();
+                    this.ctx.globalAlpha = particle.life;
+                    this.ctx.fillStyle = particle.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                }
+                
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+        
+        // Initialize professional game systems
+        const soundManager = new GameSoundManager();
+        const particleSystem = new ParticleSystem();
+        
+        // Background particles animation
+        function createBackgroundParticles() {
+            const bgParticles = document.getElementById('bgParticles');
+            if (!bgParticles) return;
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'absolute';
+                particle.style.width = Math.random() * 4 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.background = `rgba(76, 175, 80, ${Math.random() * 0.3 + 0.1})`;
+                particle.style.borderRadius = '50%';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animation = `float ${Math.random() * 10 + 10}s infinite linear`;
+                bgParticles.appendChild(particle);
+            }
+        }
+        
+        // Enhanced score update with animations
+        function updateScoreWithAnimation(newScore) {
+            const scoreElement = document.getElementById('score');
+            const hudScoreElement = document.getElementById('hudScore');
+            
+            if (scoreElement) {
+                scoreElement.textContent = newScore;
+                scoreElement.parentElement.classList.add('score-flash');
+                setTimeout(() => {
+                    scoreElement.parentElement.classList.remove('score-flash');
+                }, 500);
+            }
+            
+            if (hudScoreElement) {
+                hudScoreElement.textContent = newScore;
+            }
+            
+            // Play score sound
+            soundManager.playSound('score');
+        }
+
+        // Game state variables
+        console.log('🔐 Checking authentication status...');
+        let currentWord = null;
+        let gameStats = { total: 0, used: 0, unused: 0, completion_percentage: 0 };
+
+        let score = 0;
+        let activeBubbles = [];
+        let bubbleIndex = 0;
+        const baseDuration = 8; // seconds - base duration for bubbles
+        let gameInterval = null; // Store interval reference for cleanup
+        
+        // Progressive speed system - Much slower progression
+        let wordsCompleted = 0; // Track completed words in session
+        let currentSpeedLevel = 0; // Current speed level (0 = normal, 1+ = faster)
+        const WORDS_BEFORE_SPEED_INCREASE = 50; // First 50 words at normal speed
+        const SPEED_INCREASE_INTERVAL = 25; // Increase speed every 25 words after first 50
+        
+        // Game completion and pronunciation tracking
+        const MAX_WORDS_PER_GAME = 50; // Maximum words per game session
+        let correctPronunciations = 0; // Count of correctly pronounced words
+        let incorrectPronunciations = 0; // Count of incorrectly pronounced words
+        let gameCompleted = false; // Flag to track if game is completed
+
+        // Level and Category System
+        let currentLevel = 1; // 1 = basic game, 2 = category game
+        let selectedCategory = null; // Selected word category
+        let availableCategories = []; // List of available categories
+        let matchedWords = []; // Words matched in current session
+        let categoryWords = []; // Words for selected category
+        let totalCategoryWords = 0; // Total words in selected category
+
+        const gameArea = document.getElementById("gameArea");
+        const scoreBoard = document.getElementById("scoreBoard");
+        const startBtn = document.getElementById("startGameBtn");
+
+        // Level and Category Management Functions
+        function selectLevel(level) {
+            console.log(`🎯 selectLevel called with level: ${level}`);
+            console.log(`📊 Current state - gameContainer exists: ${!!document.getElementById('gameContainer')}`);
+            console.log(`📊 Current state - levelSelection exists: ${!!document.getElementById('levelSelection')}`);
+            console.log(`📊 Current state - categorySelection exists: ${!!document.getElementById('categorySelection')}`);
+            
+            currentLevel = level;
+            console.log(`✅ Level set to: ${currentLevel}`);
+            
+            try {
+                if (level === 1) {
+                    console.log(`🎮 Starting Level 1 - Basic Game`);
+                    // Basic game - start directly
+                    console.log(`🔄 Calling showGameArea()`);
+                    showGameArea();
+                    console.log(`🔄 Calling initializeGame()`);
+                    initializeGame();
+                    
+                    // Auto-start the game for beginner level
+                    console.log(`🚀 Auto-starting game for beginner level`);
+                    setTimeout(() => {
+                        startGame();
+                    }, 1000); // Small delay to ensure UI is ready
+                    
+                    console.log(`✅ Level 1 setup complete with auto-start`);
+                } else if (level === 2) {
+                    console.log(`🎯 Starting Level 2 - Category Game`);
+                    // Category game - show category selection
+                    console.log(`🔄 Calling showCategorySelection()`);
+                    showCategorySelection();
+                    console.log(`🔄 Calling loadCategories()`);
+                    loadCategories();
+                    console.log(`✅ Level 2 setup complete`);
+                } else {
+                    console.error(`❌ Invalid level: ${level}`);
+                    showMessage('Invalid level selected', 'error');
+                }
+            } catch (error) {
+                console.error(`❌ Error in selectLevel:`, error);
+                showMessage(`Error starting game: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize game function
+        function initializeGame() {
+            console.log(`🎮 initializeGame() called for level: ${currentLevel}`);
+            console.log(`📊 Game elements check:`);
+            console.log(`  - gameArea: ${!!gameArea}`);
+            console.log(`  - startBtn: ${!!startBtn}`);
+            
+            try {
+                // Reset game state
+                score = 0;
+                wordsCompleted = 0;
+                currentSpeedLevel = 0;
+                correctPronunciations = 0;
+                incorrectPronunciations = 0;
+                gameCompleted = false;
+                activeBubbles = [];
+                bubbleIndex = 0;
+                console.log(`✅ Game state reset`);
+                
+                // Clear game area
+                if (gameArea) {
+                    gameArea.innerHTML = "";
+                    console.log(`✅ Game area cleared`);
+                } else {
+                    console.error(`❌ gameArea element not found`);
+                }
+                
+                // Update score display
+                updateScore();
+                console.log(`✅ Score display updated`);
+                
+                // Show start button and instructions
+                if (startBtn) {
+                    startBtn.style.display = 'block';
+                    startBtn.textContent = 'Start Game';
+                    console.log(`✅ Start button displayed`);
+                } else {
+                    console.error(`❌ startBtn element not found`);
+                }
+                
+                // Show instructions
+                showMessage('🎮 Click "Start Game" to begin! Speak the words to pop bubbles.', 'info');
+                console.log(`✅ Instructions displayed`);
+                
+                console.log(`✅ Game initialized successfully`);
+            } catch (error) {
+                console.error(`❌ Error in initializeGame():`, error);
+                showMessage(`Error initializing game: ${error.message}`, 'error');
+            }
+        }
+
+        function showLevelSelection() {
+            console.log("🎯 showLevelSelection() called - Displaying level selection screen");
+            document.getElementById('levelSelection').style.display = 'flex';
+            document.getElementById('categorySelection').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('matchedWordsSidebar').style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
+            console.log("✅ Level selection screen displayed successfully");
+        }
+
+        function showCategorySelection() {
+            document.getElementById('levelSelection').style.display = 'none';
+            document.getElementById('categorySelection').style.display = 'flex';
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('matchedWordsSidebar').style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
+        }
+
+        function showGameArea() {
+            console.log(`🎮 showGameArea() called`);
+            console.log(`📊 Elements check:`);
+            console.log(`  - levelSelection: ${!!document.getElementById('levelSelection')}`);
+            console.log(`  - categorySelection: ${!!document.getElementById('categorySelection')}`);
+            console.log(`  - gameContainer: ${!!document.getElementById('gameContainer')}`);
+            console.log(`  - hud: ${!!document.getElementById('hud')}`);
+            console.log(`  - matchedWordsSidebar: ${!!document.getElementById('matchedWordsSidebar')}`);
+            
+            try {
+                const levelSelection = document.getElementById('levelSelection');
+                const categorySelection = document.getElementById('categorySelection');
+                const gameContainer = document.getElementById('gameContainer');
+                const hud = document.getElementById('hud');
+                const matchedWordsSidebar = document.getElementById('matchedWordsSidebar');
+                
+                if (levelSelection) {
+                    levelSelection.style.display = 'none';
+                    console.log(`✅ levelSelection hidden`);
+                } else {
+                    console.error(`❌ levelSelection element not found`);
+                }
+                
+                if (categorySelection) {
+                    categorySelection.style.display = 'none';
+                    console.log(`✅ categorySelection hidden`);
+                } else {
+                    console.error(`❌ categorySelection element not found`);
+                }
+                
+                if (gameContainer) {
+                    gameContainer.style.display = 'block';
+                    console.log(`✅ gameContainer displayed`);
+                    console.log(`📊 gameContainer computed styles:`, window.getComputedStyle(gameContainer));
+                } else {
+                    console.error(`❌ gameContainer element not found`);
+                }
+                
+                if (hud) {
+                    hud.style.display = 'block';
+                    console.log(`✅ hud displayed`);
+                } else {
+                    console.error(`❌ hud element not found`);
+                }
+                
+                if (currentLevel === 2) {
+                    if (matchedWordsSidebar) {
+                        matchedWordsSidebar.style.display = 'flex';
+                        console.log(`✅ matchedWordsSidebar displayed for level 2`);
+                    } else {
+                        console.error(`❌ matchedWordsSidebar element not found`);
+                    }
+                }
+                
+                console.log(`✅ showGameArea() completed successfully`);
+            } catch (error) {
+                console.error(`❌ Error in showGameArea():`, error);
+                showMessage(`Error displaying game area: ${error.message}`, 'error');
+            }
+        }
+                updateSidebarInfo();
+            }
+        }
+
+        async function loadCategories() {
+            console.log('loadCategories function called');
+            try {
+                console.log('Fetching categories from API...');
+                const response = await fetch('/api/word-categories');
+                console.log('API response received:', response);
+                const data = await response.json();
+                console.log('Parsed response data:', data);
+                
+                // Check if response has categories array
+                const categories = data.categories || [];
+                console.log('Categories array:', categories);
+                availableCategories = categories;
+                
+                const categoryGrid = document.getElementById('categoryGrid');
+                console.log('CategoryGrid element:', categoryGrid);
+                
+                if (!categoryGrid) {
+                    console.error('CategoryGrid element not found!');
+                    return;
+                }
+                
+                categoryGrid.innerHTML = '';
+                console.log('CategoryGrid cleared');
+                
+                if (categories.length === 0) {
+                    console.warn('No categories found');
+                    categoryGrid.innerHTML = '<p>No categories available</p>';
+                    return;
+                }
+                
+                categories.forEach((category, index) => {
+                    console.log(`Creating category card ${index + 1} for:`, category);
+                    const categoryCard = document.createElement('div');
+                    categoryCard.className = 'category-card';
+                    // Handle both string and object category formats
+                    const categoryName = typeof category === 'string' ? category : category.name;
+                    const displayName = typeof category === 'string' ? category : (category.display_name || category);
+                    const description = typeof category === 'string' ? `Words related to ${category}` : (category.description || `Words related to ${categoryName}`);
+                    
+                    console.log(`Setting onclick for category ${index + 1}:`, categoryName, displayName);
+                    
+                    // Use addEventListener for better debugging
+                    categoryCard.addEventListener('click', function() {
+                        console.log('Category card clicked via addEventListener:', categoryName, displayName);
+                        selectCategory(categoryName, displayName);
+                    });
+                    
+                    // Also keep onclick as backup
+                    categoryCard.onclick = () => {
+                        console.log('Category card clicked via onclick:', categoryName, displayName);
+                        selectCategory(categoryName, displayName);
+                    };
+                    
+                    categoryCard.innerHTML = `
+                        <h4>${displayName}</h4>
+                        <p>${description}</p>
+                    `;
+                    
+                    // Make it clearly clickable
+                    categoryCard.style.cursor = 'pointer';
+                    categoryCard.style.userSelect = 'none';
+                    
+                    categoryGrid.appendChild(categoryCard);
+                    console.log(`Category card ${index + 1} added to grid`);
+                });
+                
+                console.log('All category cards created successfully');
+                
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                showMessage('Error loading categories. Please try again.', 'error');
+            }
+        }
+
+        async function selectCategory(categoryName, displayName) {
+            console.log('selectCategory called with:', categoryName, displayName);
+            selectedCategory = categoryName;
+            console.log(`Selected category: ${categoryName}`);
+            
+            try {
+                console.log('Fetching words for category:', categoryName);
+                // Load words for selected category
+                const response = await fetch(`/api/category-words/${categoryName}`);
+                const words = await response.json();
+                console.log('Received words:', words);
+                categoryWords = words;
+                totalCategoryWords = words.length;
+                
+                // Reset matched words
+                matchedWords = [];
+                
+                // Update sidebar info
+                document.getElementById('currentCategoryInfo').textContent = displayName;
+                
+                // Show game area
+                console.log('Calling showGameArea()');
+                showGameArea();
+                console.log('Calling initializeGame()');
+                initializeGame();
+                
+            } catch (error) {
+                console.error('Error loading category words:', error);
+                showMessage('Error loading category words. Please try again.', 'error');
+            }
+        }
+
+        function updateSidebarInfo() {
+            if (currentLevel === 2 && selectedCategory) {
+                document.getElementById('totalWords').textContent = totalCategoryWords;
+                document.getElementById('matchedCount').textContent = matchedWords.length;
+                const progress = totalCategoryWords > 0 ? Math.round((matchedWords.length / totalCategoryWords) * 100) : 0;
+                document.getElementById('progressPercent').textContent = progress + '%';
+                
+                // Update matched words list
+                const matchedWordsList = document.getElementById('matchedWordsList');
+                matchedWordsList.innerHTML = '';
+                
+                matchedWords.forEach(word => {
+                    const wordItem = document.createElement('div');
+                    wordItem.className = 'matched-word-item';
+                    wordItem.textContent = word;
+                    matchedWordsList.appendChild(wordItem);
+                });
+            }
+        }
+
+        function addMatchedWord(word) {
+            if (currentLevel === 2 && !matchedWords.includes(word)) {
+                matchedWords.push(word);
+                updateSidebarInfo();
+                
+                // Check if all words in category are matched
+                if (matchedWords.length >= totalCategoryWords) {
+                    setTimeout(() => {
+                        showMessage(`🎉 Congratulations! You've completed all ${totalCategoryWords} words in this category!`, 'success');
+                        setTimeout(() => {
+                            showCategorySelection();
+                        }, 3000);
+                    }, 1000);
+                }
+            }
+        }
+
+        // Speech recognition setup
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            console.error('Speech recognition not supported in this browser');
+            alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+        }
+        
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = "en-US";
+        recognition.continuous = true;
+        recognition.interimResults = true;  // Enable interim results for faster detection
+        recognition.maxAlternatives = 3;    // Get multiple alternatives
+        
+        // Enhanced sensitivity settings (removed grammars property as it causes error)
+        if (recognition.serviceURI) {
+            recognition.serviceURI = 'wss://www.google.com/speech-api/v2/recognize';
+        }
+        
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            if (event.error === 'not-allowed') {
+                showMessage('Microphone access denied! Please allow microphone access in your browser settings and refresh the page.', 'error');
+                // Provide more helpful instructions
+                setTimeout(() => {
+                    showMessage('To enable microphone: Click the microphone icon in your browser address bar and select "Allow"', 'info');
+                }, 3000);
+            } else if (event.error === 'no-speech') {
+                console.log('No speech detected, continuing...');
+                // Don't show error for no-speech, just continue
+            } else if (event.error === 'audio-capture') {
+                showMessage('No microphone found. Please connect a microphone and try again.', 'error');
+            } else if (event.error === 'network') {
+                showMessage('Network error. Please check your internet connection.', 'error');
+            } else {
+                showMessage('Speech recognition error: ' + event.error, 'error');
+            }
+        };
+        
+        recognition.onstart = () => {
+            console.log('Speech recognition started');
+        };
+        
+        recognition.onend = () => {
+            console.log('Speech recognition ended');
+        };
+
+        recognition.onresult = (event) => {
+            const lastResult = event.results[event.results.length - 1];
+            
+            // Process both interim and final results for faster response
+            if (lastResult.isFinal || lastResult[0].confidence > 0.7) {
+                // Check all alternatives for better matching
+                const alternatives = [];
+                for (let i = 0; i < Math.min(lastResult.length, 3); i++) {
+                    alternatives.push(lastResult[i].transcript.toLowerCase().trim());
+                }
+                
+                console.log('Speech alternatives:', alternatives);
+                console.log('Active bubbles:', activeBubbles.map(b => b.word));
+                
+                let foundMatch = false;
+                
+                // Check each alternative against active bubbles
+                alternatives.forEach(spoken => {
+                    if (foundMatch) return; // Skip if already found match
+                    
+                    activeBubbles.forEach((bObj) => {
+                        if (!bObj.popped && !foundMatch) {
+                            const bubbleWord = bObj.word.toLowerCase();
+                            
+                            // Multiple matching strategies for better detection
+                            // Increased Levenshtein threshold for better fuzzy matching
+                            if (spoken.includes(bubbleWord) || 
+                                bubbleWord.includes(spoken) ||
+                                levenshteinDistance(spoken, bubbleWord) <= 3 ||
+                                spoken.split(' ').some(word => word === bubbleWord) ||
+                                bubbleWord.split(' ').some(word => word === spoken) ||
+                                // Additional phonetic matching for common misheard words
+                                isPhoneticMatch(spoken, bubbleWord)) {
+                                
+                                console.log('Match found! Popping bubble:', bObj.word, 'for spoken:', spoken);
+                                popBubble(bObj);
+                                foundMatch = true;
+                            }
+                        }
+                    });
+                });
+                
+                if (!foundMatch) {
+                    console.log('❌ No match found for any alternative:', alternatives);
+                    console.log('🫧 Active words on screen:', activeBubbles.filter(b => !b.popped).map(b => b.word));
+                    
+                    // Show a brief message to user about what words are available
+                    if (activeBubbles.filter(b => !b.popped).length > 0) {
+                        const activeWords = activeBubbles.filter(b => !b.popped).map(b => b.word).join(', ');
+                        console.log(`💡 Try saying one of these words: ${activeWords}`);
+                    }
+                }
+            }
+        };
+        
+        // Levenshtein distance function for fuzzy matching
+        function levenshteinDistance(str1, str2) {
+            const matrix = [];
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrix[str2.length][str1.length];
+        }
+        
+        // Phonetic matching for common speech recognition errors
+        function isPhoneticMatch(spoken, target) {
+            const spokenClean = spoken.toLowerCase().trim();
+            const targetClean = target.toLowerCase().trim();
+            
+            // Common phonetic substitutions and mishearings
+            const phoneticMap = {
+                // Common vowel confusions
+                'i': ['e', 'a', 'y'],
+                'e': ['i', 'a'],
+                'a': ['e', 'i', 'o'],
+                'o': ['a', 'u'],
+                'u': ['o', 'oo'],
+                // Common consonant confusions
+                'c': ['k', 's'],
+                'k': ['c', 'g'],
+                's': ['c', 'z'],
+                'z': ['s'],
+                'b': ['p', 'v'],
+                'p': ['b'],
+                'v': ['b', 'f'],
+                'f': ['v', 'ph'],
+                'd': ['t'],
+                't': ['d'],
+                'g': ['k', 'j'],
+                'j': ['g', 'ch'],
+                // Common endings
+                'ing': ['in', 'ng'],
+                'ed': ['d', 't'],
+                'er': ['ar', 'or'],
+                // Short words that sound similar
+                'ice': ['eyes', 'is', 'ace'],
+                'eyes': ['ice', 'is'],
+                'is': ['ice', 'eyes'],
+                'ace': ['ice', 'is']
+            };
+            
+            // Check if spoken word maps to target phonetically
+            if (phoneticMap[spokenClean] && phoneticMap[spokenClean].includes(targetClean)) {
+                return true;
+            }
+            
+            // Check reverse mapping
+            if (phoneticMap[targetClean] && phoneticMap[targetClean].includes(spokenClean)) {
+                return true;
+            }
+            
+            // Check for partial phonetic matches (first 2-3 characters)
+            if (spokenClean.length >= 2 && targetClean.length >= 2) {
+                const spokenStart = spokenClean.substring(0, Math.min(3, spokenClean.length));
+                const targetStart = targetClean.substring(0, Math.min(3, targetClean.length));
+                
+                if (spokenStart === targetStart) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // Fetch a random vocabulary word from the database (backend handles used word filtering)
+        async function getRandomWord() {
+            try {
+                console.log('🔍 Fetching random word...');
+                console.log('🔐 Testing authentication with a simple fetch first...');
+                
+                // Test authentication with a simple endpoint first
+                const authTest = await fetch('/api/vocabulary/stats');
+                console.log('🔐 Auth test response status:', authTest.status);
+                
+                if (authTest.status === 401 || authTest.status === 403) {
+                    console.error('❌ Authentication failed! User not logged in.');
+                    showMessage('Please log in to play the game', 'error');
+                    return null;
+                }
+                
+                let response;
+                
+                if (currentLevel === 2 && selectedCategory) {
+                    // Category-based word selection
+                    console.log('📂 Fetching category word for:', selectedCategory);
+                    response = await fetch(`/api/vocabulary/random?word_type=${selectedCategory}`);
+                } else {
+                    // Regular random word selection
+                    console.log('🎲 Fetching random word');
+                    response = await fetch('/api/vocabulary/random');
+                }
+                
+                console.log('📡 API Response status:', response.status);
+                console.log('📡 API Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    console.error('❌ API Response not OK:', response.status, response.statusText);
+                    const errorText = await response.text();
+                    console.error('❌ Error response body:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('📦 API Response data:', data);
+                
+                if (data.success) {
+                    currentWord = data.word;
+                    console.log('✅ Loaded word:', data.word.word, 'Category:', data.word.word_type || 'any');
+                    
+                    if (data.message) {
+                        showMessage(data.message, 'info');
+                    }
+                    return data.word;
+                } else {
+                    console.error('❌ API returned error:', data.error);
+                    showMessage('Error loading word: ' + data.error, 'error');
+                    return null;
+                }
+            } catch (error) {
+                console.error('💥 Error fetching word:', error);
+                console.error('💥 Error stack:', error.stack);
+                showMessage('Network error loading word: ' + error.message, 'error');
+                return null;
+            }
+        }
+        
+        // Mark current word as used
+        async function markWordAsUsed() {
+            if (!currentWord) return;
+            
+            try {
+                const response = await fetch('/api/vocabulary/mark_used', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ word_id: currentWord.id })
+                });
+                
+                const data = await response.json();
+                if (!data.success) {
+                    console.error('Error marking word as used:', data.error);
+                }
+                
+                // Update stats after marking word as used
+                await updateGameStats();
+            } catch (error) {
+                console.error('Error marking word as used:', error);
+            }
+        }
+        
+        // Update game statistics
+        async function updateGameStats() {
+            try {
+                const response = await fetch('/api/vocabulary/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    gameStats = data.stats;
+                    updateStatsDisplay();
+                }
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+            }
+        }
+        
+        // Update stats display in UI
+        function updateStatsDisplay() {
+            const statsElement = document.getElementById('game-stats');
+            if (statsElement) {
+                const speedLevelText = currentSpeedLevel > 0 ? ` (Level ${currentSpeedLevel + 1})` : '';
+                const totalAttempts = correctPronunciations + incorrectPronunciations;
+                const accuracy = totalAttempts > 0 ? Math.round((correctPronunciations / totalAttempts) * 100) : 100;
+                
+                statsElement.innerHTML = `
+                    <div class="stats-item">Words: ${wordsCompleted}/${MAX_WORDS_PER_GAME}${speedLevelText}</div>
+                    <div class="stats-item">Accuracy: ${accuracy}%</div>
+                    <div class="stats-item">Progress: ${gameStats.completion_percentage}%</div>
+                `;
+            }
+        }
+        
+        // Show message to user
+        function showMessage(message, type = 'info') {
+            const messageElement = document.getElementById('game-message');
+            if (messageElement) {
+                messageElement.textContent = message;
+                messageElement.className = `message ${type}`;
+                messageElement.style.display = 'block';
+                
+                // Hide message after 3 seconds
+                setTimeout(() => {
+                    messageElement.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        async function spawnBubble() {
+            console.log('🫧 Spawning new bubble...');
+            const wordObj = await getRandomWord();
+            if (!wordObj) {
+                console.error('❌ No word object received, cannot spawn bubble');
+                return; // Don't create bubble if there's an error
+            }
+            
+            console.log('📝 Creating bubble for word:', wordObj.word);
+            
+            const bubble = document.createElement("div");
+            bubble.classList.add("bubble");
+
+            const wordText = document.createElement("div");
+            wordText.textContent = wordObj.word;
+            wordText.className = "bubble-word";
+            
+            // Professional colorful styling with gradients
+            const colors = ['#4CAF50', '#2196F3', '#FF9800', '#9C27B0', '#F44336', '#00BCD4'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            bubble.style.setProperty('--bubble-color', randomColor);
+            
+            // Enhanced text styling
+            wordText.style.color = '#ffffff';
+            wordText.style.fontWeight = 'bold';
+            wordText.style.fontSize = '20px';
+            wordText.style.textShadow = '2px 2px 4px rgba(0,0,0,0.5)';
+            wordText.style.letterSpacing = '1px';
+            
+            bubble.appendChild(wordText);
+
+            // Professional hover effects
+            bubble.addEventListener('mouseenter', () => {
+                bubble.style.transform = 'scale(1.1)';
+                bubble.style.boxShadow = `0 0 30px ${randomColor}`;
+            });
+            
+            bubble.addEventListener('mouseleave', () => {
+                bubble.style.transform = 'scale(1)';
+                bubble.style.boxShadow = `0 8px 25px rgba(0,0,0,0.3)`;
+            });
+
+            bubble.style.left = Math.random() * (window.innerWidth - 150) + "px";
+
+            // Calculate bubble speed based on progressive speed system
+            let speedMultiplier = 1.0; // Start with normal speed
+            
+            // Apply progressive speed increase after first 15 words
+            if (wordsCompleted >= WORDS_BEFORE_SPEED_INCREASE) {
+                // Each speed level increases speed by 20% (reduces duration by 20%)
+                speedMultiplier = 1.0 - (currentSpeedLevel * 0.2);
+                speedMultiplier = Math.max(0.3, speedMultiplier); // Minimum 30% of original (max 3.33x speed)
+            }
+            
+            let duration = baseDuration * speedMultiplier;
+            bubble.style.animationDuration = duration + "s";
+            console.log(`🎯 Bubble speed - Level: ${currentSpeedLevel}, Duration: ${duration}s, Words: ${wordsCompleted}`);
+
+            const bubbleData = {
+                bubble,
+                word: wordObj.word,
+                wordId: wordObj.id,
+                popped: false
+            };
+            activeBubbles.push(bubbleData);
+            
+            console.log('🎮 Adding bubble to game area...');
+            console.log('🎯 Game area exists:', !!gameArea);
+            console.log('🎯 Game area display:', gameArea ? window.getComputedStyle(gameArea).display : 'N/A');
+            
+            gameArea.appendChild(bubble);
+            
+            console.log('✅ Bubble added successfully! Active bubbles:', activeBubbles.length);
+
+            setTimeout(() => {
+                if (bubble.parentNode && !bubbleData.popped) {
+                    // Bubble missed - count as incorrect pronunciation
+                    incorrectPronunciations++;
+                    wordsCompleted++; // Also increment words completed for missed bubbles
+                    updateStatsDisplay();
+                    
+                    // Create fade out effect for missed bubbles
+                    bubble.style.transition = 'all 0.5s ease-out';
+                    bubble.style.opacity = '0';
+                    bubble.style.transform = 'scale(0.5)';
+                    
+                    // Mark word as used in database even if missed
+                    if (bubbleData.wordId) {
+                        fetch('/api/vocabulary/mark_used', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ word_id: bubbleData.wordId })
+                        }).then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                updateGameStats();
+                            }
+                        }).catch(error => {
+                            console.error('Error marking missed word as used:', error);
+                        });
+                    }
+                    
+                    // Check for game completion even for missed words
+                    if (wordsCompleted >= MAX_WORDS_PER_GAME) {
+                        gameCompleted = true;
+                        showGameCompletionScreen();
+                        return;
+                    }
+                    
+                    setTimeout(() => {
+                        if (bubble.parentNode) bubble.remove();
+                        activeBubbles = activeBubbles.filter(b => b !== bubbleData);
+                    }, 500);
+                }
+            }, duration * 1000);
+
+            bubbleIndex++;
+        }
+
+        async function popBubble(bubbleData) {
+            console.log('popBubble called for:', bubbleData.word);
+            if (bubbleData.popped) {
+                console.log('Bubble already popped:', bubbleData.word);
+                return;
+            }
+            
+            bubbleData.popped = true;
+            
+            // Get bubble position for particle effects
+            const bubbleRect = bubbleData.bubble.getBoundingClientRect();
+            const bubbleX = bubbleRect.left + bubbleRect.width / 2;
+            const bubbleY = bubbleRect.top + bubbleRect.height / 2;
+            
+            // Create explosion effect
+            const bubbleColor = bubbleData.bubble.style.getPropertyValue('--bubble-color') || '#4CAF50';
+            particleSystem.createExplosion(bubbleX, bubbleY, bubbleColor);
+            
+            // Play pop sound
+            soundManager.playSound('pop');
+            
+            // IMMEDIATELY update score first for real-time feedback
+            score += 10;
+            console.log('Score updated to:', score);
+            updateScoreWithAnimation(score); // Enhanced score update with animation
+            
+            // Update words completed count and pronunciation tracking
+            wordsCompleted++;
+            correctPronunciations++;
+            console.log('Words completed:', wordsCompleted);
+            
+            // Check for game completion
+            if (wordsCompleted >= MAX_WORDS_PER_GAME) {
+                gameCompleted = true;
+                showGameCompletionScreen();
+                return;
+            }
+            
+            // Calculate new speed level after first 15 words
+            if (wordsCompleted > WORDS_BEFORE_SPEED_INCREASE) {
+                const wordsAfterInitial = wordsCompleted - WORDS_BEFORE_SPEED_INCREASE;
+                const newSpeedLevel = Math.floor(wordsAfterInitial / SPEED_INCREASE_INTERVAL);
+                
+                if (newSpeedLevel > currentSpeedLevel) {
+                    currentSpeedLevel = newSpeedLevel;
+                    console.log('Speed increased! Level:', currentSpeedLevel);
+                    soundManager.playSound('levelUp');
+                    showMessage(`🚀 Speed Level ${currentSpeedLevel + 1}! Game getting faster!`, 'info');
+                }
+            }
+            
+            // Update stats display to show current progress
+            updateStatsDisplay();
+            
+            // Add matched word to sidebar if in category mode
+            if (currentLevel === 2 && selectedCategory) {
+                addMatchedWord(bubbleData.word);
+            }
+            
+            // Professional pop animation with enhanced effects
+            bubbleData.bubble.style.transition = 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            bubbleData.bubble.style.background = `linear-gradient(45deg, ${bubbleColor}, #FFD700)`;
+            bubbleData.bubble.style.boxShadow = `0 0 40px ${bubbleColor}, 0 0 60px rgba(255, 215, 0, 0.8)`;
+            bubbleData.bubble.style.border = '3px solid #FFD700';
+            bubbleData.bubble.style.transform = 'scale(1.3) rotate(360deg)';
+            bubbleData.bubble.classList.add("pop");
+            
+            // Add a burst effect with color transition
+            setTimeout(() => {
+                bubbleData.bubble.style.background = 'linear-gradient(45deg, #2ECC71, #27AE60)';
+                bubbleData.bubble.style.boxShadow = '0 0 60px rgba(46, 204, 113, 1)';
+                bubbleData.bubble.style.border = '4px solid #2ECC71';
+                bubbleData.bubble.style.transform = 'scale(0.8) rotate(720deg)';
+            }, 150);
+            
+            // Show success message
+            showMessage('✅ Perfect! +10 Points', 'success');
+            
+            console.log('Bubble popped, score already updated:', score);
+
+            // Mark word as used in database (async, doesn't block UI)
+            if (bubbleData.wordId) {
+                fetch('/api/vocabulary/mark_used', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ word_id: bubbleData.wordId })
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateGameStats();
+                    }
+                }).catch(error => {
+                    console.error('Error marking word as used:', error);
+                });
+            }
+
+            // Enhanced bubble removal with fade effect
+            setTimeout(() => {
+                if (bubbleData.bubble.parentNode) {
+                    bubbleData.bubble.style.opacity = '0';
+                    bubbleData.bubble.style.transform = 'scale(0) rotate(1080deg)';
+                    setTimeout(() => {
+                        if (bubbleData.bubble.parentNode) bubbleData.bubble.remove();
+                    }, 200);
+                }
+            }, 300);
+        }
+
+        // Function to manage bubble spawning with progressive speed
+        function startBubbleSpawning() {
+            function spawnWithCurrentSpeed() {
+                // Calculate spawn interval based on current speed level
+                let spawnInterval = 1000; // Base interval: 1 second
+                
+                // Apply progressive speed increase after first 15 words
+                if (wordsCompleted >= WORDS_BEFORE_SPEED_INCREASE) {
+                    // Each speed level reduces spawn interval by 15% (faster spawning)
+                    const speedReduction = currentSpeedLevel * 0.15;
+                    spawnInterval = spawnInterval * (1 - speedReduction);
+                    spawnInterval = Math.max(400, spawnInterval); // Minimum 400ms interval
+                }
+                
+                console.log(`Spawn interval: ${spawnInterval}ms, Speed level: ${currentSpeedLevel}`);
+                
+                // Spawn a bubble
+                getRandomWord().then(wordObj => {
+                    if (wordObj) {
+                        spawnBubble(wordObj);
+                    }
+                });
+                
+                // Schedule next spawn with updated interval
+                gameInterval = setTimeout(spawnWithCurrentSpeed, spawnInterval);
+            }
+            
+            // Start the spawning process
+            spawnWithCurrentSpeed();
+        }
+        
+        async function startGame() {
+            console.log('🚀 Starting game...');
+            console.log('🎯 Game area element:', gameArea);
+            console.log('🎯 Game area display:', gameArea ? window.getComputedStyle(gameArea).display : 'N/A');
+            console.log('🎯 Game area visibility:', gameArea ? window.getComputedStyle(gameArea).visibility : 'N/A');
+            
+            score = 0;
+            updateScore();
+            gameArea.innerHTML = "";
+            activeBubbles = [];
+            bubbleIndex = 0;
+            
+            // Make sure game area is visible
+            if (gameArea) {
+                gameArea.style.display = 'block';
+                gameArea.style.visibility = 'visible';
+                gameArea.style.opacity = '1';
+                console.log('✅ Game area visibility set to visible');
+            }
+            
+            // Show the game container and hide other screens
+            showGameArea();
+
+            // Initialize game stats
+            await updateGameStats();
+            
+            // Reset game completion tracking
+            wordsCompleted = 0;
+            currentSpeedLevel = 0;
+            correctPronunciations = 0;
+            incorrectPronunciations = 0;
+            gameCompleted = false;
+            
+            // Show welcome message
+            showMessage('Welcome to Vocabulary Forest! Speak the words to pop bubbles!', 'info');
+
+            console.log('Starting speech recognition...');
+            
+            // Request microphone permission first
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                try {
+                    // Request permission with more specific constraints
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        } 
+                    });
+                    console.log('Microphone permission granted');
+                    
+                    // Stop the stream as we only needed permission
+                    stream.getTracks().forEach(track => track.stop());
+                    
+                    recognition.start();
+                } catch (error) {
+                    console.error('Microphone permission denied:', error);
+                    if (error.name === 'NotAllowedError') {
+                        showMessage('Microphone access denied! Please click the microphone icon in your browser and select "Allow".', 'error');
+                        setTimeout(() => {
+                            showMessage('After allowing microphone access, please refresh the page to play the game.', 'info');
+                        }, 4000);
+                    } else if (error.name === 'NotFoundError') {
+                        showMessage('No microphone found. Please connect a microphone and try again.', 'error');
+                    } else {
+                        showMessage('Error accessing microphone: ' + error.message, 'error');
+                    }
+                    return;
+                }
+            } else {
+                // Fallback for older browsers
+                try {
+                    recognition.start();
+                } catch (error) {
+                    console.error('Error starting speech recognition:', error);
+                    showMessage('Speech recognition failed to start: ' + error.message, 'error');
+                }
+            }
+            
+            // Clear any existing interval
+            if (gameInterval) {
+                clearInterval(gameInterval);
+            }
+            
+            // Start bubble spawning with progressive speed
+            startBubbleSpawning();
+        }
+
+        // Initialize everything when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("🎯 DOM CONTENT LOADED - Initializing game interface");
+            
+            const startBtn = document.getElementById("startGameBtn");
+            
+            if (startBtn) {
+                console.log("✅ Start button found successfully");
+                startBtn.addEventListener("click", () => {
+                    console.log("🎮 Start button clicked, current level:", currentLevel);
+                    
+                    // If no level selected, default to level 1 (basic game)
+                    if (!currentLevel || currentLevel === 0) {
+                        currentLevel = 1;
+                        console.log("🎯 No level selected, defaulting to level 1");
+                    }
+                    
+                    if (currentLevel === 1) {
+                        console.log("🚀 Starting basic game (Level 1)");
+                        startGame();
+                    } else if (currentLevel === 2) {
+                        if (selectedCategory) {
+                            console.log("🚀 Starting category game (Level 2) with category:", selectedCategory);
+                            startGame();
+                        } else {
+                            showMessage('Please select a category first for Level 2!', 'info');
+                        }
+                    } else {
+                        showMessage('Please select a valid level first!', 'info');
+                    }
+                });
+            } else {
+                console.error('❌ Start button not found!');
+            }
+            
+            // Initialize the game interface
+            console.log("🔧 Calling showLevelSelection()");
+            showLevelSelection();
+            console.log("📊 Calling updateGameStats()");
+            updateGameStats();
+            
+            console.log("✨ DOM initialization completed successfully");
+        });
+        
+        // Show game completion screen
+         async function showGameCompletionScreen() {
+             // Stop speech recognition
+             if (recognition) {
+                 recognition.stop();
+             }
+             
+             // Clear game interval
+             if (gameInterval) {
+                 clearTimeout(gameInterval);
+             }
+             
+             // Stop bubble spawning
+             gameActive = false;
+             
+             // Calculate accuracy
+             const totalAttempts = correctPronunciations + incorrectPronunciations;
+             const accuracy = totalAttempts > 0 ? Math.round((correctPronunciations / totalAttempts) * 100) : 0;
+             
+             // Create completion screen overlay
+             const overlay = document.createElement('div');
+             overlay.style.cssText = `
+                 position: fixed;
+                 top: 0;
+                 left: 0;
+                 width: 100%;
+                 height: 100%;
+                 background: rgba(0, 0, 0, 0.8);
+                 display: flex;
+                 justify-content: center;
+                 align-items: center;
+                 z-index: 1000;
+                 color: white;
+                 font-family: Arial, sans-serif;
+             `;
+             
+             overlay.innerHTML = `
+                 <div style="
+                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                     padding: 40px;
+                     border-radius: 20px;
+                     text-align: center;
+                     box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                     max-width: 500px;
+                     width: 90%;
+                 ">
+                     <h1 style="margin: 0 0 30px 0; font-size: 2.5em; color: #FFD700;">🎉 Game Complete! 🎉</h1>
+                     
+                     <div style="margin: 20px 0; font-size: 1.2em; line-height: 1.6;">
+                         <div style="margin: 10px 0;"><strong>Final Score:</strong> ${score}</div>
+                         <div style="margin: 10px 0;"><strong>Words Completed:</strong> ${wordsCompleted}/${MAX_WORDS_PER_GAME}</div>
+                         <div style="margin: 10px 0;"><strong>Correct Pronunciations:</strong> ${correctPronunciations}</div>
+                         <div style="margin: 10px 0;"><strong>Incorrect Pronunciations:</strong> ${incorrectPronunciations}</div>
+                         <div style="margin: 10px 0; font-size: 1.4em; color: #FFD700;"><strong>Accuracy:</strong> ${accuracy}%</div>
+                     </div>
+                     
+                     <div style="margin: 30px 0 20px 0; font-size: 1.1em; color: #E8E8E8;">
+                         ${accuracy >= 80 ? 'Excellent work! 🌟' : accuracy >= 60 ? 'Good job! Keep practicing! 👍' : 'Keep practicing to improve! 💪'}
+                     </div>
+                     
+                     <div style="margin-top: 30px;">
+                         <button onclick="restartGame()" style="
+                             background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+                             color: white;
+                             border: none;
+                             padding: 15px 30px;
+                             font-size: 1.2em;
+                             border-radius: 25px;
+                             cursor: pointer;
+                             margin: 0 10px;
+                             transition: transform 0.2s;
+                         " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Play Again</button>
+                         
+                         <button onclick="goToDashboard()" style="
+                             background: linear-gradient(45deg, #667eea, #764ba2);
+                             color: white;
+                             border: none;
+                             padding: 15px 30px;
+                             font-size: 1.2em;
+                             border-radius: 25px;
+                             cursor: pointer;
+                             margin: 0 10px;
+                             transition: transform 0.2s;
+                         " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Dashboard</button>
+                     </div>
+                 </div>
+             `;
+             
+             document.body.appendChild(overlay);
+         }
+         
+         // Restart game function
+         async function restartGame() {
+             // Remove completion screen
+             const overlay = document.querySelector('div[style*="position: fixed"]');
+             if (overlay) {
+                 overlay.remove();
+             }
+             
+             // Reset database - mark all words as unused
+             try {
+                 const response = await fetch('/api/vocabulary/reset_game', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json'
+                     }
+                 });
+                 
+                 const data = await response.json();
+                 if (data.success) {
+                     showMessage('Starting new game session!', 'info');
+                 }
+             } catch (error) {
+                 console.error('Error resetting game:', error);
+             }
+             
+             // Reset all game variables
+             score = 0;
+             wordsCompleted = 0;
+             currentSpeedLevel = 0;
+             correctPronunciations = 0;
+             incorrectPronunciations = 0;
+             gameCompleted = false;
+             
+             // Clear game area
+             gameArea.innerHTML = '';
+             activeBubbles = [];
+             
+             // Reset matched words if in category mode
+             if (currentLevel === 2) {
+                 matchedWords = [];
+                 updateSidebarInfo();
+             }
+             
+             // Start new game with same level and category
+             if (currentLevel === 1) {
+                 showGameArea();
+                 startGame();
+             } else if (currentLevel === 2 && selectedCategory) {
+                 showGameArea();
+                 startGame();
+             } else {
+                 // Go back to level selection if no category selected
+                 showLevelSelection();
+             }
+         }
+         
+         // Go to dashboard function
+         function goToDashboard() {
+             window.location.href = '/';
+         }
+        
+        // Update score display with animation
+        function updateScore() {
+            console.log('updateScore called with score:', score);
+            const scoreElement = document.getElementById('score');
+            if (scoreElement) {
+                scoreElement.textContent = score;
+                scoreElement.classList.add('score-flash');
+                setTimeout(() => {
+                    scoreElement.classList.remove('score-flash');
+                }, 500);
+                console.log('Updated score element to:', score);
+            } else {
+                console.log('Score element not found!');
+            }
+            // Also update the old scoreBoard if it exists
+            if (typeof scoreBoard !== 'undefined' && scoreBoard) {
+                scoreBoard.textContent = "⭐ Score: " + score;
+                scoreBoard.classList.add('score-flash');
+                setTimeout(() => {
+                    scoreBoard.classList.remove('score-flash');
+                }, 500);
+                console.log('Updated scoreBoard to:', score);
+            } else {
+                console.log('ScoreBoard element not found!');
+            }
+        }
+    </script>
+</body>
+</html>

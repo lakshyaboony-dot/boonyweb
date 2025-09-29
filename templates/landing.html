@@ -1,0 +1,935 @@
+{% extends "base.html" %}
+{% block title %}Boony – Speak English, The Smart Way{% endblock %}
+{% block content %}
+
+<!-- Fullscreen Stage -->
+<div class="stage" id="stage">
+    <!-- soft animated background blobs -->
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+
+    <!-- top-left brand/intro badge -->
+    <div class="brand-badge">
+        <div class="brand-line">Boony • Spoken English</div>
+        <div class="brand-sub">Teachers × AI • 15+ Years</div>
+    </div>
+
+    <!-- left/right reason panels -->
+    <aside class="reasons left" id="reasonsLeft" aria-label="Why English Spoken">
+        <h3 id="leftTitle">Why English Spoken?</h3>
+        <ul>
+            <li data-topic="Confidence" id="liConfidence">Build day-to-day speaking confidence</li>
+            <li data-topic="Career" id="liCareer">Better career & interviews</li>
+            <li data-topic="Global" id="liGlobal">Talk to global audience</li>
+            <li data-topic="Travel" id="liTravel">Travel with ease</li>
+            <li data-topic="Networking" id="liNetworking">Wider networking</li>
+            <li data-topic="Learning" id="liLearning">Access best learning</li>
+            <li data-topic="Culture" id="liCulture">Understand culture</li>
+            <li data-topic="Media" id="liMedia">Enjoy movies & media</li>
+            <li data-topic="Exams" id="liExams">Crack exams & tests</li>
+            <li data-topic="Growth" id="liGrowth">Personal growth</li>
+        </ul>
+    </aside>
+
+    <aside class="reasons right" id="reasonsRight" aria-label="Why Choose Boony">
+        <h3 id="rightTitle">Why Choose Boony?</h3>
+        <div class="stat-badge" id="statBadge">1000+ students has got excellence in English spoken</div>
+        <ul>
+            <li data-topic="Teachers+AI" id="liTeachersAI">Teachers + AI guidance</li>
+            <li data-topic="Practice" id="liPractice">Daily speaking practice</li>
+            <li data-topic="Feedback" id="liFeedback">Instant feedback</li>
+            <li data-topic="Structured" id="liStructured">Structured syllabus</li>
+            <li data-topic="Pronunciation" id="liPronunciation">Pronunciation focus</li>
+            <li data-topic="Gamified" id="liGamified">Gamified challenges</li>
+            <li data-topic="Progress" id="liProgress">Track progress</li>
+            <li data-topic="Flexible" id="liFlexible">Flexible schedule</li>
+            <li data-topic="Community" id="liCommunity">Supportive community</li>
+            <li data-topic="Results" id="liResults">Real results</li>
+        </ul>
+    </aside>
+
+    <!-- center headline -->
+    <div class="headline">
+        <h1 id="headlineTitle">Learn to <span class="highlight">Speak</span> English Confidently</h1>
+        <p class="sub" id="headlineSub">Real techniques. Real practice. Real progress.</p>
+        <div class="cta-row">
+            <a class="btn primary" id="startBtn" href="{{ url_for('signup_step1') }}">Start Free</a>
+            <a class="btn ghost" id="loginBtn" href="{{ url_for('login') }}">I already have an account</a>
+        </div>
+    </div>
+
+    <!-- container where animated technique cards spawn -->
+    <div class="cards-layer" id="cardsLayer" aria-live="polite" aria-atomic="false"></div>
+</div>
+
+<!-- Scripts -->
+<script>
+    /* -------------------- CONFIG -------------------- */
+    const techniqueCardsByLang = {
+        hinglish: [
+            { text: "🎧 Suno aur Repeat karo", border: "#4CC9F0" },
+            { text: "🗣️ Rozana Conversation Practice", border: "#F72585" },
+            { text: "📖 Context ke saath Vocabulary", border: "#48BFE3" },
+            { text: "✍️ Bolkar Grammar sikho", border: "#B5179E" },
+            { text: "⏱️ 2-Minute Micro Practices", border: "#560BAD" },
+            { text: "🤝 Teachers + AI Guidance", border: "#3A0CA3" },
+            { text: "🕹️ Gamified Challenges", border: "#4361EE" },
+            { text: "🔁 Shadowing aur Paraphrasing", border: "#FF7B00" },
+            { text: "🎯 Pronunciation Targets", border: "#00B894" },
+            { text: "📊 Apni Progress Track karo", border: "#FFA801" }
+        ],
+        english: [
+            { text: "🎧 Listen & Repeat", border: "#4CC9F0" },
+            { text: "🗣️ Daily Conversation Drills", border: "#F72585" },
+            { text: "📖 Vocabulary in Context", border: "#48BFE3" },
+            { text: "✍️ Grammar through Speaking", border: "#B5179E" },
+            { text: "⏱️ 2-Minute Micro Practices", border: "#560BAD" },
+            { text: "🤝 Teacher + AI Guidance", border: "#3A0CA3" },
+            { text: "🕹️ Gamified Challenges", border: "#4361EE" },
+            { text: "🔁 Shadowing & Paraphrasing", border: "#FF7B00" },
+            { text: "🎯 Pronunciation Targets", border: "#00B894" },
+            { text: "📊 Track Your Progress", border: "#FFA801" }
+        ]
+    };
+    function getTechniqueCards(){
+        if (!window.getPrefs) {
+            return techniqueCardsByLang.hinglish; // fallback
+        }
+        const p = window.getPrefs() || {};
+        return techniqueCardsByLang[p.lang] || techniqueCardsByLang.hinglish;
+    }
+
+    // Intro lines removed per request
+
+    /* If you already have a Flask TTS route like /tts?text=... this will work. */
+    // Use global getPrefs function from base.html
+    // window.getPrefs is available globally
+    function mapToMsVoice(p){
+        // Map gender + accent to Azure/Microsoft voice names
+        if (p.accent === 'en-US') {
+            return p.voice === 'female' ? 'en-US-JennyNeural' : 'en-US-GuyNeural';
+        }
+        // default/Indian
+        return p.voice === 'female' ? 'en-IN-KavyaNeural' : 'hi-IN-PrabhatNeural';
+    }
+    const TTS_ENDPOINT = (line) => {
+        if (!window.getPrefs) {
+            // Fallback when base.html hasn't loaded yet
+            const params = new URLSearchParams({ text: line, voice: 'female', accent: 'en-US', lang: 'hinglish', voice_name: 'en-US-JennyNeural', mode: 'auto' });
+            return `/tts?${params.toString()}`;
+        }
+        const p = window.getPrefs() || {};
+        const voiceName = mapToMsVoice(p);
+        const params = new URLSearchParams({ text: line, voice: p.voice, accent: p.accent, lang: p.lang, voice_name: voiceName, mode: p.mode });
+        return `/tts?${params.toString()}`;
+    };
+
+    /* -------------------- AUDIO / TTS -------------------- */
+    let isMuted = (localStorage.getItem('boony.muted') === 'true');
+    const currentAudios = new Set();
+
+    function stopAllAudioPlayback() {
+        // Stop any HTMLAudio elements we started
+        currentAudios.forEach(a => {
+            try { a.pause(); a.src = ''; } catch (e) {}
+            currentAudios.delete(a);
+        });
+        // Stop any browser speech synthesis
+        try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+        try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: false } })); } catch (e) {}
+    }
+
+    // Listen to global mute events from base
+    window.addEventListener('boony:mute', (e) => {
+        isMuted = !!(e.detail && e.detail.muted);
+        if (isMuted) {
+            stopAllAudioPlayback();
+        } else {
+            const overlay = document.getElementById('explainOverlay');
+            if (overlay && overlay.style.display === 'flex' && window.__lastExplainText) {
+                speakText(window.__lastExplainText);
+            }
+        }
+    });
+
+    async function speakQueue(lines) {
+        for (const line of lines) {
+            if (isMuted) { stopAllAudioPlayback(); break; }
+            try {
+                const audio = new Audio(TTS_ENDPOINT(line));
+                currentAudios.add(audio);
+                audio.addEventListener('ended', () => currentAudios.delete(audio), { once: true });
+                audio.addEventListener('error', () => currentAudios.delete(audio), { once: true });
+                // attempt autoplay; if blocked, user can press Sound On
+                try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: true } })); } catch(e) {}
+                await audio.play();
+                await waitUntilEnded(audio);
+            } catch (e) {
+                // autoplay blocked — politely stop trying further until user toggles
+                break;
+            }
+            if (isMuted) { stopAllAudioPlayback(); break; }
+        }
+    }
+
+    function wait(ms) { return new Promise(res => setTimeout(res, ms)); }
+    function waitUntilEnded(audio) {
+        return new Promise(res => {
+            const done = () => { try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: false } })); } catch(e) {} res(); };
+            audio.addEventListener('ended', done, { once: true });
+            audio.addEventListener('error', done, { once: true });
+        });
+    }
+
+    /* -------------------- CARD SPAWNER -------------------- */
+    const cardsLayer = document.getElementById('cardsLayer');
+    const stage = document.getElementById('stage');
+
+    function getSafeArea(bubbleWidth = 200, bubbleHeight = 200) {
+        const pad = 24;
+        const stageRect = stage.getBoundingClientRect();
+        const leftPanel = document.getElementById('reasonsLeft');
+        const rightPanel = document.getElementById('reasonsRight');
+        const headline = document.querySelector('.headline');
+
+        let leftBlock = 0;
+        let rightBlock = 0;
+        let yTopBlock = 0;
+
+        if (leftPanel && window.getComputedStyle(leftPanel).display !== 'none') {
+            leftBlock = leftPanel.getBoundingClientRect().width + pad;
+        }
+        if (rightPanel && window.getComputedStyle(rightPanel).display !== 'none') {
+            rightBlock = rightPanel.getBoundingClientRect().width + pad;
+        }
+        if (headline) {
+            const h = headline.getBoundingClientRect();
+            yTopBlock = (h.bottom - stageRect.top) + pad; // below headline
+        }
+
+        let xMin = stageRect.left + leftBlock + pad;
+        let xMax = stageRect.right - rightBlock - pad;
+        let yMin = stageRect.top + Math.max(100, yTopBlock);
+        let yMax = stageRect.bottom - pad;
+
+        // ensure space for bubble dimensions
+        xMax = Math.max(xMin + bubbleWidth + pad, xMax);
+        yMax = Math.max(yMin + bubbleHeight + pad, yMax);
+
+        return { xMin, xMax, yMin, yMax };
+    }
+
+    function spawnCard(item, delay = 0) {
+        const card = document.createElement('div');
+        card.className = 'tech-card bubble enter-' + pick(['up', 'down', 'left', 'right', 'zoom']);
+        card.textContent = item.text;
+        card.style.borderColor = item.border;
+
+        // random size & position (within safe padding)
+        const pad = 24;
+        const maxW = Math.min(220, Math.max(140, Math.round(140 + Math.random() * 60)));
+        const maxH = maxW; // circle bubble
+        const safe = getSafeArea(maxW, maxH);
+        const x = Math.random() * ((safe.xMax - safe.xMin) - maxW) + safe.xMin;
+        const y = Math.random() * ((safe.yMax - safe.yMin) - maxH) + safe.yMin;
+
+        card.style.width = maxW + "px";
+        card.style.left = (x - stage.getBoundingClientRect().left) + "px";
+        card.style.top = (y - stage.getBoundingClientRect().top) + "px";
+
+        // subtle different float speeds
+        card.style.setProperty('--float-dur', (2.5 + Math.random() * 2.5) + 's');
+
+        cardsLayer.appendChild(card);
+
+        // schedule exit & cleanup
+        const life = 6000 + Math.random() * 4000;
+        setTimeout(() => {
+            card.classList.add('exit');
+            setTimeout(() => card.remove(), 600);
+        }, life + delay);
+    }
+
+    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    let bubbleTimer;
+    function startCardShow() {
+        let idx = 0;
+        // initial burst
+        for (let k = 0; k < 5; k++) {
+            const item = getTechniqueCards()[(idx++) % getTechniqueCards().length];
+            spawnCard(item, k * 100);
+        }
+        // continuous trickle
+        bubbleTimer = setInterval(() => {
+            const item = getTechniqueCards()[(idx++) % getTechniqueCards().length];
+            spawnCard(item);
+        }, 1200);
+    }
+
+    // Bubble pop every 5s: pause, highlight topic, show overlay, TTS
+    let pauseTimer;
+    const POP_INTERVAL_MS = 9000;
+    const PAUSE_MS = 6500;
+
+    function pauseBubbles() {
+        document.querySelectorAll('.tech-card').forEach(el => el.style.animationPlayState = 'paused');
+    }
+    function resumeBubbles() {
+        document.querySelectorAll('.tech-card').forEach(el => el.style.animationPlayState = 'running');
+    }
+
+    function pickRandomTopic() {
+        const pool = [...document.querySelectorAll('#reasonsLeft li, #reasonsRight li')];
+        if (!pool.length) return null;
+        return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function explanationFor(topic) {
+        const lang = (window.getPrefs && window.getPrefs().lang) || 'hinglish';
+        const maps = {
+            english: {
+                "Confidence": "Speaking daily with guided prompts builds natural confidence, reducing hesitation and fear.",
+                "Career": "Strong spoken English unlocks better roles, interviews, and growth opportunities.",
+                "Global": "English connects you with people across countries, opening doors worldwide.",
+                "Travel": "From airports to hotels, English helps you navigate confidently when traveling.",
+                "Networking": "Communicate with mentors, communities, and peers to expand your network.",
+                "Learning": "World-class books, courses, and podcasts are easily accessible in English.",
+                "Culture": "Understand global culture, ideas, and perspectives more deeply.",
+                "Media": "Enjoy movies, shows, and videos without depending on translations.",
+                "Exams": "Excel in competitive exams that test speaking and listening.",
+                "Growth": "Fluent communication boosts self-image and accelerates personal growth.",
+                "Teachers+AI": "Experienced teachers plus AI ensure you practice the right way, every day.",
+                "Practice": "Short, focused drills make daily speaking practice effortless.",
+                "Feedback": "Instant feedback helps you correct mistakes on the spot.",
+                "Structured": "A step-by-step syllabus keeps your progress consistent and trackable.",
+                "Pronunciation": "Targeted drills improve clarity, stress, and natural rhythm.",
+                "Gamified": "Challenges and rewards keep you motivated to practice.",
+                "Progress": "Visual progress tracking shows your improvement week by week.",
+                "Flexible": "Practice anytime with bite-sized sessions that fit your schedule.",
+                "Community": "Learn with peers and mentors who support your journey.",
+                "Results": "Practical speaking outcomes you can see, hear, and feel."
+            },
+            hinglish: {
+                "Confidence": "Roz practice aur guided prompts se natural confidence banta hai, ghabrahat kam hoti hai.",
+                "Career": "Strong spoken English se better jobs, interviews aur growth ke chances badhte hain.",
+                "Global": "English se duniya bhar ke logon se connect karna aasan ho jata hai.",
+                "Travel": "Airports se hotels tak, travel ke dauran English se help milti hai.",
+                "Networking": "Mentors aur communities se easily connect ho kar network badhta hai.",
+                "Learning": "Best books, courses aur podcasts English me aasani se milte hain.",
+                "Culture": "Global culture aur ideas ko aur achhe se samajh paate ho.",
+                "Media": "Movies, shows aur videos ko bina translation ke enjoy kar paate ho.",
+                "Exams": "Speaking aur listening test waale exams me perform karna aasan hota hai.",
+                "Growth": "Fluent bolna self-image ko boost karke personal growth tez karta hai.",
+                "Teachers+AI": "Experienced teachers + AI aapko roz sahi tarike se practice karate hain.",
+                "Practice": "Chhote, focused drills daily practice ko easy bana dete hain.",
+                "Feedback": "Instant feedback galtiyon ko turant sahi karne me help karta hai.",
+                "Structured": "Step-by-step syllabus se progress consistent aur trackable rehti hai.",
+                "Pronunciation": "Targeted drills se clarity, stress aur rhythm improve hoti hai.",
+                "Gamified": "Challenges aur rewards se motivation high rehta hai.",
+                "Progress": "Visual tracking se week-by-week improvement dikhai deta hai.",
+                "Flexible": "Kabhi bhi, chhote sessions me practice kar sakte ho.",
+                "Community": "Peers aur mentors ke saath seekhne se journey easy ho jati hai.",
+                "Results": "Practical speaking results jo aap dekh aur sun sakte ho."
+            }
+        };
+        const map = maps[lang] || maps.hinglish;
+        return map[topic] || (lang === 'english' ? "This topic improves your speaking journey with practical impact." : "Yeh topic aapki speaking journey par practical asar dalta hai.");
+    }
+
+    function showOverlay(topic, text) {
+        let overlay = document.getElementById('explainOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'explainOverlay';
+            overlay.className = 'overlay-explain';
+            stage.appendChild(overlay);
+        }
+        overlay.innerHTML = `<div class="box"><div class="t">${topic}</div><div class="p">${text}</div></div>`;
+        overlay.style.display = 'flex';
+    }
+    function hideOverlay() {
+        const overlay = document.getElementById('explainOverlay');
+        if (overlay) overlay.style.display = 'none';
+    }
+
+    async function speakText(text) {
+        if (isMuted) return;
+        try {
+            const audio = new Audio(TTS_ENDPOINT(text));
+            currentAudios.add(audio);
+            audio.addEventListener('ended', () => currentAudios.delete(audio), { once: true });
+            audio.addEventListener('error', () => currentAudios.delete(audio), { once: true });
+            try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: true } })); } catch(e) {}
+            await audio.play();
+        } catch (e) { /* ignore */ }
+    }
+
+    function highlightTopic(el) {
+        el.classList.add('highlight');
+        const side = el.closest('.reasons');
+        side && side.classList.add('active');
+    }
+    function clearHighlights() {
+        document.querySelectorAll('.reasons li.highlight').forEach(el => el.classList.remove('highlight'));
+        document.querySelectorAll('.reasons.active').forEach(el => el.classList.remove('active'));
+    }
+
+    // Track last explanation for quick resume
+    window.__lastExplainText = '';
+    function runPopOnce() {
+        const topicEl = pickRandomTopic();
+        if (!topicEl) return;
+        const topic = topicEl.getAttribute('data-topic') || topicEl.textContent.trim();
+
+        // simulate a bubble pop: pause animations and fade bubbles
+        pauseBubbles();
+        document.querySelectorAll('.tech-card').forEach(el => el.classList.add('dim'));
+
+        clearHighlights();
+        highlightTopic(topicEl);
+
+        const text = explanationFor(topic);
+        window.__lastExplainText = text;
+        showOverlay(topic, text);
+        speakText(text);
+
+        setTimeout(() => {
+            hideOverlay();
+            document.querySelectorAll('.tech-card').forEach(el => el.classList.remove('dim'));
+            resumeBubbles();
+        }, PAUSE_MS);
+    }
+
+    function schedulePops() {
+        setInterval(runPopOnce, POP_INTERVAL_MS);
+    }
+
+    /* -------------------- KICKOFF -------------------- */
+    function startIntroByLang(){ /* removed: no auto intro speech */ }
+
+    // UI text translations
+    const uiText = {
+        english: {
+            brandLine: "Boony • Spoken English",
+            brandSub: "Teachers × AI • 15+ Years",
+            headlineTitle: "Learn to Speak English Confidently",
+            headlineSub: "Real techniques. Real practice. Real progress.",
+            startBtn: "Start Free",
+            loginBtn: "I already have an account",
+            leftTitle: "Why English Spoken?",
+            rightTitle: "Why Choose Boony?",
+            statBadge: "1000+ students achieved excellence in Spoken English",
+            liConfidence: "Build day-to-day speaking confidence",
+            liCareer: "Better career & interviews",
+            liGlobal: "Talk to global audience",
+            liTravel: "Travel with ease",
+            liNetworking: "Wider networking",
+            liLearning: "Access best learning",
+            liCulture: "Understand culture",
+            liMedia: "Enjoy movies & media",
+            liExams: "Crack exams & tests",
+            liGrowth: "Personal growth",
+            liTeachersAI: "Teachers + AI guidance",
+            liPractice: "Daily speaking practice",
+            liFeedback: "Instant feedback",
+            liStructured: "Structured syllabus",
+            liPronunciation: "Pronunciation focus",
+            liGamified: "Gamified challenges",
+            liProgress: "Track progress",
+            liFlexible: "Flexible schedule",
+            liCommunity: "Supportive community",
+            liResults: "Real results"
+        },
+        hinglish: {
+            brandLine: "Boony • Spoken English",
+            brandSub: "Teachers × AI • 15+ Years",
+            headlineTitle: "Confident English bolna sikhna shuru karein",
+            headlineSub: "Real techniques. Roz practice. Pakka progress.",
+            startBtn: "Start Free",
+            loginBtn: "Mera account hai",
+            leftTitle: "Why English Spoken?",
+            rightTitle: "Why Choose Boony?",
+            statBadge: "1000+ students ne Spoken English me excellence hasil kiya",
+            liConfidence: "Roz bolkar confidence banta hai",
+            liCareer: "Career aur interviews me fayda",
+            liGlobal: "Global audience se baat karein",
+            liTravel: "Travel easy ho jata hai",
+            liNetworking: "Zyada achha networking",
+            liLearning: "Best learning access karein",
+            liCulture: "Culture ko samjhein",
+            liMedia: "Movies & media ka maza lein",
+            liExams: "Exams & tests crack karein",
+            liGrowth: "Personal growth",
+            liTeachersAI: "Teachers + AI guidance",
+            liPractice: "Roz speaking practice",
+            liFeedback: "Instant feedback",
+            liStructured: "Structured syllabus",
+            liPronunciation: "Pronunciation focus",
+            liGamified: "Gamified challenges",
+            liProgress: "Progress track karein",
+            liFlexible: "Flexible schedule",
+            liCommunity: "Supportive community",
+            liResults: "Real results"
+        }
+    };
+
+    function setText(id, text) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (id === 'headlineTitle') {
+            // preserve highlighted 'Speak' span styling if present
+            el.innerHTML = text.replace(/Speak/i, '<span class="highlight">Speak<\/span>');
+        } else {
+            el.textContent = text;
+        }
+    }
+    function renderContentByLang() {
+        if (!window.getPrefs) {
+            // Wait for base.html to initialize
+            setTimeout(renderContentByLang, 100);
+            return;
+        }
+        const lang = (window.getPrefs && window.getPrefs().lang) || 'hinglish';
+        const t = uiText[lang] || uiText.hinglish;
+        setText('headlineTitle', t.headlineTitle);
+        setText('headlineSub', t.headlineSub);
+        setText('startBtn', t.startBtn);
+        setText('loginBtn', t.loginBtn);
+        setText('leftTitle', t.leftTitle);
+        setText('rightTitle', t.rightTitle);
+        setText('statBadge', t.statBadge);
+        setText('liConfidence', t.liConfidence);
+        setText('liCareer', t.liCareer);
+        setText('liGlobal', t.liGlobal);
+        setText('liTravel', t.liTravel);
+        setText('liNetworking', t.liNetworking);
+        setText('liLearning', t.liLearning);
+        setText('liCulture', t.liCulture);
+        setText('liMedia', t.liMedia);
+        setText('liExams', t.liExams);
+        setText('liGrowth', t.liGrowth);
+        setText('liTeachersAI', t.liTeachersAI);
+        setText('liPractice', t.liPractice);
+        setText('liFeedback', t.liFeedback);
+        setText('liStructured', t.liStructured);
+        setText('liPronunciation', t.liPronunciation);
+        setText('liGamified', t.liGamified);
+        setText('liProgress', t.liProgress);
+        setText('liFlexible', t.liFlexible);
+        setText('liCommunity', t.liCommunity);
+        setText('liResults', t.liResults);
+        // brand texts
+        const bl = document.querySelector('.brand-line'); if (bl) bl.textContent = t.brandLine;
+        const bs = document.querySelector('.brand-sub'); if (bs) bs.textContent = t.brandSub;
+    }
+
+
+    window.addEventListener('load', () => {
+        // Start TTS immediately (browser may allow; if not, user can press Sound On)
+        renderContentByLang();
+        // Start card animations
+        startCardShow();
+        schedulePops();
+    });
+
+    // React to preference changes from base
+    window.addEventListener('boony:prefs', (e) => {
+        // Update avatar image gender immediately if present
+        const { voice, lang } = e.detail || {};
+        const img = document.querySelector('#avatar-img');
+        if (img && voice) {
+            img.dataset.gender = voice === 'female' ? 'Female' : 'Male';
+        }
+        // On language change, restart intro in new language (polite)
+        if (lang) {
+            stopAllAudioPlayback();
+            startIntroByLang();
+            renderContentByLang();
+        }
+    });
+</script>
+
+<!-- Styles -->
+<style>
+    :root {
+        --bg1: var(--bg-primary);
+        --bg2: var(--bg-secondary);
+        --ink: var(--text-primary);
+        --muted: var(--text-secondary);
+        --accent: var(--accent-color);
+    }
+
+    .stage {
+        position: relative;
+        height: calc(100vh - 50px); /* leaves a little for nav/bottom bars from base */
+        min-height: 560px;
+        border-radius: 0px;
+        overflow: hidden;
+        background: var(--bg-primary);
+        box-shadow: 0 20px 60px var(--accent-shadow);
+    }
+
+    /* soft blobs */
+    .blob {
+        position: absolute;
+        inset: auto;
+        width: 420px;
+        height: 420px;
+        filter: blur(60px);
+        opacity: .22;
+        background: var(--accent-color);
+        border-radius: 50%;
+        animation: drift 18s ease-in-out infinite alternate;
+        pointer-events: none;
+    }
+
+    .b1 {
+        left: -120px;
+        top: -140px;
+        background: var(--accent-color);
+        animation-delay: 0s;
+    }
+
+    .b2 {
+        right: -160px;
+        bottom: -160px;
+        background: var(--accent-color);
+        animation-delay: 1.2s;
+    }
+
+    .b3 {
+        left: 45%;
+        top: 20%;
+        background: var(--accent-color);
+        animation-delay: 2.4s;
+    }
+
+    @keyframes drift {
+        from {
+            transform: translate(0,0) scale(1);
+        }
+
+        to {
+            transform: translate(40px,-30px) scale(1.1);
+        }
+    }
+
+    /* brand badge */
+    .brand-badge {
+        position: absolute;
+        left: 24px;
+        top: 18px;
+        background: var(--surface-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--ink);
+        padding: 10px 14px;
+        border-radius: 12px;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 8px 20px var(--accent-shadow) inset, 0 4px 10px var(--accent-shadow);
+    }
+
+    .brand-line {
+        font-weight: 700;
+        letter-spacing: .3px;
+    }
+
+    .brand-sub {
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    /* headline center */
+    .headline {
+        position: absolute;
+        left: 50%;
+        top: 72px;
+        transform: translateX(-50%);
+        text-align: center;
+        color: var(--ink);
+        padding: 6px 16px;
+    }
+
+        .headline h1 {
+            font-size: clamp(24px, 4.2vw, 42px);
+            margin: 0 0 6px;
+            font-weight: 800;
+        }
+
+        .headline .highlight {
+            color: var(--accent);
+        }
+
+        .headline .sub {
+            margin: 0 0 12px;
+            color: var(--muted);
+            font-size: clamp(13px,1.6vw,16px);
+        }
+
+    .cta-row {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* buttons */
+    .btn {
+        border: 1px solid var(--border-color);
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform .15s ease, background .2s ease, border .2s ease;
+        user-select: none;
+    }
+
+        .btn.primary {
+            background: var(--accent);
+            color: var(--text-primary);
+            border-color: transparent;
+        }
+
+            .btn.primary:hover {
+                transform: translateY(-2px);
+            }
+
+        .btn.ghost {
+            background: var(--surface-secondary);
+            color: var(--text-secondary);
+        }
+
+            .btn.ghost:hover {
+                background: var(--surface-hover);
+                transform: translateY(-2px);
+            }
+
+        .btn.mute {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+            .btn.mute[aria-pressed="true"] {
+                opacity: .7;
+            }
+
+    /* card layer */
+    .cards-layer {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    /* technique card */
+    .tech-card {
+        position: absolute;
+        padding: 12px 14px;
+        background: var(--surface-secondary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        border-radius: 999px;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 10px 24px var(--accent-shadow);
+        font-weight: 700;
+        letter-spacing: .2px;
+        animation: float var(--float-dur,3s) ease-in-out infinite alternate;
+        will-change: transform, opacity, left, top;
+        pointer-events: none;
+    }
+
+    .tech-card.bubble { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; text-align: center; }
+    .tech-card.dim { opacity: .25; filter: blur(1px); }
+
+    /* enter animations */
+    .enter-up {
+        animation: enterUp .5s ease both, float var(--float-dur,3s) ease-in-out .5s infinite alternate;
+    }
+
+    .enter-down {
+        animation: enterDown .5s ease both, float var(--float-dur,3s) ease-in-out .5s infinite alternate;
+    }
+
+    .enter-left {
+        animation: enterLeft .5s ease both, float var(--float-dur,3s) ease-in-out .5s infinite alternate;
+    }
+
+    .enter-right {
+        animation: enterRight .5s ease both, float var(--float-dur,3s) ease-in-out .5s infinite alternate;
+    }
+
+    .enter-zoom {
+        animation: enterZoom .5s ease both, float var(--float-dur,3s) ease-in-out .5s infinite alternate;
+    }
+
+    @keyframes enterUp {
+        from {
+            transform: translateY(24px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes enterDown {
+        from {
+            transform: translateY(-24px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes enterLeft {
+        from {
+            transform: translateX(-24px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes enterRight {
+        from {
+            transform: translateX(24px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes enterZoom {
+        from {
+            transform: scale(.86);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* exit */
+    .tech-card.exit {
+        animation: exit .55s ease forwards;
+    }
+
+    @keyframes exit {
+        to {
+            transform: translateY(8px) scale(.96);
+            opacity: 0;
+        }
+    }
+
+    /* subtle float */
+    @keyframes float {
+        from {
+            transform: translateY(0px);
+        }
+
+        to {
+            transform: translateY(-10px);
+        }
+    }
+
+    /* responsive tweaks */
+    @media (max-width: 640px) {
+        .brand-badge {
+            left: 12px;
+            top: 12px;
+        }
+
+        .headline {
+            top: 64px;
+        }
+
+        .btn {
+            padding: 9px 12px;
+        }
+    }
+
+    /* reasons side panels */
+    .reasons {
+        position: absolute;
+        top: 110px;
+        bottom: 20px;
+        width: min(320px, 28%);
+        overflow: hidden;
+        padding: 12px 14px;
+        border-radius: 14px;
+        color: var(--ink);
+        background: var(--surface-secondary);
+        border: 1px solid var(--border-color);
+        box-shadow: inset 0 1px 0 var(--border-color);
+    }
+    .reasons.left { left: 16px; }
+    .reasons.right { right: 16px; }
+    .reasons h3 { margin: 4px 6px 8px; font-size: 16px; opacity: .9; letter-spacing: .3px; }
+    .reasons ul { list-style: none; margin: 0; padding: 6px 8px; display: grid; gap: 8px; }
+    .reasons li {
+        padding: 8px 10px;
+        border-radius: 10px;
+        color: var(--text-secondary);
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        box-shadow: inset 0 -1px 0 var(--border-color);
+        opacity: .8;
+    }
+    .reasons li.highlight { outline: 2px solid var(--accent); color: var(--text-primary); opacity: 1; background: var(--hover-bg); }
+    .reasons.active { box-shadow: 0 0 0 2px var(--accent-shadow) inset; }
+    @media (max-width: 1024px) { .reasons { display:none; } }
+
+    /* overlay explanation */
+    .overlay-explain {
+        position: absolute;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: radial-gradient(600px 300px at 50% 40%, var(--bg-secondary), var(--surface-secondary));
+        pointer-events: none;
+    }
+    .overlay-explain .box {
+        max-width: 680px;
+        border-radius: 16px;
+        padding: 16px 18px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        text-align: left;
+        box-shadow: 0 20px 60px var(--accent-shadow);
+    }
+    .overlay-explain .t { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--accent); }
+    .overlay-explain .p { font-size: 15px; color: var(--text-secondary); }
+
+    /* stat badge */
+    .stat-badge {
+        margin: 6px 8px 10px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: var(--hover-bg);
+        color: var(--text-primary);
+        border: 1px solid var(--accent-color);
+        font-weight: 700;
+        letter-spacing: .2px;
+        text-shadow: 0 1px 0 var(--accent-shadow);
+    }
+</style>
+
+{% endblock %}

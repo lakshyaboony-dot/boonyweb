@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Microphone Test{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">🎤 Microphone Permission Test</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>📋 Instructions:</h5>
+                        <ol>
+                            <li>Click "Test Microphone" button</li>
+                            <li>Allow microphone permission when browser asks</li>
+                            <li>Speak something and click "Stop Recording"</li>
+                            <li>Check if audio is recorded properly</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="text-center mb-4">
+                        <button id="testMicBtn" class="btn btn-primary btn-lg">
+                            <i class="fas fa-microphone"></i> Test Microphone
+                        </button>
+                        <button id="stopTestBtn" class="btn btn-danger btn-lg" style="display:none;">
+                            <i class="fas fa-stop"></i> Stop Recording
+                        </button>
+                    </div>
+                    
+                    <div id="status" class="alert alert-secondary text-center">
+                        Ready to test microphone...
+                    </div>
+                    
+                    <div id="audioPlayer" style="display:none;" class="text-center mt-3">
+                        <h5>Recorded Audio:</h5>
+                        <audio controls id="recordedAudio"></audio>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>🔧 Troubleshooting:</h5>
+                        <ul>
+                            <li><strong>Permission Denied:</strong> Click the microphone icon in browser address bar and allow access</li>
+                            <li><strong>No Audio:</strong> Check if microphone is connected and working</li>
+                            <li><strong>HTTPS Required:</strong> Some browsers require HTTPS for microphone access</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let testMediaRecorder = null;
+let testChunks = [];
+let testIsRecording = false;
+
+const testMicBtn = document.getElementById('testMicBtn');
+const stopTestBtn = document.getElementById('stopTestBtn');
+const status = document.getElementById('status');
+const audioPlayer = document.getElementById('audioPlayer');
+const recordedAudio = document.getElementById('recordedAudio');
+
+testMicBtn.addEventListener('click', startMicTest);
+stopTestBtn.addEventListener('click', stopMicTest);
+
+async function startMicTest() {
+    try {
+        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Requesting microphone permission...';
+        status.className = 'alert alert-warning text-center';
+        
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
+            }
+        });
+        
+        console.log('✅ Microphone access granted');
+        status.innerHTML = '<i class="fas fa-microphone"></i> Recording... Speak now!';
+        status.className = 'alert alert-success text-center';
+        
+        testChunks = [];
+        testMediaRecorder = new MediaRecorder(stream);
+        
+        testMediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+                testChunks.push(event.data);
+                console.log('Audio chunk received:', event.data.size, 'bytes');
+            }
+        };
+        
+        testMediaRecorder.onstop = () => {
+            console.log('Recording stopped, chunks:', testChunks.length);
+            const audioBlob = new Blob(testChunks, { type: 'audio/webm' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            
+            recordedAudio.src = audioUrl;
+            audioPlayer.style.display = 'block';
+            
+            status.innerHTML = '<i class="fas fa-check-circle"></i> Recording completed! Play the audio below to test.';
+            status.className = 'alert alert-success text-center';
+            
+            // Stop all tracks
+            stream.getTracks().forEach(track => track.stop());
+            
+            // Reset buttons
+            testMicBtn.style.display = 'inline-block';
+            stopTestBtn.style.display = 'none';
+            testIsRecording = false;
+        };
+        
+        testMediaRecorder.start();
+        testIsRecording = true;
+        
+        // Update buttons
+        testMicBtn.style.display = 'none';
+        stopTestBtn.style.display = 'inline-block';
+        
+    } catch (error) {
+        console.error('❌ Microphone error:', error);
+        
+        let errorMessage = '';
+        if (error.name === 'NotAllowedError') {
+            errorMessage = '<i class="fas fa-exclamation-triangle"></i> <strong>Permission Denied!</strong><br>Please allow microphone access in your browser settings.';
+        } else if (error.name === 'NotFoundError') {
+            errorMessage = '<i class="fas fa-microphone-slash"></i> <strong>No Microphone Found!</strong><br>Please connect a microphone and try again.';
+        } else {
+            errorMessage = `<i class="fas fa-times-circle"></i> <strong>Error:</strong> ${error.message}`;
+        }
+        
+        status.innerHTML = errorMessage;
+        status.className = 'alert alert-danger text-center';
+    }
+}
+
+function stopMicTest() {
+    if (testMediaRecorder && testIsRecording) {
+        testMediaRecorder.stop();
+        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing recording...';
+        status.className = 'alert alert-info text-center';
+    }
+}
+
+// Check browser compatibility
+if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    status.innerHTML = '<i class="fas fa-times-circle"></i> <strong>Browser Not Supported!</strong><br>Please use a modern browser like Chrome, Firefox, or Safari.';
+    status.className = 'alert alert-danger text-center';
+    testMicBtn.disabled = true;
+}
+</script>
+{% endblock %}

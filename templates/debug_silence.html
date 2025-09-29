@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silence Detection Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .debug-panel {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .start-btn {
+            background: #4CAF50;
+            color: white;
+        }
+        .stop-btn {
+            background: #f44336;
+            color: white;
+        }
+        .status {
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .audio-level {
+            width: 100%;
+            height: 20px;
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .audio-level-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #FFC107, #f44336);
+            width: 0%;
+            transition: width 0.1s;
+        }
+    </style>
+</head>
+<body>
+    <h1>Silence Detection Debug Tool</h1>
+    
+    <div class="debug-panel">
+        <h3>Settings</h3>
+        <label>Silence Threshold: <input type="range" id="threshold" min="0.01" max="0.2" step="0.01" value="0.05"> <span id="threshold-value">0.05</span></label><br>
+        <label>Silence Duration (ms): <input type="number" id="duration" value="3000" min="1000" max="10000" step="500"> ms</label>
+    </div>
+    
+    <div class="controls">
+        <button class="start-btn" onclick="startRecording()">Start Recording</button>
+        <button class="stop-btn" onclick="stopRecording()">Stop Recording</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div class="status" id="status">Status: Ready</div>
+    
+    <div class="audio-level">
+        <div class="audio-level-bar" id="audio-level-bar"></div>
+    </div>
+    <div>Audio Level: <span id="audio-level-text">0.000</span> | Threshold: <span id="current-threshold">0.05</span></div>
+    
+    <div class="debug-panel">
+        <h3>Console Log</h3>
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        let mediaRecorder = null;
+        let isRecording = false;
+        let audioContext = null;
+        let analyser = null;
+        let silenceStartTime = null;
+        let silenceThreshold = 0.05;
+        let silenceDuration = 3000;
+        let recordedChunks = [];
+        
+        function log(message) {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logEl.innerHTML += `[${timestamp}] ${message}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(status) {
+            document.getElementById('status').textContent = `Status: ${status}`;
+            log(`Status: ${status}`);
+        }
+        
+        function updateThreshold() {
+            silenceThreshold = parseFloat(document.getElementById('threshold').value);
+            document.getElementById('threshold-value').textContent = silenceThreshold;
+            document.getElementById('current-threshold').textContent = silenceThreshold;
+        }
+        
+        function updateDuration() {
+            silenceDuration = parseInt(document.getElementById('duration').value);
+        }
+        
+        document.getElementById('threshold').addEventListener('input', updateThreshold);
+        document.getElementById('duration').addEventListener('input', updateDuration);
+        
+        function startRecording() {
+            if (isRecording) {
+                log('❌ Already recording!');
+                return;
+            }
+            
+            log('🎤 Requesting microphone access...');
+            updateStatus('Requesting microphone...');
+            
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    log('✅ Microphone access granted');
+                    
+                    recordedChunks = [];
+                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            recordedChunks.push(event.data);
+                            log(`📊 Audio chunk received: ${event.data.size} bytes`);
+                        }
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        log('⏹️ MediaRecorder stopped');
+                        const audioBlob = new Blob(recordedChunks, { type: 'audio/wav' });
+                        log(`📁 Audio blob created: ${audioBlob.size} bytes`);
+                        
+                        // Stop all tracks
+                        stream.getTracks().forEach(track => {
+                            track.stop();
+                            log(`🔇 Audio track stopped: ${track.kind}`);
+                        });
+                        
+                        // Clean up audio context
+                        if (audioContext) {
+                            audioContext.close();
+                            audioContext = null;
+                            log('🔧 Audio context closed');
+                        }
+                        
+                        updateStatus('Recording stopped');
+                    };
+                    
+                    mediaRecorder.start();
+                    isRecording = true;
+                    log('✅ Recording started');
+                    updateStatus('Recording...');
+                    
+                    // Setup silence detection AFTER setting isRecording = true
+                    setupSilenceDetection(stream);
+                    
+                })
+                .catch(error => {
+                    log(`❌ Microphone error: ${error.name} - ${error.message}`);
+                    updateStatus('Microphone error');
+                });
+        }
+        
+        function stopRecording() {
+            if (!isRecording) {
+                log('❌ Not recording!');
+                return;
+            }
+            
+            log('⏹️ Stopping recording manually...');
+            
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                isRecording = false;
+                
+                // Reset recording start time for next recording
+                recordingStartTime = null;
+            }
+        }
+        
+        function setupSilenceDetection(stream) {
+            try {
+                log('🔧 Setting up silence detection...');
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                const microphone = audioContext.createMediaStreamSource(stream);
+                
+                analyser.fftSize = 512;
+                analyser.minDecibels = -90;
+                analyser.maxDecibels = -10;
+                analyser.smoothingTimeConstant = 0.85;
+                
+                microphone.connect(analyser);
+                
+                log('✅ Silence detection setup complete');
+                monitorSilence();
+                
+            } catch (error) {
+                log(`❌ Silence detection setup error: ${error.message}`);
+            }
+        }
+        
+        let recordingStartTime = null;
+        
+        function monitorSilence() {
+            if (!analyser || !isRecording) {
+                log('🛑 Stopping silence monitoring');
+                return;
+            }
+            
+            // Set recording start time on first call
+            if (!recordingStartTime) {
+                recordingStartTime = Date.now();
+                log('⏰ Recording start time set');
+            }
+            
+            // Skip silence detection for first 2 seconds
+            const recordingDuration = Date.now() - recordingStartTime;
+            if (recordingDuration < 2000) {
+                // Continue monitoring without silence detection
+                if (isRecording) {
+                    requestAnimationFrame(monitorSilence);
+                }
+                return;
+            }
+            
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            
+            analyser.getByteFrequencyData(dataArray);
+            
+            // Calculate average volume
+            let sum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+                sum += dataArray[i];
+            }
+            const average = sum / bufferLength / 255;
+            
+            // Update UI
+            document.getElementById('audio-level-text').textContent = average.toFixed(3);
+            document.getElementById('audio-level-bar').style.width = (average * 100) + '%';
+            
+            // Check if silence
+            if (average < silenceThreshold) {
+                if (!silenceStartTime) {
+                    silenceStartTime = Date.now();
+                    log(`🔇 Silence started (level: ${average.toFixed(3)})`);
+                } else {
+                    const currentSilenceDuration = Date.now() - silenceStartTime;
+                    if (currentSilenceDuration > silenceDuration) {
+                        log(`🔇 ${silenceDuration/1000}s silence detected, stopping recording`);
+                        stopRecording();
+                        return;
+                    }
+                    
+                    // Log silence progress every second
+                    if (currentSilenceDuration % 1000 < 50) {
+                        log(`🔇 Silence: ${Math.floor(currentSilenceDuration/1000)}s / ${silenceDuration/1000}s`);
+                    }
+                }
+            } else {
+                if (silenceStartTime) {
+                    log(`🔊 Sound detected (level: ${average.toFixed(3)}), resetting silence timer`);
+                }
+                silenceStartTime = null;
+            }
+            
+            // Continue monitoring
+            if (isRecording) {
+                requestAnimationFrame(monitorSilence);
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        // Initialize
+        updateThreshold();
+        log('🚀 Silence Detection Debug Tool initialized');
+    </script>
+</body>
+</html>

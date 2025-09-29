@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Indian Woman Voice TTS</title>
+  <script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+      background-color: #f0f8ff;
+      padding: 20px;
+    }
+    textarea, select, button {
+      width: 100%;
+      font-size: 16px;
+      margin-top: 10px;
+      padding: 10px;
+    }
+    button {
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Text to Speech – Indian Woman + Download</h1>
+
+<textarea id="textInput" placeholder="Type something..."></textarea>
+<select id="voiceSelect"></select>
+<button onclick="startSpeaking()">Speak & Record</button>
+<button onclick="downloadAudio()">Download Audio</button>
+
+<script>
+  const voiceSelect = document.getElementById("voiceSelect");
+  let voices = [];
+  let recorder;
+  let audioBlob;
+
+  function loadVoices() {
+    voices = speechSynthesis.getVoices();
+    voiceSelect.innerHTML = '';
+
+    voices.forEach((voice, index) => {
+      const option = document.createElement("option");
+      option.value = index;
+      option.textContent = `${voice.name} (${voice.lang})`;
+      voiceSelect.appendChild(option);
+
+      // Auto-select an Indian female voice if found
+      if (voice.name.toLowerCase().includes("heera") || voice.lang === "hi-IN") {
+        voiceSelect.selectedIndex = index;
+      }
+    });
+  }
+
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
+
+  async function startSpeaking() {
+    const text = document.getElementById("textInput").value;
+    const selectedVoice = voices[voiceSelect.value];
+
+    // Start microphone to record
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recorder = RecordRTC(stream, { type: 'audio' });
+    recorder.startRecording();
+
+    // Speak
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.voice = selectedVoice;
+    speechSynthesis.speak(utterance);
+
+    // When speaking ends, stop recording
+    utterance.onend = () => {
+      recorder.stopRecording(() => {
+        audioBlob = recorder.getBlob();
+        stream.getTracks().forEach(track => track.stop());
+        alert("Done! Click 'Download Audio'.");
+      });
+    };
+  }
+
+  function downloadAudio() {
+    if (!audioBlob) {
+      alert("Please speak first.");
+      return;
+    }
+    const url = URL.createObjectURL(audioBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "indian_woman_voice.wav";
+    a.click();
+  }
+</script>
+
+</body>
+</html>

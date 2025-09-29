@@ -1,0 +1,96 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3498DB;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#2980B9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1F618D;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/> 
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Sound waves -->
+  <g transform="translate(100,100)">
+    <circle cx="0" cy="0" r="30" fill="none" stroke="url(#blueGradient)" stroke-width="2" opacity="0.8">
+      <animate attributeName="r" values="30;50;30" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="0" cy="0" r="40" fill="none" stroke="url(#blueGradient)" stroke-width="2" opacity="0.6">
+      <animate attributeName="r" values="40;60;40" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="0" cy="0" r="50" fill="none" stroke="url(#blueGradient)" stroke-width="2" opacity="0.4">
+      <animate attributeName="r" values="50;70;50" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0.1;0.4" dur="3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Ear -->
+  <g transform="translate(100,100)">
+    <!-- Outer ear -->
+    <path d="M -20,-25 Q -35,-20 -35,0 Q -35,20 -20,25 Q -10,20 -10,0 Q -10,-20 -20,-25 Z" fill="#FDBCB4" filter="url(#glow)">
+      <animateTransform attributeName="transform" type="scale" values="1;1.05;1" dur="2s" repeatCount="indefinite"/>
+    </path>
+    
+    <!-- Inner ear -->
+    <path d="M -18,-15 Q -25,-10 -25,0 Q -25,10 -18,15 Q -15,10 -15,0 Q -15,-10 -18,-15 Z" fill="#F4A688">
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+    </path>
+    
+    <!-- Ear canal -->
+    <ellipse cx="-20" cy="0" rx="3" ry="8" fill="#E8967A">
+      <animate attributeName="opacity" values="0.6;0.9;0.6" dur="2s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+  
+  <!-- Sound particles -->
+  <g>
+    <circle cx="50" cy="80" r="2" fill="url(#blueGradient)">
+      <animateTransform attributeName="transform" type="translate" values="0,0;30,0;60,0" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.5;0" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="45" cy="100" r="2.5" fill="url(#blueGradient)">
+      <animateTransform attributeName="transform" type="translate" values="0,0;35,0;70,0" dur="3.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.4;0" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="50" cy="120" r="2" fill="url(#blueGradient)">
+      <animateTransform attributeName="transform" type="translate" values="0,0;30,0;60,0" dur="2.8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.6;0" dur="2.8s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Musical notes -->
+  <g>
+    <g transform="translate(140,60)">
+      <circle cx="0" cy="8" r="4" fill="url(#blueGradient)"/>
+      <rect x="3" y="-8" width="2" height="16" fill="url(#blueGradient)"/>
+      <path d="M 5,-8 Q 12,-5 12,2" stroke="url(#blueGradient)" stroke-width="2" fill="none"/>
+      <animateTransform attributeName="transform" type="translate" values="0,0;-10,-20;-20,-40" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.5;0" dur="4s" repeatCount="indefinite"/>
+    </g>
+    
+    <g transform="translate(160,90)">
+      <circle cx="0" cy="8" r="3" fill="url(#blueGradient)"/>
+      <rect x="2" y="-6" width="1.5" height="14" fill="url(#blueGradient)"/>
+      <animateTransform attributeName="transform" type="translate" values="0,0;-15,-25;-30,-50" dur="4.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;0.3;0" dur="4.5s" repeatCount="indefinite"/>
+    </g>
+  </g>
+  
+  <!-- Text -->
+  <text x="100" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="url(#blueGradient)" filter="url(#glow)">
+    I'm Listening
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Hindi subtitle -->
+  <text x="100" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">
+    मैं सुन रहा हूं
+    <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.5s" repeatCount="indefinite"/>
+  </text>
+</svg>

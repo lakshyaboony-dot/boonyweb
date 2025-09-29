@@ -1,0 +1,9 @@
+Paragraph:
+I wake up at 6 am every day. I brush my teeth before breakfast.
+
+Transcription:
+🎙️ Recording started... Speak now.
+⏹ Stopping recording...
+✅ Audio recorded → Day-1_revision.wav
+📝 Transcribing...
+[No speech detected]

@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listen Test - Day {{ day }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: var(--bg-primary);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-primary);
+        }
+        
+        .test-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+        
+        .test-header {
+            background: var(--accent-color);
+            color: var(--text-primary);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .test-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        }
+        
+        .test-header h1 {
+            font-size: 3rem;
+            margin: 0 0 15px 0;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .test-header p {
+            font-size: 1.3rem;
+            margin: 0;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .test-content {
+            padding: 40px 30px;
+        }
+        
+        .question-card {
+            background: linear-gradient(145deg, #ffffff, #f8f9ff);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            overflow: hidden;
+        }
+        
+        .question-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.6s;
+        }
+        
+        .question-card:hover::after {
+            left: 100%;
+        }
+        
+        .question-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+        
+        .question-card:focus {
+            outline: none;
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.2);
+        }
+        
+        .audio-hint {
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .audio-hint::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #667eea;
+        }
+        
+        .question-card:hover .audio-hint {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+        
+        .question-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .question-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            min-width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-right: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            position: relative;
+        }
+        
+        .question-number::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+        
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            line-height: 1.5;
+            flex: 1;
+        }
+        
+        .audio-icon {
+            margin-left: auto;
+            color: #667eea;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .question-card:hover .audio-icon {
+            color: #764ba2;
+            transform: scale(1.1);
+        }
+        
+        .options {
+            display: grid;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            background: linear-gradient(145deg, #ffffff, #f8f9ff);
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: #2c3e50;
+            font-size: 1rem;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+            transition: left 0.5s;
+        }
+        
+        .option:hover::before {
+            left: 100%;
+        }
+        
+        .option:hover {
+            background: linear-gradient(145deg, #f8f9ff, #ffffff);
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+        
+        .option input[type="radio"] {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            margin-right: 15px;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+            box-shadow: none;
+            transition: all 0.3s ease;
+        }
+        
+        .option input[type="radio"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
+        .option input[type="radio"]:checked {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
+        .option input[type="radio"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .option.selected {
+            background: linear-gradient(145deg, #f0f4ff, #e8f0ff);
+            border-color: #667eea;
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+        
+        .option-label {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .submit-section {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px 0;
+            border-top: 1px solid rgba(102, 126, 234, 0.1);
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+        
+        .submit-btn:disabled {
+            background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .audio-control-btn {
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+        
+        .audio-control-btn:hover {
+            background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.2));
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .result-content {
+            background: linear-gradient(145deg, #ffffff, #f8f9ff);
+            padding: 50px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 550px;
+            margin: 20px;
+            box-shadow: 0 30px 80px rgba(102, 126, 234, 0.3);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .result-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .result-icon {
+            font-size: 5rem;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .result-icon.success {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .result-icon.failure {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .result-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .result-score {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: #4a5568;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .result-message {
+            font-size: 1.2rem;
+            line-height: 1.7;
+            margin-bottom: 35px;
+            color: #2d3748;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .result-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .result-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .question-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .question-card:nth-child(2) { animation-delay: 0.1s; }
+        .question-card:nth-child(3) { animation-delay: 0.2s; }
+        .question-card:nth-child(4) { animation-delay: 0.3s; }
+        .question-card:nth-child(5) { animation-delay: 0.4s; }
+        .question-card:nth-child(6) { animation-delay: 0.5s; }
+        
+        .audio-btn {
+            background: linear-gradient(45deg, #a122e0, #46125f);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(161, 34, 224, 0.3);
+        }
+        
+        .audio-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(161, 34, 224, 0.5);
+        }
+        
+        .audio-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .audio-btn-small {
+            background: linear-gradient(45deg, #a122e0, #46125f);
+            color: white;
+            border: none;
+            padding: 4px 6px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 4px rgba(161, 34, 224, 0.3);
+        }
+        
+        .audio-btn-small:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 6px rgba(161, 34, 224, 0.5);
+        }
+        
+        .audio-btn-small:active {
+            transform: scale(0.9);
+        }
+        
+        .audio-control-btn {
+            background: linear-gradient(45deg, #a122e0, #46125f);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(161, 34, 224, 0.3);
+        }
+        
+        .audio-control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(161, 34, 224, 0.5);
+        }
+        
+        .audio-control-btn:active {
+            transform: translateY(0);
+        }
+        
+        .celebration-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(15px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .celebration-content {
+            text-align: center;
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            padding: 50px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+            animation: bounceIn 0.6s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .celebration-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: rotate 3s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .celebration-animation {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .celebration-animation svg {
+            width: 100%;
+            height: 100%;
+            max-width: 200px;
+            max-height: 200px;
+        }
+        
+        .celebration-text {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .celebration-subtext {
+            color: #f0f0f0;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        /* Fill-in-the-blanks styles */
+        .fill-blanks-section {
+            margin-top: 15px;
+        }
+        
+        .fill-blanks-mcq-section {
+            margin-top: 15px;
+        }
+        
+        .statement-with-blanks {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            padding: 15px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            border-left: 4px solid #a122e0;
+        }
+        
+        .hindi-meaning {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        
+        .fill-blank-input {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1.1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            background: var(--bg-secondary);
+        }
+        
+        .fill-blank-input:focus {
+            outline: none;
+            border-color: #a122e0;
+            box-shadow: 0 0 0 3px rgba(161, 34, 224, 0.1);
+        }
+        
+        .fill-blank-input.answered {
+             border-color: #28a745;
+             background: #f8fff9;
+         }
+         
+         /* Simple question box styles */
+         .simple-question-box {
+             margin-top: 15px;
+         }
+         
+         .simple-options {
+             display: grid;
+             gap: 10px;
+             margin-top: 15px;
+         }
+         
+         .simple-option {
+             display: flex;
+             align-items: center;
+             padding: 12px 15px;
+             background: var(--bg-primary);
+             border: 2px solid var(--border-color);
+             border-radius: 8px;
+             cursor: pointer;
+             transition: all 0.3s ease;
+             color: var(--text-primary);
+             font-size: 1rem;
+         }
+         
+         .simple-option:hover {
+             background: #f3e5f5;
+             border-color: #8e44ad;
+             color: var(--text-primary);
+         }
+         
+         .simple-option input[type="radio"] {
+             appearance: none;
+             -webkit-appearance: none;
+             -moz-appearance: none;
+             width: 18px;
+             height: 18px;
+             border: 2px solid #8e44ad;
+             border-radius: 3px;
+             margin-right: 12px;
+             position: relative;
+             cursor: pointer;
+             outline: none;
+             box-shadow: none;
+         }
+         
+         .simple-option input[type="radio"]:focus {
+             outline: none;
+             box-shadow: none;
+         }
+         
+         .simple-option input[type="radio"]:checked {
+             background: #8e44ad;
+             border-color: #8e44ad;
+         }
+         
+         .simple-option input[type="radio"]:checked::after {
+             content: '✓';
+             position: absolute;
+             top: 50%;
+             left: 50%;
+             transform: translate(-50%, -50%);
+             color: white;
+             font-size: 12px;
+             font-weight: bold;
+         }
+         
+         .simple-option.selected {
+             background: #f3e5f5;
+             border-color: #8e44ad;
+             color: var(--text-primary);
+         }
+         
+         .option-text {
+             font-weight: 500;
+         }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #FFD700;
+            animation: confetti-fall 3s linear infinite;
+        }
+        
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body style="background-color: #210033; margin: 0; padding: 0;">
+    <!-- Navigation from base.html -->
+    <nav class="nav">
+        <div class="container">
+            <div class="nav-left">
+                <a href="/" class="logo">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Boony" style="height: 40px;">
+                </a>
+            </div>
+            <div class="nav-right">
+                <a href="/dashboard" class="nav-link">Dashboard</a>
+                <a href="/logout" class="nav-link">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="test-container">
+        <div class="test-header">
+            <h1><i class="fas fa-headphones"></i> Listen Test - Day {{ day }}</h1>
+            <p>Test your understanding! आपकी समझ को परखते हैं!</p>
+            <p><strong>Passing Score: 80% (4/5 questions)</strong></p>
+            <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button type="button" class="audio-control-btn" onclick="readAllQuestions()" title="Read all questions / सभी सवाल सुनें">
+                    <i class="fas fa-volume-up"></i> Read All Questions
+                </button>
+                <button type="button" class="audio-control-btn" onclick="stopAllAudio()" title="Stop audio / आवाज़ बंद करें">
+                    <i class="fas fa-volume-mute"></i> Stop Audio
+                </button>
+            </div>
+        </div>
+        
+        <div class="test-content">
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <form id="testForm">
+            {% for i in range(questions|length) %}
+            <div class="question-card" onmouseenter="speak('{{ questions[i].question|replace("'", "\\'")|replace('"', '\\"') }}')">
+                <div class="audio-hint"><i class="fas fa-volume-up"></i> Hover to listen / सुनने के लिए hover करें</div>
+                <div class="question-header">
+                    <span class="question-number">{{ i + 1 }}</span>
+                    <div class="question-text">{{ questions[i].question }}</div>
+                    <i class="fas fa-volume-up audio-icon"></i>
+                </div>
+                
+                {% if questions[i].type == 'fill_blanks_mcq' %}
+                <div class="simple-question-box">
+                    <div class="hindi-meaning">{{ questions[i].hindi_meaning }}</div>
+                    <div class="options">
+                        {% for j in range(questions[i].options|length) %}
+                        <label class="option" for="q{{ i }}_{{ j }}">
+                            <input type="radio" name="question_{{ i }}" value="{{ j }}" id="q{{ i }}_{{ j }}" onchange="updateProgress()">
+                            <span class="option-label">{{ questions[i].options[j] }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% elif questions[i].type == 'fill_blanks' %}
+                <div class="fill-blanks-section">
+                    <div class="statement-with-blanks">{{ questions[i].statement_with_blanks }}</div>
+                    <div class="hindi-meaning">{{ questions[i].hindi_meaning }}</div>
+                    <input type="text" name="question_{{ i }}" class="fill-blank-input" placeholder="Type your answer here / यहाँ अपना उत्तर लिखें" oninput="updateProgress()" autocomplete="off">
+                    <button type="button" class="audio-btn" onclick="speak('{{ questions[i].statement_with_blanks|replace("'", "\\'")|replace('"', '\\"') }}')
+                        🔊
+                    </button>
+                </div>
+                {% else %}
+                <div class="options">
+                    {% for j in range(questions[i].options|length) %}
+                    <label class="option" for="q{{ i }}_{{ j }}">
+                        <input type="radio" name="question_{{ i }}" value="{{ j }}" id="q{{ i }}_{{ j }}" onchange="updateProgress()">
+                        <span class="option-label">{{ questions[i].options[j] }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <div class="submit-section">
+                <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                    Submit Test / टेस्ट जमा करें
+                </button>
+            </div>
+        </form>
+        </div>
+    </div>
+    
+    <!-- Result Modal -->
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <div class="result-icon" id="resultIcon">🎉</div>
+            <div class="result-title" id="resultTitle">Congratulations!</div>
+            <div class="result-score" id="resultScore">Score: 4/5 (80%)</div>
+            <div class="result-message" id="resultMessage">
+                Great job! You passed the test.<br>
+                बहुत बढ़िया! आपने टेस्ट पास कर लिया।
+            </div>
+            <div id="resultButtons">
+                <button class="result-btn" onclick="goToSpeaking()">Go to Speaking / स्पीकिंग पर जाएं</button>
+                <button class="result-btn" onclick="retryTest()">Retry Test / दोबारा कोशिश करें</button>
+                <button class="result-btn" onclick="goBackToListen()" style="display: none;">Go back to Listen / वापस लिसन पर जाएं</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Celebration Overlay -->
+    <div id="celebrationOverlay" class="celebration-overlay">
+        <div class="celebration-content">
+            <div id="celebrationAnimation" class="celebration-animation">
+                <!-- Animated SVG will be loaded here -->
+            </div>
+            <div class="celebration-text">🎉 Congratulations! बधाई हो! 🎉</div>
+            <div class="celebration-subtext">Test Passed! / टेस्ट पास!</div>
+            <button class="audio-control-btn" onclick="hideCelebration()">Continue / आगे बढ़ें</button>
+        </div>
+    </div>
+
+    <script>
+        let totalQuestions = {{ questions|length }};
+        let answeredQuestions = 0;
+        
+        // TTS and audio handling
+        const currentAudios = new Set();
+        let isMuted = (localStorage.getItem('boony.muted') === 'true');
+        
+        window.addEventListener('boony:mute', (e) => { 
+            isMuted = !!(e.detail && e.detail.muted); 
+            if (isMuted) stopAllAudio(); 
+        });
+
+        // Use global getPrefs function from base.html
+        // window.getPrefs is available globally
+
+        function mapToMsVoice(p) { 
+            if (p.accent === 'en-US') return p.voice === 'female' ? 'en-US-JennyNeural' : 'en-US-GuyNeural'; 
+            return p.voice === 'female' ? 'en-IN-KavyaNeural' : 'hi-IN-PrabhatNeural'; 
+        }
+
+        function TTS_ENDPOINT(text) { 
+            const p = window.getPrefs && window.getPrefs() || {}; 
+            const qs = new URLSearchParams({
+                text, 
+                voice: p.voice, 
+                accent: p.accent, 
+                lang: p.lang, 
+                voice_name: mapToMsVoice(p), 
+                mode: p.mode
+            }); 
+            return `/tts?${qs.toString()}`; 
+        }
+
+        function stopAllAudio() { 
+            currentAudios.forEach(a => {
+                try { a.pause(); a.src = ''; } catch (e) {} 
+                currentAudios.delete(a); 
+            }); 
+            try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: false } })); } catch (e) {} 
+        }
+
+        async function speak(text) { 
+            if (!text || isMuted) return; 
+            stopAllAudio(); 
+            return new Promise((resolve) => {
+                try { 
+                    const a = new Audio(TTS_ENDPOINT(text)); 
+                    currentAudios.add(a); 
+                    a.addEventListener('ended', () => {
+                        currentAudios.delete(a);
+                        resolve();
+                    }, { once: true }); 
+                    a.addEventListener('error', () => {
+                        currentAudios.delete(a);
+                        resolve();
+                    }, { once: true }); 
+                    try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: true } })); } catch (e) {} 
+                    a.play().catch(() => resolve()); 
+                } catch (e) { 
+                    resolve();
+                } 
+            });
+        }
+        
+        function updateProgress() {
+            answeredQuestions = 0;
+            for (let i = 0; i < totalQuestions; i++) {
+                const input = document.querySelector(`input[name="question_${i}"]`);
+                
+                if (input) {
+                    if (input.type === 'text') {
+                        // Fill-in-the-blanks question
+                        if (input.value.trim() !== '') {
+                            answeredQuestions++;
+                            input.classList.add('answered');
+                        } else {
+                            input.classList.remove('answered');
+                        }
+                    } else {
+                        // Multiple choice question
+                        const radios = document.querySelectorAll(`input[name="question_${i}"]`);
+                        for (let radio of radios) {
+                            if (radio.checked) {
+                                answeredQuestions++;
+                                // Add selected class to parent option
+                                 document.querySelectorAll(`input[name="question_${i}"]`).forEach(r => {
+                                     const parentElement = r.closest('.option') || r.closest('.simple-option');
+                                     if (parentElement) parentElement.classList.remove('selected');
+                                 });
+                                 const parentElement = radio.closest('.option') || radio.closest('.simple-option');
+                                 if (parentElement) parentElement.classList.add('selected');
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Update progress bar
+            const progress = (answeredQuestions / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            // Enable submit button if all questions answered
+            document.getElementById('submitBtn').disabled = answeredQuestions < totalQuestions;
+        }
+        
+        document.getElementById('testForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Collect answers
+            const answers = [];
+            for (let i = 0; i < totalQuestions; i++) {
+                const input = document.querySelector(`input[name="question_${i}"]`);
+                
+                if (input) {
+                    if (input.type === 'text') {
+                        // Fill-in-the-blanks question - collect text answer
+                        answers.push(input.value.trim());
+                    } else {
+                        // Multiple choice question - collect selected option index
+                        const radios = document.querySelectorAll(`input[name="question_${i}"]`);
+                        let answered = false;
+                        for (let radio of radios) {
+                            if (radio.checked) {
+                                answers.push(parseInt(radio.value));
+                                answered = true;
+                                break;
+                            }
+                        }
+                        if (!answered) {
+                            answers.push(null); // No answer selected
+                        }
+                    }
+                } else {
+                    answers.push(null); // No input found
+                }
+            }
+            
+            // Collect original questions data for accurate scoring
+            const originalQuestions = [];
+            {% for question in questions %}
+            originalQuestions.push({
+                question: {{ question.question | tojson }},
+                options: {{ question.options | tojson }},
+                correct_answer: {{ question.correct_answer }},
+                hindi_meaning: {{ question.hindi_meaning | tojson }},
+                type: {{ question.type | tojson }}
+            });
+            {% endfor %}
+            
+            // Submit to backend
+            try {
+                const response = await fetch('/api/submit-listen-test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        day: '{{ day }}',
+                        answers: answers,
+                        questions: originalQuestions
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // Show celebration first if passed, then show result
+                if (result.passed) {
+                    showCelebration();
+                    setTimeout(() => {
+                        showResult(result);
+                    }, 3500);
+                } else {
+                    showResult(result);
+                }
+            } catch (error) {
+                console.error('Error submitting test:', error);
+                alert('Error submitting test. Please try again.');
+            }
+        });
+        
+        function showResult(result) {
+            const modal = document.getElementById('resultModal');
+            const icon = document.getElementById('resultIcon');
+            const title = document.getElementById('resultTitle');
+            const score = document.getElementById('resultScore');
+            const message = document.getElementById('resultMessage');
+            
+            // Get button elements
+            const goToSpeakingBtn = document.querySelector('button[onclick="goToSpeaking()"]');
+            const retryBtn = document.querySelector('button[onclick="retryTest()"]');
+            const goBackBtn = document.querySelector('button[onclick="goBackToListen()"]');
+            
+            score.textContent = `Score: ${result.score}/${result.total} (${result.percentage}%)`;
+            
+            if (result.passed) {
+                icon.textContent = '🎉';
+                icon.className = 'result-icon success';
+                title.textContent = 'Congratulations! बधाई हो!';
+                message.innerHTML = `
+                    Excellent! You passed the test with ${result.percentage}%<br>
+                    बहुत बढ़िया! आपने ${result.percentage}% के साथ टेस्ट पास किया।<br><br>
+                    Now you can proceed to the Speaking stage!<br>
+                    अब आप स्पीकिंग स्टेज पर जा सकते हैं!
+                `;
+                // Show speaking and retry buttons, hide go back button
+                goToSpeakingBtn.style.display = 'inline-block';
+                retryBtn.style.display = 'inline-block';
+                goBackBtn.style.display = 'none';
+            } else {
+                icon.textContent = '😔';
+                icon.className = 'result-icon failure';
+                title.textContent = 'Keep Trying! कोशिश करते रहें!';
+                message.innerHTML = `
+                    You scored ${result.percentage}%. You need 80% to pass.<br>
+                    आपका स्कोर ${result.percentage}% है। पास होने के लिए 80% चाहिए।<br><br>
+                    Go back to Listen page for more practice!<br>
+                    अधिक अभ्यास के लिए लिसन पेज पर वापस जाएं!
+                `;
+                // Hide speaking button, show retry and go back buttons
+                goToSpeakingBtn.style.display = 'none';
+                retryBtn.style.display = 'inline-block';
+                goBackBtn.style.display = 'inline-block';
+            }
+            
+            // Hide celebration overlay first if it's showing
+            hideCelebration();
+            modal.style.display = 'flex';
+        }
+        
+        function goToSpeaking() {
+            window.location.href = '/speak/{{ day }}';
+        }
+        
+        function retryTest() {
+            window.location.reload();
+        }
+        
+        function goBackToListen() {
+            window.location.href = '/listen/{{ day }}';
+        }
+        
+        // Close modal on outside click
+        document.getElementById('resultModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+        
+        // Auto-read first question when page loads
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                readFirstQuestion();
+                
+                // Add auto-play functionality on question card hover/focus
+                addQuestionAutoPlay();
+            }, 1000);
+        });
+        
+        // Function to read first question with options for fill_blanks_mcq
+        function readFirstQuestion() {
+            const firstQuestionCard = document.querySelector('.question-card');
+            if (!firstQuestionCard) return;
+            
+            const questionType = firstQuestionCard.querySelector('.simple-question-box') ? 'fill_blanks_mcq' : 'other';
+            
+            if (questionType === 'fill_blanks_mcq') {
+                readFillBlanksMCQQuestion(firstQuestionCard);
+            } else {
+                const firstQuestion = firstQuestionCard.querySelector('.question-text');
+                if (firstQuestion) {
+                    speak(firstQuestion.textContent);
+                }
+            }
+        }
+        
+        // Function to read fill blanks MCQ question with options
+        async function readFillBlanksMCQQuestion(questionCard) {
+            const hindiMeaning = questionCard.querySelector('.hindi-meaning');
+            const options = questionCard.querySelectorAll('.simple-option .option-text');
+            
+            // Read Hindi meaning first
+            if (hindiMeaning) {
+                await speak(hindiMeaning.textContent);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
+            // Read all options
+            for (let i = 0; i < options.length; i++) {
+                const optionText = options[i].textContent.trim();
+                if (optionText) {
+                    await speak(optionText);
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                }
+            }
+            
+            // Ask which one is right
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await speak('Which one is right? Batao konsa sahi hai?');
+        }
+        
+        // Function to add auto-play on question card hover/focus
+        function addQuestionAutoPlay() {
+            const questionCards = document.querySelectorAll('.question-card');
+            
+            questionCards.forEach((card, index) => {
+                const questionText = card.querySelector('.question-text');
+                const questionType = card.querySelector('.simple-question-box') ? 'fill_blanks_mcq' : 'other';
+                let hoverTimeout;
+                
+                // Add hover event for auto-play
+                card.addEventListener('mouseenter', function() {
+                    // Clear any existing timeout
+                    if (hoverTimeout) {
+                        clearTimeout(hoverTimeout);
+                    }
+                    
+                    // Set a small delay to avoid accidental triggers
+                    hoverTimeout = setTimeout(() => {
+                        if (questionType === 'fill_blanks_mcq') {
+                            readFillBlanksMCQQuestion(card);
+                        } else if (questionText && questionText.textContent) {
+                            speak(questionText.textContent);
+                        }
+                    }, 500); // 500ms delay
+                });
+                
+                // Clear timeout on mouse leave
+                card.addEventListener('mouseleave', function() {
+                    if (hoverTimeout) {
+                        clearTimeout(hoverTimeout);
+                        hoverTimeout = null;
+                    }
+                });
+                
+                // Add focus event for keyboard navigation
+                card.addEventListener('focusin', function() {
+                    if (questionType === 'fill_blanks_mcq') {
+                        readFillBlanksMCQQuestion(card);
+                    } else if (questionText && questionText.textContent) {
+                        speak(questionText.textContent);
+                    }
+                });
+                
+                // Make question cards focusable for keyboard navigation
+                card.setAttribute('tabindex', '0');
+                card.style.outline = 'none';
+            });
+        }
+        
+        // Function to read all questions
+        function readAllQuestions() {
+            const questions = document.querySelectorAll('.question-text');
+            let index = 0;
+            
+            function readNext() {
+                if (index < questions.length) {
+                    const questionText = `Question ${index + 1}: ${questions[index].textContent}`;
+                    speak(questionText);
+                    index++;
+                    setTimeout(readNext, 3000); // Wait 3 seconds between questions
+                }
+            }
+            
+            readNext();
+         }
+         
+         // Celebration functions
+         function showCelebration() {
+             const overlay = document.getElementById('celebrationOverlay');
+             const animationDiv = document.getElementById('celebrationAnimation');
+             
+             // Load animated congratulation SVG
+             fetch('/static/gifs/congratulation.svg')
+                 .then(response => response.text())
+                 .then(svgContent => {
+                     animationDiv.innerHTML = svgContent;
+                 })
+                 .catch(error => {
+                     console.error('Error loading celebration animation:', error);
+                     // Fallback to text if SVG fails to load
+                     animationDiv.innerHTML = '<div style="font-size: 4rem; color: #FFD700;">🎉</div>';
+                 });
+             
+             overlay.style.display = 'flex';
+             createConfetti();
+             
+             // Auto-hide after 3 seconds
+             setTimeout(() => {
+                 hideCelebration();
+             }, 3000);
+         }
+         
+         function hideCelebration() {
+             const overlay = document.getElementById('celebrationOverlay');
+             overlay.style.display = 'none';
+             removeConfetti();
+         }
+         
+         function createConfetti() {
+             const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'];
+             
+             for (let i = 0; i < 50; i++) {
+                 setTimeout(() => {
+                     const confetti = document.createElement('div');
+                     confetti.className = 'confetti';
+                     confetti.style.left = Math.random() * 100 + '%';
+                     confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                     confetti.style.animationDelay = Math.random() * 3 + 's';
+                     confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                     document.body.appendChild(confetti);
+                     
+                     // Remove confetti after animation
+                     setTimeout(() => {
+                         if (confetti.parentNode) {
+                             confetti.parentNode.removeChild(confetti);
+                         }
+                     }, 5000);
+                 }, i * 100);
+             }
+         }
+         
+         function removeConfetti() {
+             const confettiElements = document.querySelectorAll('.confetti');
+             confettiElements.forEach(confetti => {
+                 if (confetti.parentNode) {
+                     confetti.parentNode.removeChild(confetti);
+                 }
+             });
+         }
+    </script>
+</body>
+</html>

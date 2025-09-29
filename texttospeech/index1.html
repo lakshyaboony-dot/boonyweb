@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Script to Video</title>
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #scriptText {
+      font-size: 24px;
+      margin-top: 50px;
+    }
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>📜 Script to Video</h1>
+
+<textarea id="scriptInput" placeholder="Enter your script here..." rows="5" style="width:100%; font-size:18px;"></textarea><br>
+<button onclick="playScript()">Play Video</button>
+
+<div id="scriptText"></div>
+
+<script>
+  function playScript() {
+    const script = document.getElementById('scriptInput').value;
+    const lines = script.split('. '); // Split by sentence
+    const scriptText = document.getElementById('scriptText');
+
+    let index = 0;
+
+    function showLine() {
+      if (index >= lines.length) return;
+
+      const line = lines[index];
+      scriptText.textContent = line;
+      
+      const utterance = new SpeechSynthesisUtterance(line);
+      utterance.onend = () => {
+        index++;
+        showLine();
+      };
+      speechSynthesis.speak(utterance);
+    }
+
+    showLine();
+  }
+</script>
+
+</body>
+</html>

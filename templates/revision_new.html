@@ -1,0 +1,1002 @@
+{% extends "base.html" %}
+{% block title %}Revision — {{ day }}{% endblock %}
+{% block content %}
+
+<div class="astra-bg">
+    <section class="revision-section">
+        <!-- Header -->
+        <div class="revision-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <img src="{{ url_for('static', filename='gifs/boony_logo.gif') }}" alt="Boony" class="logo" onerror="this.style.display='none'">
+                    <h2>Hello, {{ user_name }}!</h2>
+                </div>
+                <h1>📖 Revision — {{ day }}</h1>
+                <div class="stats-display">
+                    <div class="credits">
+                        Credits: <span id="revision-credits">{{ stats.credits_earned or 0 }}</span>
+                    </div>
+                    <div class="score">
+                        Score: <span id="best-score">{{ stats.best_score or 0 }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="revision-content">
+            <!-- Paragraph Section -->
+            <div class="paragraph-section">
+                <h3>📝 Paragraph:</h3>
+                <div class="paragraph-card">
+                    <div class="paragraph-text" id="paragraph-text">{{ paragraph or "No statements found for today." }}</div>
+                    <div class="audio-controls">
+                        <button class="btn-play" id="paragraph-toggle-btn" onclick="toggleParagraphTTS()">▶ Play Paragraph</button>
+                        <button class="btn-record" id="paragraph-complete-btn" onclick="completeParagraphSection()" disabled>✅ Complete Section (10 Credits)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transcription Section -->
+            <div class="transcription-section">
+                <h3>🗒️ Your Transcription:</h3>
+                <div class="transcription-card">
+                    <textarea id="transcription-text" placeholder="Your transcription will appear here..." readonly></textarea>
+                    <div class="recording-controls">
+                        <button class="btn-record" id="recording-toggle-btn" onclick="toggleRecording()">🎙️ Start Recording</button>
+                        <button class="btn-record" id="playback-toggle-btn" onclick="togglePlayback()" disabled>▶ Play Recording</button>
+                        <button class="btn-record" id="transcription-complete-btn" onclick="completeTranscriptionSection()" disabled>✅ Complete Section (10 Credits)</button>
+                    </div>
+                    <div class="waveform-container" id="waveform-container"></div>
+                </div>
+            </div>
+
+            <!-- Vocabulary Section (Day 7+) -->
+            {% if day_number >= 7 and vocab_list %}
+            <div class="vocabulary-section">
+                <h3>📚 Today's Vocabulary</h3>
+                <div class="vocabulary-card">
+                    <div class="vocabulary-list">
+                        {% for word, meaning, sentence in vocab_list %}
+                        <div class="vocab-item">
+                            <div class="vocab-word">• {{ word }} — {{ meaning }}</div>
+                            {% if sentence %}
+                            <div class="vocab-sentence">➡ {{ sentence }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn-save" onclick="savePDF()">📄 Save PDF</button>
+                <button class="btn-close" onclick="closeAndContinue()">✅ Close & Continue</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+// Global variables
+let mediaRecorder;
+let audioChunks = [];
+let isRecording = false;
+let recordedAudioBlob;
+let currentAudioUrl;
+let currentAudio;
+let isPlayingRecording = false;
+
+// Section completion tracking
+let sectionProgress = {
+    paragraph: false,
+    transcription: false,
+    totalCredits: 0,
+    pronunciationScore: 0
+};
+
+// Section completion functions
+function completeParagraphSection() {
+    if (!sectionProgress.paragraph) {
+        sectionProgress.paragraph = true;
+        sectionProgress.totalCredits += 10;
+        
+        // Update UI
+        document.getElementById('paragraph-complete-btn').innerHTML = '✅ Completed';
+        document.getElementById('paragraph-complete-btn').disabled = true;
+        updateCreditsDisplay();
+        
+        // Save progress to server
+        saveSectionProgress('paragraph', 10);
+        
+        alert('🎉 Paragraph section completed! +10 Credits earned!');
+    }
+}
+
+function completeTranscriptionSection() {
+    if (!sectionProgress.transcription && recordedAudioBlob) {
+        // Calculate pronunciation score
+        calculatePronunciationScore().then(score => {
+            sectionProgress.pronunciationScore = score;
+            
+            if (score >= 60) {
+                sectionProgress.transcription = true;
+                sectionProgress.totalCredits += 10;
+                
+                // Update UI
+                document.getElementById('transcription-complete-btn').innerHTML = '✅ Completed';
+                document.getElementById('transcription-complete-btn').disabled = true;
+                updateCreditsDisplay();
+                
+                // Save progress to server
+                saveSectionProgress('transcription', 10, score);
+                
+                alert(`🎉 Transcription section completed! Score: ${score}% (+10 Credits earned!)`);
+            } else {
+                alert(`❌ Pronunciation score too low: ${score}%. Minimum 60% required to complete section.`);
+            }
+        });
+    } else if (!recordedAudioBlob) {
+        alert('Please record your voice first!');
+    }
+}
+
+function updateCreditsDisplay() {
+    document.getElementById('revision-credits').textContent = sectionProgress.totalCredits;
+}
+
+function saveSectionProgress(section, credits, score = null) {
+    const data = {
+        day: '{{ day }}',
+        section: section,
+        credits: credits,
+        score: score
+    };
+    
+    fetch('/api/revision/section_complete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Section progress saved successfully');
+        } else {
+            console.error('Failed to save section progress:', data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error saving section progress:', error);
+    });
+}
+
+async function calculatePronunciationScore() {
+    if (!recordedAudioBlob) return 0;
+    
+    try {
+        // Create FormData for audio upload
+        const formData = new FormData();
+        formData.append('audio', recordedAudioBlob, 'recording.wav');
+        formData.append('original_text', document.getElementById('paragraph-text').textContent);
+        formData.append('day', '{{ day }}');
+        
+        const response = await fetch('/api/pronunciation/analyze', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            return data.score;
+        } else {
+            console.error('Pronunciation analysis failed:', data.error);
+            return 0;
+        }
+    } catch (error) {
+        console.error('Error analyzing pronunciation:', error);
+        return 0;
+    }
+}
+
+// Toggle recording functionality
+function toggleRecording() {
+    const toggleBtn = document.getElementById('recording-toggle-btn');
+    
+    if (isRecording) {
+        stopRecording();
+        toggleBtn.innerHTML = '🎙️ Start Recording';
+    } else {
+        startRecording();
+    }
+}
+
+// Audio recording functionality
+function startRecording() {
+    if (isRecording) return;
+    
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+            
+            mediaRecorder.onstop = () => {
+                recordedAudioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                transcribeAudio(recordedAudioBlob);
+                updateRecordingUI(false);
+            };
+            
+            mediaRecorder.start();
+            isRecording = true;
+            updateRecordingUI(true);
+            appendTranscription('🎙️ Recording started... Speak now.');
+            
+            // Update toggle button
+            const toggleBtn = document.getElementById('recording-toggle-btn');
+            toggleBtn.innerHTML = '⏹ Stop Recording';
+            
+            // Start waveform visualization
+            startWaveform(stream);
+        })
+        .catch(err => {
+            console.error('Error accessing microphone:', err);
+            alert('Microphone access denied. Please allow microphone access and try again.');
+        });
+}
+
+function stopRecording() {
+    if (!isRecording || !mediaRecorder) return;
+    
+    appendTranscription('⏹ Stopping recording...');
+    mediaRecorder.stop();
+    isRecording = false;
+    
+    // Stop all tracks
+    if (mediaRecorder.stream) {
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    }
+    
+    stopWaveform();
+    
+    // Enable transcription completion button after recording
+    setTimeout(() => {
+        if (recordedAudioBlob) {
+            document.getElementById('transcription-complete-btn').disabled = false;
+        }
+    }, 1000);
+}
+
+function updateRecordingUI(recording) {
+    const playBtn = document.getElementById('playback-toggle-btn');
+    
+    if (!recording && recordedAudioBlob) {
+        playBtn.disabled = false;
+    }
+}
+
+// Toggle playback functionality
+function togglePlayback() {
+    const toggleBtn = document.getElementById('playback-toggle-btn');
+    
+    if (isPlayingRecording) {
+        stopPlayback();
+        toggleBtn.innerHTML = '▶ Play Recording';
+        isPlayingRecording = false;
+    } else {
+        playRecording();
+    }
+}
+
+function playRecording() {
+    if (!recordedAudioBlob) {
+        appendTranscription('❌ No recording available to play.');
+        return;
+    }
+    
+    if (currentAudioUrl) {
+        URL.revokeObjectURL(currentAudioUrl);
+    }
+    
+    currentAudioUrl = URL.createObjectURL(recordedAudioBlob);
+    currentAudio = new Audio(currentAudioUrl);
+    
+    currentAudio.onended = () => {
+        const toggleBtn = document.getElementById('playback-toggle-btn');
+        toggleBtn.innerHTML = '▶ Play Recording';
+        isPlayingRecording = false;
+        appendTranscription('✅ Playback completed.');
+    };
+    
+    currentAudio.onerror = () => {
+        const toggleBtn = document.getElementById('playback-toggle-btn');
+        toggleBtn.innerHTML = '▶ Play Recording';
+        isPlayingRecording = false;
+        appendTranscription('❌ Playback failed.');
+    };
+    
+    currentAudio.play().then(() => {
+        const toggleBtn = document.getElementById('playback-toggle-btn');
+        toggleBtn.innerHTML = '⏸ Stop Playback';
+        isPlayingRecording = true;
+        appendTranscription('🔊 Playing recording...');
+    }).catch(err => {
+        console.error('Playback failed:', err);
+        appendTranscription('❌ Playback failed.');
+    });
+}
+
+function stopPlayback() {
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        appendTranscription('⏹ Playback stopped.');
+    }
+}
+
+// Transcription functionality
+function transcribeAudio(audioBlob) {
+    appendTranscription('📝 Transcribing...');
+    
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.wav');
+    
+    fetch('/api/transcribe', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            appendTranscription(data.transcription);
+        } else {
+            appendTranscription('[Transcription failed: ' + (data.error || 'Unknown error') + ']');
+        }
+    })
+    .catch(error => {
+        console.error('Transcription error:', error);
+        appendTranscription('[Transcription failed: Network error]');
+    });
+}
+
+function appendTranscription(text) {
+    const textarea = document.getElementById('transcription-text');
+    const currentText = textarea.value;
+    textarea.value = currentText + (currentText ? '\n' : '') + text;
+    textarea.scrollTop = textarea.scrollHeight;
+}
+
+// Text-to-speech functionality
+let currentUtterance = null;
+let isPlaying = false;
+
+// Listen for global preference changes
+window.addEventListener('boony:prefs', (e) => {
+    // If audio is currently playing and preferences changed, we could restart with new settings
+    // For now, just log the change
+    console.log('Preferences updated:', e.detail);
+});
+
+// Listen for global mute changes
+window.addEventListener('boony:mute', (e) => {
+    const isMuted = e.detail.muted;
+    if (isMuted && isPlaying) {
+        // Stop current audio if muted
+        stopAllAudio();
+    }
+});
+
+function toggleParagraphTTS() {
+    const toggleBtn = document.getElementById('paragraph-toggle-btn');
+    
+    if (isPlaying) {
+        stopAllAudio();
+        toggleBtn.innerHTML = '▶ Play Paragraph';
+        isPlaying = false;
+    } else {
+        playParagraphTTS();
+        
+        // Enable paragraph completion button after playing
+        document.getElementById('paragraph-complete-btn').disabled = false;
+    }
+}
+
+function playParagraphTTS() {
+    stopAllAudio();
+    const paragraphText = document.getElementById('paragraph-text').textContent;
+    const toggleBtn = document.getElementById('paragraph-toggle-btn');
+    
+    if (paragraphText && !paragraphText.toLowerCase().includes('no statements')) {
+        speakText(paragraphText);
+        toggleBtn.innerHTML = '⏸ Stop';
+        isPlaying = true;
+    }
+}
+
+function speakText(text) {
+    if ('speechSynthesis' in window) {
+        // Check if audio is muted from global preferences
+        const prefs = window.getPrefs ? window.getPrefs() : { voice: 'female', accent: 'indian', lang: 'hinglish' };
+        const isMuted = localStorage.getItem('boony_mute') === 'true';
+        
+        if (isMuted) {
+            console.log('Audio is muted, not playing TTS');
+            return;
+        }
+        
+        currentUtterance = new SpeechSynthesisUtterance(text);
+        currentUtterance.rate = 0.8;
+        currentUtterance.pitch = 1;
+        currentUtterance.volume = 1;
+        
+        // Use voice preference from global settings
+        const voices = speechSynthesis.getVoices();
+        let selectedVoice = null;
+        
+        if (prefs.voice === 'male') {
+            // Try to find male voice based on accent preference
+            selectedVoice = voices.find(voice => 
+                (voice.name.toLowerCase().includes('male') || 
+                 voice.name.toLowerCase().includes('man') ||
+                 voice.gender === 'male') &&
+                (prefs.accent === 'indian' ? 
+                 (voice.lang.includes('en-IN') || voice.name.toLowerCase().includes('indian')) :
+                 voice.lang.includes('en-US') || voice.lang.includes('en-GB'))
+            );
+        } else {
+            // Try to find female voice based on accent preference
+            selectedVoice = voices.find(voice => 
+                (voice.name.toLowerCase().includes('female') || 
+                 voice.name.toLowerCase().includes('woman') ||
+                 voice.gender === 'female') &&
+                (prefs.accent === 'indian' ? 
+                 (voice.lang.includes('en-IN') || voice.name.toLowerCase().includes('indian')) :
+                 voice.lang.includes('en-US') || voice.lang.includes('en-GB'))
+            );
+        }
+        
+        // Fallback to any voice of preferred gender if accent-specific not found
+        if (!selectedVoice) {
+            if (prefs.voice === 'male') {
+                selectedVoice = voices.find(voice => 
+                    voice.name.toLowerCase().includes('male') || 
+                    voice.name.toLowerCase().includes('man') ||
+                    voice.gender === 'male'
+                );
+            } else {
+                selectedVoice = voices.find(voice => 
+                    voice.name.toLowerCase().includes('female') || 
+                    voice.name.toLowerCase().includes('woman') ||
+                    voice.gender === 'female'
+                );
+            }
+        }
+        
+        if (selectedVoice) {
+            currentUtterance.voice = selectedVoice;
+        }
+        
+        // Notify global UI about audio playing
+        window.dispatchEvent(new CustomEvent('boony:audio', { 
+            detail: { playing: true } 
+        }));
+        
+        // Auto-stop when speech ends
+        currentUtterance.onend = function() {
+            const toggleBtn = document.getElementById('paragraph-toggle-btn');
+            toggleBtn.innerHTML = '▶ Play Paragraph';
+            isPlaying = false;
+            currentUtterance = null;
+            
+            // Notify global UI that audio stopped
+            window.dispatchEvent(new CustomEvent('boony:audio', { 
+                detail: { playing: false } 
+            }));
+        };
+        
+        // Handle speech errors
+        currentUtterance.onerror = function() {
+            const toggleBtn = document.getElementById('paragraph-toggle-btn');
+            toggleBtn.innerHTML = '▶ Play Paragraph';
+            isPlaying = false;
+            currentUtterance = null;
+            
+            // Notify global UI that audio stopped
+            window.dispatchEvent(new CustomEvent('boony:audio', { 
+                detail: { playing: false } 
+            }));
+        };
+        
+        speechSynthesis.speak(currentUtterance);
+    }
+}
+
+function stopAllAudio() {
+    if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+    }
+    const toggleBtn = document.getElementById('paragraph-toggle-btn');
+    if (toggleBtn) {
+        toggleBtn.innerHTML = '▶ Play Paragraph';
+    }
+    isPlaying = false;
+    currentUtterance = null;
+    
+    // Notify global UI that audio stopped
+    window.dispatchEvent(new CustomEvent('boony:audio', { 
+        detail: { playing: false } 
+    }));
+}
+
+// Waveform visualization
+let waveformCanvas;
+let waveformContext;
+let animationId;
+let analyser;
+let dataArray;
+
+function startWaveform(stream) {
+    const container = document.getElementById('waveform-container');
+    container.innerHTML = '<canvas id="waveform-canvas" width="400" height="100"></canvas>';
+    
+    waveformCanvas = document.getElementById('waveform-canvas');
+    waveformContext = waveformCanvas.getContext('2d');
+    
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioContext.createMediaStreamSource(stream);
+    analyser = audioContext.createAnalyser();
+    
+    analyser.fftSize = 256;
+    const bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+    
+    source.connect(analyser);
+    
+    drawWaveform();
+}
+
+function drawWaveform() {
+    animationId = requestAnimationFrame(drawWaveform);
+    
+    analyser.getByteFrequencyData(dataArray);
+    
+    waveformContext.fillStyle = '#f0f0f0';
+    waveformContext.fillRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+    
+    const barWidth = (waveformCanvas.width / dataArray.length) * 2.5;
+    let barHeight;
+    let x = 0;
+    
+    for (let i = 0; i < dataArray.length; i++) {
+        barHeight = (dataArray[i] / 255) * waveformCanvas.height;
+        
+        waveformContext.fillStyle = `rgb(${barHeight + 100}, 50, 150)`;
+        waveformContext.fillRect(x, waveformCanvas.height - barHeight, barWidth, barHeight);
+        
+        x += barWidth + 1;
+    }
+}
+
+function stopWaveform() {
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+    }
+    const container = document.getElementById('waveform-container');
+    container.innerHTML = '';
+}
+
+// PDF generation functionality
+function savePDF() {
+    const transcriptionText = document.getElementById('transcription-text').value;
+    const paragraphText = document.getElementById('paragraph-text').textContent;
+    
+    const pdfData = {
+        day: '{{ day }}',
+        user_name: '{{ user_name }}',
+        paragraph: paragraphText,
+        transcription: transcriptionText,
+        date: new Date().toLocaleDateString()
+    };
+    
+    fetch('/api/generate-pdf', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(pdfData)
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `{{ day }}_revision.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        alert('PDF saved successfully!');
+    })
+    .catch(error => {
+        console.error('PDF generation error:', error);
+        alert('PDF could not be saved.');
+    });
+}
+
+// Navigation functionality
+function closeAndContinue() {
+    stopAllAudio();
+    if (currentAudioUrl) {
+        URL.revokeObjectURL(currentAudioUrl);
+    }
+    
+    // Check if minimum requirements are met
+    if (!sectionProgress.paragraph || !sectionProgress.transcription) {
+        alert('❌ Please complete both sections before continuing!');
+        return;
+    }
+    
+    if (sectionProgress.pronunciationScore < 60) {
+        alert(`❌ Minimum 60% pronunciation score required to progress. Your score: ${sectionProgress.pronunciationScore}%`);
+        return;
+    }
+    
+    // Progress to next day before returning to dashboard
+    fetch('/api/progress_to_next_day', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Successfully progressed to:', data.new_day);
+        } else {
+            console.warn('Day progression failed:', data.error);
+        }
+        // Redirect to dashboard regardless of API success/failure
+        window.location.href = '/dashboard';
+    })
+    .catch(error => {
+        console.error('Error progressing to next day:', error);
+        // Redirect to dashboard even if API call fails
+        window.location.href = '/dashboard';
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Load voices for speech synthesis
+    if ('speechSynthesis' in window) {
+        speechSynthesis.getVoices();
+    }
+    
+    // Auto-save transcription
+    const transcriptionTextarea = document.getElementById('transcription-text');
+    transcriptionTextarea.addEventListener('input', function() {
+        sessionStorage.setItem('revision_transcription_{{ day }}', this.value);
+    });
+    
+    // Load saved transcription
+    const savedTranscription = sessionStorage.getItem('revision_transcription_{{ day }}');
+    if (savedTranscription) {
+        transcriptionTextarea.value = savedTranscription;
+    }
+});
+</script>
+
+<style>
+.revision-section {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+
+.revision-header {
+    background: linear-gradient(135deg, #210033, #4a0e4e);
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    color: white;
+}
+
+.header-content {
+    text-align: center;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
+.logo-section h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #fff;
+}
+
+.revision-header h1 {
+    margin: 15px 0;
+    font-size: 32px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.stats-display {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+.stats-display > div {
+    background: rgba(255,255,255,0.1);
+    padding: 10px 20px;
+    border-radius: 25px;
+    backdrop-filter: blur(10px);
+}
+
+.revision-content {
+    background: var(--bg-secondary);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.paragraph-section,
+.transcription-section,
+.vocabulary-section {
+    margin-bottom: 40px;
+}
+
+.paragraph-section h3,
+.transcription-section h3,
+.vocabulary-section h3 {
+    color: #4B0082;
+    font-size: 22px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.paragraph-card,
+.transcription-card,
+.vocabulary-card {
+    background: var(--bg-primary);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid #a855f7;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.paragraph-text {
+    font-size: 18px;
+    line-height: 1.8;
+    color: #2c3e50;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    text-align: justify;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+}
+
+.audio-controls,
+.recording-controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.btn-play,
+.btn-stop,
+.btn-record,
+.btn-save,
+.btn-close {
+    background: linear-gradient(135deg, #a855f7, #9333ea);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.btn-play:hover,
+.btn-stop:hover,
+.btn-record:hover,
+.btn-save:hover,
+.btn-close:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+}
+
+.btn-play:disabled,
+.btn-stop:disabled,
+.btn-record:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+#transcription-text {
+    width: 100%;
+    min-height: 200px;
+    padding: 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    resize: vertical;
+    background: white;
+}
+
+#transcription-text:focus {
+    outline: none;
+    border-color: #a855f7;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+}
+
+.waveform-container {
+    margin-top: 15px;
+    text-align: center;
+}
+
+#waveform-canvas {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: #f0f0f0;
+}
+
+.vocabulary-list {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.vocab-item {
+    margin-bottom: 15px;
+    padding: 15px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border-left: 4px solid #a855f7;
+}
+
+.vocab-word {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.vocab-sentence {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-left: 20px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #e0e0e0;
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-save:hover {
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btn-close {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-close:hover {
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .revision-section {
+        padding: 10px;
+    }
+    
+    .revision-header {
+        padding: 20px;
+    }
+    
+    .revision-header h1 {
+        font-size: 24px;
+    }
+    
+    .logo-section {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .stats-display {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .revision-content {
+        padding: 20px;
+    }
+    
+    .audio-controls,
+    .recording-controls,
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn-play,
+    .btn-stop,
+    .btn-record,
+    .btn-save,
+    .btn-close {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    #waveform-canvas {
+        width: 100%;
+        max-width: 350px;
+    }
+}
+
+@media (max-width: 480px) {
+    .paragraph-text {
+        font-size: 16px;
+        padding: 15px;
+    }
+    
+    .paragraph-section h3,
+    .transcription-section h3,
+    .vocabulary-section h3 {
+        font-size: 18px;
+    }
+    
+    .paragraph-card,
+    .transcription-card,
+    .vocabulary-card {
+        padding: 15px;
+    }
+}
+</style>
+
+{% endblock %}

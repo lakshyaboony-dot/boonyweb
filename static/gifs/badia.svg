@@ -1,0 +1,100 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2ECC71;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#27AE60;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E8449;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/> 
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background burst -->
+  <g transform="translate(100,100)">
+    <g>
+      <line x1="0" y1="-60" x2="0" y2="-80" stroke="url(#greenGradient)" stroke-width="3" opacity="0.7">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="4s" repeatCount="indefinite"/>
+      </line>
+      <line x1="42" y1="-42" x2="56" y2="-56" stroke="url(#greenGradient)" stroke-width="3" opacity="0.7">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="4s" repeatCount="indefinite"/>
+      </line>
+      <line x1="60" y1="0" x2="80" y2="0" stroke="url(#greenGradient)" stroke-width="3" opacity="0.7">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="4s" repeatCount="indefinite"/>
+      </line>
+      <line x1="42" y1="42" x2="56" y2="56" stroke="url(#greenGradient)" stroke-width="3" opacity="0.7">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="4s" repeatCount="indefinite"/>
+      </line>
+      <line x1="0" y1="60" x2="0" y2="80" stroke="url(#greenGradient)" stroke-width="3" opacity="0.7">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="4s" repeatCount="indefinite"/>
+      </line>
+      <line x1="-42" y1="42" x2="-56" y2="56" stroke="url(#greenGradient)" stroke-width="3" opacity="0.7">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="4s" repeatCount="indefinite"/>
+      </line>
+      <line x1="-60" y1="0" x2="-80" y2="0" stroke="url(#greenGradient)" stroke-width="3" opacity="0.7">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="4s" repeatCount="indefinite"/>
+      </line>
+      <line x1="-42" y1="-42" x2="-56" y2="-56" stroke="url(#greenGradient)" stroke-width="3" opacity="0.7">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="4s" repeatCount="indefinite"/>
+      </line>
+    </g>
+  </g>
+  
+  <!-- Thumbs up -->
+  <g transform="translate(100,90)">
+    <!-- Thumb -->
+    <ellipse cx="0" cy="-15" rx="8" ry="20" fill="#FDBCB4" filter="url(#glow)">
+      <animateTransform attributeName="transform" type="scale" values="1;1.1;1" dur="1.5s" repeatCount="indefinite"/>
+    </ellipse>
+    
+    <!-- Hand base -->
+    <rect x="-12" y="5" width="24" height="20" rx="8" fill="#FDBCB4">
+      <animate attributeName="y" values="5;3;5" dur="1.5s" repeatCount="indefinite"/>
+    </rect>
+    
+    <!-- Fingers -->
+    <rect x="-10" y="25" width="4" height="12" rx="2" fill="#FDBCB4"/>
+    <rect x="-3" y="25" width="4" height="12" rx="2" fill="#FDBCB4"/>
+    <rect x="4" y="25" width="4" height="12" rx="2" fill="#FDBCB4"/>
+    <rect x="11" y="25" width="4" height="12" rx="2" fill="#FDBCB4"/>
+  </g>
+  
+  <!-- Sparkles -->
+  <g>
+    <polygon points="60,50 62,56 68,56 63,60 65,66 60,62 55,66 57,60 52,56 58,56" fill="#FFD700">
+      <animateTransform attributeName="transform" type="rotate" values="0 60 58;360 60 58" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+    </polygon>
+    
+    <polygon points="140,60 142,66 148,66 143,70 145,76 140,72 135,76 137,70 132,66 138,66" fill="#FFD700">
+      <animateTransform attributeName="transform" type="rotate" values="360 140 68;0 140 68" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+    </polygon>
+    
+    <polygon points="80,40 82,46 88,46 83,50 85,56 80,52 75,56 77,50 72,46 78,46" fill="#FFD700">
+      <animateTransform attributeName="transform" type="scale" values="1;1.3;1" dur="1.8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="1.8s" repeatCount="indefinite"/>
+    </polygon>
+    
+    <polygon points="120,45 122,51 128,51 123,55 125,61 120,57 115,61 117,55 112,51 118,51" fill="#FFD700">
+      <animateTransform attributeName="transform" type="scale" values="1.2;1;1.2" dur="2.2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;0.4;0.8" dur="2.2s" repeatCount="indefinite"/>
+    </polygon>
+  </g>
+  
+  <!-- Text -->
+  <text x="100" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="url(#greenGradient)" filter="url(#glow)">
+    Badia!
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Hindi subtitle -->
+  <text x="100" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">
+    बढ़िया!
+    <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.5s" repeatCount="indefinite"/>
+  </text>
+</svg>

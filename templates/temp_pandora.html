@@ -1,0 +1,1354 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Login | Boony</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Load external CSS -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="icon" href="/static/icons/app.ico" type="image/x-icon">
+    <style>
+        /* Theme Variables */
+        :root {
+            --bg-primary: #210033;
+            --bg-secondary: rgba(33, 0, 51, 0.95);
+            --text-primary: white;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --accent-color: #ff6b35;
+            --accent-shadow: rgba(255, 107, 53, 0.5);
+            --accent-glow: rgba(255, 107, 53, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --hover-bg: rgba(255, 107, 53, 0.2);
+            --surface-secondary: rgba(255, 255, 255, 0.1);
+            --surface-hover: rgba(255, 255, 255, 0.2);
+            --error-color: #dc3545;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+        }
+        
+        [data-theme="light"] {
+            /* Light Theme (Light backgrounds) */
+            --bg-primary: #ffffff;
+            --bg-secondary: rgba(248, 249, 250, 0.95);
+            --text-primary: #212529;
+            --text-secondary: rgba(33, 37, 41, 0.8);
+            --text-muted: rgba(33, 37, 41, 0.6);
+            --accent-color: #007bff;
+            --accent-shadow: rgba(0, 123, 255, 0.5);
+            --accent-glow: rgba(0, 123, 255, 0.8);
+            --border-color: rgba(33, 37, 41, 0.1);
+            --hover-bg: rgba(0, 123, 255, 0.1);
+            --surface-secondary: rgba(33, 37, 41, 0.1);
+            --surface-hover: rgba(33, 37, 41, 0.2);
+            --error-color: #dc3545;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+        }
+        
+        [data-theme="dark"] {
+            /* Dark Theme (Dark grey based) */
+            --bg-primary: #1a1a1a;
+            --bg-secondary: rgba(42, 42, 42, 0.95);
+            --text-primary: #e9ecef;
+            --text-secondary: rgba(233, 236, 239, 0.8);
+            --text-muted: rgba(233, 236, 239, 0.6);
+            --accent-color: #6c757d;
+            --accent-shadow: rgba(108, 117, 125, 0.5);
+            --accent-glow: rgba(108, 117, 125, 0.8);
+            --border-color: rgba(233, 236, 239, 0.1);
+            --hover-bg: rgba(108, 117, 125, 0.2);
+            --surface-secondary: rgba(233, 236, 239, 0.1);
+            --surface-hover: rgba(233, 236, 239, 0.2);
+            --error-color: #dc3545;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+        }
+        
+        /* Global Body Styles */
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Professional Navigation Styles */
+        .professional-nav {
+            background: var(--bg-secondary);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .brand-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .brand-logo {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .nav-avatars {
+            display: flex;
+            gap: 8px;
+        }
+
+        .avatar-img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .avatar-img:hover {
+            transform: scale(1.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .avatar-img.active {
+            border-color: #ff6b35;
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
+        }
+
+        .nav-menu {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .signup-btn {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border: none;
+            font-weight: 600;
+        }
+
+        .signup-btn:hover {
+            background: linear-gradient(135deg, #f7931e, #ff6b35);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 0, 0, 0.2);
+        }
+
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle::after {
+            content: '▼';
+            margin-left: 5px;
+            font-size: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown:hover .dropdown-toggle::after {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: rgba(33, 0, 51, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            min-width: 250px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+            list-style: none;
+            padding: 10px 0;
+            margin: 0;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-link {
+            display: block;
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            padding-left: 25px;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 10px 0;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            padding: 15px 20px;
+        }
+
+        .setting-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .setting-group:last-child {
+            margin-bottom: 0;
+            justify-content: center;
+        }
+
+        .setting-group label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            min-width: 60px;
+        }
+
+        .setting-select {
+            padding: 6px 10px;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(70, 18, 95, 0.9);
+            color: white;
+            border-radius: 6px;
+            backdrop-filter: blur(10px);
+            min-width: 100px;
+        }
+
+        .mute-btn {
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(70, 18, 95, 0.9);
+            color: white;
+            border-radius: 6px;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mute-btn:hover {
+            background: rgba(255, 107, 53, 0.3);
+        }
+
+        /* Bottom Bar Styles */
+        .bottombar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .bottom-left {
+            flex: 1;
+        }
+
+        .bottom-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .bottom-btn {
+            background: var(--hover-bg);
+            border: 1px solid var(--accent-color);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        .bottom-btn:hover {
+            background: var(--accent-color);
+            transform: scale(1.05);
+        }
+
+        .mute-btn[aria-pressed="true"] {
+            background: var(--accent-color);
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .mobile-menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 15px;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .mobile-menu-toggle {
+                display: flex;
+            }
+
+            .nav-brand {
+                gap: 15px;
+            }
+
+            .brand-link {
+                font-size: 18px;
+            }
+
+            .brand-logo {
+                width: 30px;
+                height: 30px;
+            }
+
+            .avatar-img {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        /* Legacy styles removed - using professional navigation now */
+
+        /* Professional Avatar Styles */
+        .nav-avatars {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .nav-avatars img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            background: #fff;
+            object-fit: cover;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .nav-avatars img:hover {
+            transform: scale(1.1);
+            border-color: var(--border-color);
+        }
+        .nav-avatars img.active {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-shadow);
+            transform: scale(1.06);
+        }
+        .nav-avatars img.swap {
+            animation: popIn .28s ease;
+        }
+        @keyframes popIn {
+            from { transform: scale(.85); opacity: .6; }
+            to   { transform: scale(1.06); opacity: 1; }
+        }
+        .nav-avatars img.speaking {
+            border-color: var(--accent-color);
+            transform: scale(1.08);
+            animation: avatarPulse 1.5s infinite;
+        }
+        @keyframes avatarPulse {
+            0%, 100% { 
+                transform: scale(1.08); 
+                box-shadow: 0 0 15px var(--accent-shadow);
+            }
+            50% { 
+                transform: scale(1.15); 
+                box-shadow: 0 0 25px var(--accent-glow);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Professional Navigation -->
+    <nav class="professional-nav">
+        <div class="nav-container">
+            <!-- Brand Section -->
+            <div class="nav-brand">
+                <a href="/" class="brand-link">
+                    <img id="navLogo" alt="Logo" src="/static/icons/app.jpeg" class="brand-logo" />
+                    <span class="brand-text">Boony</span>
+                </a>
+                <!-- Avatar Section -->
+                <div class="nav-avatars">
+                    <img id="navAvatarMale" data-voice="male" src="/static/avatars/boony_male_idle.png" alt="Male" title="Male Voice" class="avatar-img" />
+                    <img id="navAvatarFemale" data-voice="female" src="/static/avatars/boony_female_idle.png" alt="Female" title="Female Voice" class="avatar-img" />
+                </div>
+            </div>
+
+            <!-- Main Navigation Menu -->
+            <div class="nav-menu">
+                <ul class="nav-links">
+                    <li><a href="/" class="nav-link">🏠 Home</a></li>
+                    <li><a href="/about" class="nav-link">ℹ️ About Us</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="nav-link dropdown-toggle">⚙️ Settings</a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <div class="settings-panel">
+                                    <div class="setting-group">
+                                        <label>🎨 Theme:</label>
+                                        <select id="pref-theme" class="setting-select">
+                                            <option value="light">☀️ Light (Blue Fonts)</option>
+                                            <option value="dark">🌙 Dark</option>
+                                            <option value="vibrant">💜 Vibrant (Random)</option>
+                                            <option value="dynamic">🎲 Dynamic (Random)</option>
+                                        </select>
+                                    </div>
+                                    <div class="setting-group">
+                                        <label>🎤 Voice:</label>
+                                        <select id="pref-voice" class="setting-select">
+                                            <option value="male">👨 Male</option>
+                                            <option value="female">👩 Female</option>
+                                        </select>
+                                    </div>
+                                    <div class="setting-group">
+                                        <label>🗣️ Language:</label>
+                                        <select id="pref-lang" class="setting-select">
+                                            <option value="hinglish">Hinglish</option>
+                                            <option value="english">English</option>
+                                        </select>
+                                    </div>
+                                    <div class="setting-group">
+                                        <label>🌍 Accent:</label>
+                                        <select id="pref-accent" class="setting-select">
+                                            <option value="hi-IN">🇮🇳 Indian</option>
+                                            <option value="en-US">🇺🇸 American</option>
+                                        </select>
+                                    </div>
+                                    <div class="setting-group">
+                                        <label>🔧 Mode:</label>
+                                        <select id="pref-mode" class="setting-select" title="TTS Mode">
+                                            <option value="auto">Auto</option>
+                                            <option value="online">Online</option>
+                                            <option value="offline">Offline</option>
+                                        </select>
+                                    </div>
+
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                    
+                        <li class="dropdown">
+                            <a href="#" class="nav-link dropdown-toggle">🔑 Login</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="/login" class="dropdown-link">👤 User Login</a></li>
+                                <li><a href="#admin-login" class="dropdown-link">👨‍💼 Admin Login</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="/signup/step1" class="nav-link signup-btn">📝 Sign Up</a></li>
+                    
+                </ul>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <div class="mobile-menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container page">
+        
+
+<div class="astra-bg" style="min-height:100vh; display:flex; align-items:center; justify-content:center;">
+    <div class="card" style="max-width:440px; width:100%; text-align:center;">
+
+        <h2 style="margin-bottom:10px;" id="loginTitle">🔑 Login</h2>
+        
+        <!-- AI Guide Message -->
+        
+        <div class="guide-message" style="background: var(--accent-color); color: white; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; text-align: left;">
+            <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 18px; margin-right: 8px;">🤖</span>
+                <strong>Boony Guide</strong>
+            </div>
+            <div>Apne credentials enter karke English learning journey continue karein!</div>
+        </div>
+        
+
+        <form method="POST" id="login-form">
+            <input class="input" name="username" id="usernameInput" placeholder="User ID / Username / Email" required>
+            <small class="hint" id="usernameHint">👉 Apna User ID ya Email daalo (Enter your User ID or Email)</small>
+            <div style="height:12px"></div>
+
+            <input class="input" type="password" name="password" id="passwordInput" placeholder="Password" required>
+            <small class="hint" id="passwordHint">👉 Password type karo (Enter your password)</small>
+            <div style="height:16px"></div>
+
+            <button class="btn-astra" type="submit" id="loginButton">🚀 Login</button>
+        </form>
+
+        
+
+        <!-- Forgot Password -->
+        <div style="margin-top:16px;">
+            <a href="/forgot-password" class="forgot-link" id="forgotPasswordLink">❓ Forgot Password?</a>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .hint {
+        display: block;
+        font-size: 13px;
+        color: var(--text-secondary);
+        text-align: left;
+        margin-top: 4px;
+    }
+
+    .forgot-link {
+        font-size: 14px;
+        color: var(--accent-color); /* Lighter, more visible color */
+        text-decoration: underline;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .forgot-link:hover {
+        color: var(--accent-color); /* Even lighter on hover */
+        opacity: 0.8;
+    }
+</style>
+
+<script>
+    // Bilingual text content
+    const loginTexts = {
+        hinglish: {
+            title: "🔑 Login",
+            usernamePlaceholder: "User ID / Username / Email",
+            usernameHint: "👉 Apna User ID ya Email daalo",
+            passwordPlaceholder: "Password", 
+            passwordHint: "👉 Password type karo",
+            loginButton: "🚀 Login",
+            forgotPassword: "❓ Password bhool gaye?"
+        },
+        english: {
+            title: "🔑 Login",
+            usernamePlaceholder: "User ID / Username / Email",
+            usernameHint: "👉 Enter your User ID or Email",
+            passwordPlaceholder: "Password",
+            passwordHint: "👉 Enter your password", 
+            loginButton: "🚀 Login",
+            forgotPassword: "❓ Forgot Password?"
+        }
+    };
+
+    // TTS and audio handling
+    const currentAudios = new Set();
+    let isMuted = (localStorage.getItem('boony.muted') === 'true');
+    
+    window.addEventListener('boony:mute', (e) => { 
+        isMuted = !!(e.detail && e.detail.muted); 
+        if (isMuted) stopAllAudio(); 
+    });
+
+    // Use global getPrefs function from base.html
+    // window.getPrefs is available globally
+
+    function mapToMsVoice(p) { 
+        if (p.accent === 'en-US') return p.voice === 'female' ? 'en-US-JennyNeural' : 'en-US-GuyNeural'; 
+        return p.voice === 'female' ? 'en-IN-KavyaNeural' : 'hi-IN-PrabhatNeural'; 
+    }
+
+    function TTS_ENDPOINT(text) { 
+        const p = window.getPrefs && window.getPrefs() || {}; 
+        const qs = new URLSearchParams({
+            text, 
+            voice: p.voice, 
+            accent: p.accent, 
+            lang: p.lang, 
+            voice_name: mapToMsVoice(p), 
+            mode: p.mode
+        }); 
+        return `/tts?${qs.toString()}`; 
+    }
+
+    function stopAllAudio() { 
+        currentAudios.forEach(a => {
+            try { a.pause(); a.src = ''; } catch (e) {} 
+            currentAudios.delete(a); 
+        }); 
+        try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: false } })); } catch (e) {} 
+    }
+
+    async function speak(text) { 
+        if (!text || isMuted) return; 
+        stopAllAudio(); 
+        try { 
+            const a = new Audio(TTS_ENDPOINT(text)); 
+            currentAudios.add(a); 
+            a.addEventListener('ended', () => currentAudios.delete(a), { once: true }); 
+            a.addEventListener('error', () => currentAudios.delete(a), { once: true }); 
+            try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: true } })); } catch (e) {} 
+            await a.play(); 
+        } catch (e) {} 
+    }
+
+    // Update UI based on language preference
+    function updateLoginUI() {
+        const lang = (window.getPrefs && window.getPrefs().lang) || 'hinglish';
+        const texts = loginTexts[lang] || loginTexts.hinglish;
+        
+        // Update text elements
+        const titleEl = document.getElementById('loginTitle');
+        const usernameInput = document.getElementById('usernameInput');
+        const usernameHint = document.getElementById('usernameHint');
+        const passwordInput = document.getElementById('passwordInput');
+        const passwordHint = document.getElementById('passwordHint');
+        const loginButton = document.getElementById('loginButton');
+        const forgotLink = document.getElementById('forgotPasswordLink');
+        
+        if (titleEl) titleEl.textContent = texts.title;
+        if (usernameInput) usernameInput.placeholder = texts.usernamePlaceholder;
+        if (usernameHint) usernameHint.textContent = texts.usernameHint;
+        if (passwordInput) passwordInput.placeholder = texts.passwordPlaceholder;
+        if (passwordHint) passwordHint.textContent = texts.passwordHint;
+        if (loginButton) loginButton.textContent = texts.loginButton;
+        if (forgotLink) forgotLink.textContent = texts.forgotPassword;
+    }
+
+    // Add click handlers for TTS
+    function addTTSHandlers() {
+        const titleEl = document.getElementById('loginTitle');
+        const usernameHint = document.getElementById('usernameHint');
+        const passwordHint = document.getElementById('passwordHint');
+        const loginButton = document.getElementById('loginButton');
+        const forgotLink = document.getElementById('forgotPasswordLink');
+
+        if (titleEl) {
+            titleEl.style.cursor = 'pointer';
+            titleEl.addEventListener('click', () => speak(titleEl.textContent));
+        }
+        
+        if (usernameHint) {
+            usernameHint.style.cursor = 'pointer';
+            usernameHint.addEventListener('click', () => speak(usernameHint.textContent));
+        }
+        
+        if (passwordHint) {
+            passwordHint.style.cursor = 'pointer';
+            passwordHint.addEventListener('click', () => speak(passwordHint.textContent));
+        }
+        
+        if (loginButton) {
+            loginButton.addEventListener('click', () => speak(loginButton.textContent));
+        }
+        
+        if (forgotLink) {
+            forgotLink.addEventListener('click', () => speak(forgotLink.textContent));
+        }
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', () => {
+        updateLoginUI();
+        addTTSHandlers();
+    });
+
+    // Setup guide message TTS
+    function setupGuideMessageTTS() {
+        const guideMessage = document.querySelector('.guide-message');
+        if (guideMessage) {
+            guideMessage.style.cursor = 'pointer';
+            guideMessage.addEventListener('click', () => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            });
+            
+            // Auto-speak guide message on page load
+            setTimeout(() => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            }, 1000);
+        }
+    }
+
+    // Initialize guide TTS on page load
+    window.addEventListener('load', () => {
+        setupGuideMessageTTS();
+    });
+
+    // React to preference changes from base template
+    window.addEventListener('boony:prefs', (e) => {
+        const { lang } = e.detail || {};
+        if (lang) {
+            updateLoginUI();
+            addTTSHandlers(); // Re-add handlers with new text
+            setupGuideMessageTTS(); // Re-setup guide message TTS
+        }
+    });
+</script>
+
+
+    </div>
+
+    <!-- Bottom bar: Stars and Controls -->
+    <div class="bottombar">
+        <div class="bottom-left">
+            🌟 Star of the Day: harshita
+            &nbsp;|&nbsp;
+            🏆 Star of the Week: harshita
+        </div>
+        <div class="bottom-right">
+            <button id="globalMuteBtn" class="bottom-btn mute-btn" aria-pressed="false" title="Sound">🔊</button>
+            <button id="helpBtn" class="bottom-btn help-btn" title="Help">❓</button>
+        </div>
+    </div>
+
+<script>
+    (function(){
+        const store = window.localStorage;
+        const els = {
+            accent: null,
+            lang: null,
+            mode: null,
+            theme: null,
+            muteBtn: null,
+            helpBtn: null,
+            avMale: null,
+            avFemale: null
+        };
+        function loadPrefs(){
+            return {
+                voice: store.getItem('boony.voice') || 'male',
+                accent: store.getItem('boony.accent') || 'hi-IN',
+                lang: store.getItem('boony.lang') || 'hinglish',
+                mode: store.getItem('boony.mode') || 'auto',
+                theme: store.getItem('boony.theme') || 'auto'
+            };
+        }
+        function savePrefs(p){
+            store.setItem('boony.voice', p.voice);
+            store.setItem('boony.accent', p.accent);
+            store.setItem('boony.lang', p.lang);
+            store.setItem('boony.mode', p.mode);
+            store.setItem('boony.theme', p.theme);
+        }
+        function broadcast(p){
+            window.dispatchEvent(new CustomEvent('boony:prefs', { detail: p }));
+            // Also broadcast language change specifically
+            window.dispatchEvent(new CustomEvent('boony:language', { detail: { lang: p.lang } }));
+        }
+        function loadMute(){
+            return store.getItem('boony.muted') === 'true';
+        }
+        function saveMute(v){
+            store.setItem('boony.muted', v ? 'true' : 'false');
+        }
+        function updateMuteBtnUI(){
+            const muted = loadMute();
+            if (!els.muteBtn) return;
+            els.muteBtn.textContent = muted ? '🔈' : '🔊';
+            els.muteBtn.setAttribute('aria-pressed', String(muted));
+        }
+        function broadcastMute(){
+            window.dispatchEvent(new CustomEvent('boony:mute', { detail: { muted: loadMute() } }));
+        }
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            // Broadcast theme change to other components
+            window.dispatchEvent(new CustomEvent('boony:theme', { detail: { theme: theme } }));
+        }
+        function updateThemeUI() {
+            const prefs = loadPrefs();
+            if (els.theme) {
+                els.theme.value = prefs.theme;
+            }
+            applyTheme(prefs.theme);
+        }
+        
+        // Listen for theme messages from parent window (for iframes)
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'theme-change') {
+                const theme = event.data.theme;
+                document.documentElement.setAttribute('data-theme', theme);
+                document.body.setAttribute('data-theme', theme);
+                
+                // Update local storage if this is the main window
+                if (window.parent === window) {
+                    localStorage.setItem('boony.theme', event.data.originalTheme || theme);
+                }
+            }
+        });
+        
+        // Global theme functions
+         window.applyTheme = applyTheme;
+         window.initializeTheme = initializeTheme;
+         window.showThemeChangeFeedback = showThemeChangeFeedback;
+         
+         function setSpeakingUI(active){
+            const v = loadPrefs().voice || 'male';
+            const male = document.getElementById('navAvatarMale');
+            const female = document.getElementById('navAvatarFemale');
+            
+            // Remove speaking class from both avatars first
+            [male, female].forEach(el => {
+                if (el) {
+                    el.classList.remove('speaking');
+                    // Reset to idle state for both
+                    const voiceType = el.dataset.voice;
+                    const idleSrc = voiceType === 'female' ? '/static/avatars/boony_female_idle.png' : '/static/avatars/boony_male_idle.png';
+                    el.src = idleSrc;
+                }
+            });
+            
+            // Only activate speaking for selected avatar
+            const target = v === 'female' ? female : male;
+            if (!target || !active) return;
+            
+            target.classList.add('speaking');
+            // Change to animated gif only for speaking avatar
+            const speakSrc = v === 'female' ? '/static/avatars/boony_female_speaking.gif' : '/static/avatars/boony_male_speaking.gif';
+            target.src = speakSrc;
+        }
+        function setVoice(v){
+            const p = loadPrefs();
+            p.voice = v;
+            
+            // Auto-sync accent based on avatar selection
+            if (v === 'female') {
+                // Female avatar prefers American accent for better Microsoft voice
+                p.accent = 'en-US';
+                p.mode = 'online'; // Prefer online for better quality
+            } else {
+                // Male avatar can use Indian accent
+                p.accent = 'hi-IN';
+                p.mode = 'auto'; // Auto mode for flexibility
+            }
+            
+            savePrefs(p);
+            
+            // Update UI selects to reflect changes
+            if (els.accent) els.accent.value = p.accent;
+            if (els.mode) els.mode.value = p.mode;
+            
+            broadcast(p);
+            updateAvatars(v);
+            
+            // Show voice selection feedback
+            showVoiceSelectionFeedback(v, p.accent, p.mode);
+        }
+        function updateAvatars(v){
+            if (!els.avMale || !els.avFemale) return;
+            
+            // Remove active class from both and reset to idle
+            [els.avMale, els.avFemale].forEach(el => {
+                if (el) {
+                    el.classList.remove('active', 'speaking');
+                    const voiceType = el.dataset.voice;
+                    const idleSrc = voiceType === 'female' ? '/static/avatars/boony_female_idle.png' : '/static/avatars/boony_male_idle.png';
+                    el.src = idleSrc;
+                }
+            });
+            
+            // Set active class for selected avatar
+            els.avMale.classList.toggle('active', v === 'male');
+            els.avFemale.classList.toggle('active', v === 'female');
+            
+            const target = v === 'male' ? els.avMale : els.avFemale;
+            if (target) {
+                target.classList.remove('swap');
+                void target.offsetWidth; // restart animation
+                target.classList.add('swap');
+            }
+        }
+        function init(){
+            els.accent = document.getElementById('pref-accent');
+            els.lang = document.getElementById('pref-lang');
+            els.mode = document.getElementById('pref-mode');
+            els.theme = document.getElementById('pref-theme');
+            els.muteBtn = document.getElementById('globalMuteBtn');
+            els.helpBtn = document.getElementById('helpBtn');
+            els.avMale = document.getElementById('navAvatarMale');
+            els.avFemale = document.getElementById('navAvatarFemale');
+            if(!els.accent || !els.lang || !els.mode) return;
+            const p = loadPrefs();
+            
+            // Add voice preference selector
+            const voiceSelect = document.getElementById('pref-voice');
+            if (voiceSelect) {
+                els.voice = voiceSelect;
+                els.voice.value = p.voice;
+                ['change','input'].forEach(evt => {
+                    els.voice.addEventListener(evt, () => {
+                        const newVoice = els.voice.value;
+                        setVoice(newVoice); // This will handle sync and feedback
+                    });
+                });
+            }
+            els.accent.value = p.accent;
+            els.lang.value = p.lang;
+            els.mode.value = p.mode;
+            broadcast(p);
+            updateAvatars(p.voice);
+            ['change','input'].forEach(evt => {
+                els.accent.addEventListener(evt, () => { 
+                    const q = loadPrefs(); 
+                    q.accent = els.accent.value; 
+                    savePrefs(q); 
+                    broadcast(q);
+                    // Update voice selector to reflect accent change
+                    if (els.voice) els.voice.value = q.voice;
+                    updateAvatars(q.voice);
+                });
+                els.lang.addEventListener(evt, () => { 
+                    const q = loadPrefs(); 
+                    q.lang = els.lang.value; 
+                    savePrefs(q); 
+                    broadcast(q);
+                    // Update page content immediately
+                    updatePageLanguage(q.lang);
+                });
+                els.mode.addEventListener(evt, () => { 
+                    const q = loadPrefs(); 
+                    q.mode = els.mode.value; 
+                    savePrefs(q); 
+                    broadcast(q);
+                    // Show mode change feedback
+                    showVoiceSelectionFeedback(q.voice, q.accent, q.mode);
+                });
+            });
+            
+            // Theme handling
+            updateThemeUI();
+            if (els.theme) {
+                ['change','input'].forEach(evt => {
+                    els.theme.addEventListener(evt, () => {
+                        const q = loadPrefs();
+                        q.theme = els.theme.value;
+                        savePrefs(q);
+                        applyTheme(q.theme);
+                        broadcast(q);
+                    });
+                });
+            });
+
+            if (els.avMale) els.avMale.addEventListener('click', async () => {
+                setVoice('male');
+                // Test voice availability after selection
+                const prefs = loadPrefs();
+                await testVoiceAvailability(prefs.voice, prefs.accent, prefs.mode);
+            });
+            if (els.avFemale) els.avFemale.addEventListener('click', async () => {
+                setVoice('female');
+                // Test voice availability after selection
+                const prefs = loadPrefs();
+                await testVoiceAvailability(prefs.voice, prefs.accent, prefs.mode);
+            });
+
+            // Mute handling
+            updateMuteBtnUI();
+            broadcastMute();
+            if (els.muteBtn) {
+                els.muteBtn.addEventListener('click', () => {
+                    const v = !loadMute();
+                    saveMute(v);
+                    updateMuteBtnUI();
+                    broadcastMute();
+                    
+                    // If muting, stop speaking animation immediately
+                    if (v) {
+                        setSpeakingUI(false);
+                    }
+                });
+            }
+            
+            // Help button functionality
+            if (els.helpBtn) {
+                els.helpBtn.addEventListener('click', () => {
+                    showHelpModal();
+                });
+            }
+            
+            function showHelpModal() {
+                alert('🎯 Boony Help\n\n🎤 Voice Controls:\n- Click avatars to switch voices\n- Use mute button to toggle sound\n\n🎨 Themes:\n- Light: Cream background\n- Dark: Grey background\n- Vibrant: Random themes\n- Dynamic: Random colors\n\n📚 Learning:\n- Practice pronunciation daily\n- Use feedback to improve\n- Track your progress\n\nFor more help, contact support!');
+            }
+
+            // React to global audio from pages
+            window.addEventListener('boony:audio', (e) => {
+                const playing = !!(e.detail && e.detail.playing);
+                const muted = loadMute();
+                
+                // If muted, always show idle state
+                if (muted) { 
+                    setSpeakingUI(false); 
+                    return; 
+                }
+                
+                // Only show speaking animation if not muted and audio is playing
+                setSpeakingUI(playing);
+            });
+        }
+        
+        // Voice selection feedback function
+        function showVoiceSelectionFeedback(voice, accent, mode) {
+            const voiceInfo = {
+                'female': {
+                    'en-US': 'Microsoft Jenny (American Female)',
+                    'hi-IN': 'Microsoft Kavya (Indian Female)'
+                },
+                'male': {
+                    'en-US': 'Microsoft Guy (American Male)', 
+                    'hi-IN': 'Microsoft Prabhat (Indian Male)'
+                }
+            };
+            
+            const selectedVoice = voiceInfo[voice]?.[accent] || 'System Default';
+            const modeText = mode === 'online' ? 'Online' : mode === 'offline' ? 'Offline' : 'Auto';
+            
+            // Create or update feedback element
+            let feedback = document.getElementById('voice-feedback');
+            if (!feedback) {
+                feedback = document.createElement('div');
+                feedback.id = 'voice-feedback';
+                feedback.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    background: rgba(0, 0, 0, 0.9);
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    z-index: 10000;
+                    max-width: 300px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                    transition: opacity 0.3s ease;
+                `;
+                document.body.appendChild(feedback);
+            }
+            
+            feedback.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 4px;">🎤 Voice Selected</div>
+                <div>Voice: ${selectedVoice}</div>
+                <div>Mode: ${modeText}</div>
+                <div style="font-size: 12px; opacity: 0.8; margin-top: 4px;">
+                    ${mode === 'online' ? '🌐 Online voice preferred' : mode === 'offline' ? '💻 Offline voice only' : '🔄 Auto: Online first, offline fallback'}
+                </div>
+            `;
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                if (feedback && feedback.parentNode) {
+                    feedback.style.opacity = '0';
+                    setTimeout(() => {
+                        if (feedback && feedback.parentNode) {
+                            feedback.parentNode.removeChild(feedback);
+                        }
+                    }, 300);
+                }
+            }, 3000);
+        }
+        
+        // Enhanced TTS function with fallback handling and error display
+        function testVoiceAvailability(voice, accent, mode) {
+            return new Promise((resolve) => {
+                const testText = 'Test';
+                const p = { voice, accent, mode, lang: 'hinglish' };
+                const voiceName = mapToMsVoice(p);
+                const params = new URLSearchParams({
+                    text: testText,
+                    voice: voice,
+                    accent: accent,
+                    lang: p.lang,
+                    voice_name: voiceName,
+                    mode: mode
+                });
+                
+                fetch(`/tts?${params.toString()}`)
+                    .then(async response => {
+                        if (response.ok) {
+                            resolve(true);
+                        } else {
+                            // Try to get error details
+                            try {
+                                const errorData = await response.json();
+                                showVoiceErrorMessage(errorData);
+                            } catch (e) {
+                                showVoiceErrorMessage({
+                                    error: 'Voice unavailable',
+                                    message: 'आवाज़ उपलब्ध नहीं है।',
+                                    suggested_action: 'Try different voice settings'
+                                });
+                            }
+                            resolve(false);
+                        }
+                    })
+                    .catch(() => {
+                        showVoiceErrorMessage({
+                            error: 'Connection error',
+                            message: 'कनेक्शन की समस्या। कृपया दोबारा कोशिश करें।',
+                            suggested_action: 'Check your internet connection'
+                        });
+                        resolve(false);
+                    });
+            });
+        }
+        
+        // Show voice error messages to user
+        function showVoiceErrorMessage(errorData) {
+            let errorDiv = document.getElementById('voice-error');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.id = 'voice-error';
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    background: rgba(220, 53, 69, 0.95);
+                    color: white;
+                    padding: 16px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    z-index: 10001;
+                    max-width: 350px;
+                    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+                    border-left: 4px solid #dc3545;
+                `;
+                document.body.appendChild(errorDiv);
+            }
+            
+            errorDiv.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 8px;">⚠️ ${errorData.error || 'Voice Error'}</div>
+                <div style="margin-bottom: 8px;">${errorData.message || 'Voice not available'}</div>
+                <div style="font-size: 12px; opacity: 0.9; font-style: italic;">
+                    💡 ${errorData.suggested_action || 'Try changing voice settings'}
+                </div>
+                <button onclick="this.parentElement.remove()" style="
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    background: none;
+                    border: none;
+                    color: white;
+                    font-size: 16px;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 20px;
+                    height: 20px;
+                ">×</button>
+            `;
+            
+            // Auto-hide after 8 seconds
+            setTimeout(() => {
+                if (errorDiv && errorDiv.parentNode) {
+                    errorDiv.style.opacity = '0';
+                    setTimeout(() => {
+                        if (errorDiv && errorDiv.parentNode) {
+                            errorDiv.parentNode.removeChild(errorDiv);
+                        }
+                    }, 300);
+                }
+            }, 8000);
+        }
+        
+        // Map preferences to Microsoft voice names
+        function mapToMsVoice(p) {
+            if (p.accent === 'en-US') {
+                return p.voice === 'female' ? 'en-US-JennyNeural' : 'en-US-GuyNeural';
+            }
+            return p.voice === 'female' ? 'en-IN-KavyaNeural' : 'hi-IN-PrabhatNeural';
+        }
+        
+        // Global preferences functions - exposed to all pages
+        window.getPrefs = loadPrefs;
+        window.savePrefs = savePrefs;
+        window.broadcastPrefs = broadcast;
+        window.setVoice = setVoice;
+        window.setSpeakingUI = setSpeakingUI;
+        window.testVoiceAvailability = testVoiceAvailability;
+        window.mapToMsVoice = mapToMsVoice;
+        window.showVoiceErrorMessage = showVoiceErrorMessage;
+        window.showVoiceSelectionFeedback = showVoiceSelectionFeedback;
+        
+        // Global language update function
+        function updatePageLanguage(lang) {
+            // Update navigation text based on language
+            const navTexts = {
+                hinglish: {
+                    dashboard: '📊 Dashboard',
+                    logout: '🚪 Logout',
+                    login: '🔑 Login',
+                    signup: '📝 Sign Up'
+                },
+                english: {
+                    dashboard: '📊 Dashboard',
+                    logout: '🚪 Logout', 
+                    login: '🔑 Login',
+                    signup: '📝 Sign Up'
+                }
+            };
+            
+            // Update navigation links text
+            const dashboardLink = document.querySelector('a[href*="dashboard"]');
+            const logoutLink = document.querySelector('a[href*="logout"]');
+            const loginLink = document.querySelector('a[href*="login"]');
+            const signupLink = document.querySelector('a[href*="signup"]');
+            
+            if (dashboardLink) dashboardLink.textContent = navTexts[lang].dashboard;
+            if (logoutLink) logoutLink.textContent = navTexts[lang].logout;
+            if (loginLink) loginLink.textContent = navTexts[lang].login;
+            if (signupLink) signupLink.textContent = navTexts[lang].signup;
+            
+            // Broadcast to child pages
+            window.dispatchEvent(new CustomEvent('boony:language-update', { 
+                detail: { language: lang } 
+            }));
+        }
+        
+        // Expose global language update function
+        window.updatePageLanguage = updatePageLanguage;
+        
+        // Legacy theme functions - now handled by theme-manager.js
+        // These are kept for backward compatibility
+        function initializeTheme() {
+            // Theme manager handles initialization
+            console.log('Theme initialization handled by theme-manager.js');
+        }
+        
+        function applyTheme(theme) {
+            // Delegate to theme manager if available
+            if (window.themeManager) {
+                window.themeManager.applyTheme(theme);
+            } else {
+                // Fallback for legacy support
+                let actualTheme = theme;
+                if (theme === 'auto') {
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    actualTheme = prefersDark ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', actualTheme);
+                document.body.setAttribute('data-theme', actualTheme);
+            }
+        }
+        
+        function showThemeChangeFeedback(theme) {
+            // Delegate to theme manager if available
+            if (window.themeManager) {
+                window.themeManager.showThemeChangeFeedback(theme);
+            }
+        }
+        
+        // Listen for system theme changes when auto mode is selected
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+            const currentTheme = localStorage.getItem('boony.theme');
+            if (currentTheme === 'auto') {
+                applyTheme('auto');
+            }
+        });
+
+        // Initialize language on page load
+        function initializeLanguage() {
+            const prefs = loadPrefs();
+            updatePageLanguage(prefs.lang);
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                init();
+                initializeLanguage();
+                // Theme initialization is now handled by theme-manager.js
+            });
+        } else { 
+            init(); 
+            initializeLanguage();
+            // Theme initialization is now handled by theme-manager.js
+        }
+    })();
+</script>
+<script src="/static/js/theme-manager.js"></script>
+<script src="/static/js/main.js"></script>
+<script src="/static/js/guide.js"></script>
+
+
+
+</body>
+</html>

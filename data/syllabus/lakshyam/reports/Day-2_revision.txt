@@ -1,0 +1,9 @@
+Paragraph:
+My name is Boony
+
+Transcription:
+🎙️ Recording started... Speak now.
+⏹ Stopping recording...
+✅ Audio recorded → Day-2_revision.wav
+📝 Transcribing...
+[No speech detected]

@@ -1,0 +1,194 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2ECC71;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#27AE60;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E8449;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="medalGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#F7DC6F;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#F4D03F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F1C40F;stop-opacity:1" />
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/> 
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background celebration elements -->
+  <g>
+    <rect x="20" y="30" width="3" height="15" fill="#E74C3C" opacity="0.7">
+      <animateTransform attributeName="transform" type="rotate" values="0;360" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0.3;0.7" dur="2s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="170" y="50" width="2" height="12" fill="#3498DB" opacity="0.6">
+      <animateTransform attributeName="transform" type="rotate" values="360;0" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0.2;0.6" dur="1.8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="40" y="160" width="4" height="18" fill="#F39C12" opacity="0.8">
+      <animateTransform attributeName="transform" type="rotate" values="0;360" dur="2.2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;0.4;0.8" dur="2.3s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+  
+  <!-- Medal -->
+  <g transform="translate(100,90)">
+    <!-- Medal ribbon -->
+    <rect x="-15" y="-40" width="10" height="30" fill="#E74C3C">
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="5" y="-40" width="10" height="30" fill="#3498DB">
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+    </rect>
+    
+    <!-- Medal body -->
+    <circle cx="0" cy="0" r="20" fill="url(#medalGradient)" filter="url(#glow)">
+      <animate attributeName="r" values="20;22;20" dur="2s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="rotate" values="0;10;-10;0" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Medal inner circle -->
+    <circle cx="0" cy="0" r="15" fill="#F7DC6F" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Medal star -->
+    <polygon points="0,-8 2,-3 8,-3 3,0 5,6 0,3 -5,6 -3,0 -8,-3 -2,-3" 
+             fill="#E67E22">
+      <animateTransform attributeName="transform" type="rotate" values="0;360" dur="4s" repeatCount="indefinite"/>
+    </polygon>
+    
+    <!-- Medal number 1 -->
+    <text x="0" y="3" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#8B4513">
+      1
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+    </text>
+  </g>
+  
+  <!-- Confetti -->
+  <g>
+    <rect x="60" y="40" width="4" height="4" fill="#E74C3C">
+      <animateTransform attributeName="transform" 
+                        type="translate" 
+                        values="0,0;-20,40;-40,80" 
+                        dur="3s" 
+                        repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" 
+                        type="rotate" 
+                        values="0;360;720" 
+                        dur="3s" 
+                        repeatCount="indefinite" 
+                        additive="sum"/>
+      <animate attributeName="opacity" values="1;0.5;0" dur="3s" repeatCount="indefinite"/>
+    </rect>
+    
+    <rect x="140" y="50" width="3" height="3" fill="#3498DB">
+      <animateTransform attributeName="transform" 
+                        type="translate" 
+                        values="0,0;20,35;40,70" 
+                        dur="2.8s" 
+                        repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" 
+                        type="rotate" 
+                        values="0;-360;-720" 
+                        dur="2.8s" 
+                        repeatCount="indefinite" 
+                        additive="sum"/>
+      <animate attributeName="opacity" values="1;0.6;0" dur="2.8s" repeatCount="indefinite"/>
+    </rect>
+    
+    <rect x="80" y="35" width="3" height="3" fill="#F39C12">
+      <animateTransform attributeName="transform" 
+                        type="translate" 
+                        values="0,0;15,45;30,90" 
+                        dur="3.2s" 
+                        repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" 
+                        type="rotate" 
+                        values="0;360;720" 
+                        dur="3.2s" 
+                        repeatCount="indefinite" 
+                        additive="sum"/>
+      <animate attributeName="opacity" values="1;0.4;0" dur="3.2s" repeatCount="indefinite"/>
+    </rect>
+    
+    <rect x="120" y="45" width="2" height="2" fill="#9B59B6">
+      <animateTransform attributeName="transform" 
+                        type="translate" 
+                        values="0,0;-15,50;-30,100" 
+                        dur="2.5s" 
+                        repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" 
+                        type="rotate" 
+                        values="0;-360;-720" 
+                        dur="2.5s" 
+                        repeatCount="indefinite" 
+                        additive="sum"/>
+      <animate attributeName="opacity" values="1;0.7;0" dur="2.5s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+  
+  <!-- Success checkmarks -->
+  <g>
+    <g transform="translate(50,120)">
+      <circle cx="0" cy="0" r="8" fill="url(#greenGradient)" opacity="0.8">
+        <animate attributeName="r" values="8;10;8" dur="1.8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.8s" repeatCount="indefinite"/>
+      </circle>
+      <path d="M -3,0 L -1,2 L 3,-2" stroke="white" stroke-width="2" fill="none" stroke-linecap="round">
+        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.8s" repeatCount="indefinite"/>
+      </path>
+    </g>
+    
+    <g transform="translate(150,120)">
+      <circle cx="0" cy="0" r="8" fill="url(#greenGradient)" opacity="0.7">
+        <animate attributeName="r" values="8;10;8" dur="2.2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="2.2s" repeatCount="indefinite"/>
+      </circle>
+      <path d="M -3,0 L -1,2 L 3,-2" stroke="white" stroke-width="2" fill="none" stroke-linecap="round">
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="2.2s" repeatCount="indefinite"/>
+      </path>
+    </g>
+  </g>
+  
+  <!-- Sparkle effects -->
+  <g>
+    <g transform="translate(70,60)">
+      <path d="M 0,-6 L 1.5,0 L 0,6 L -1.5,0 Z" fill="#F1C40F">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;1;0.5" dur="1.5s" repeatCount="indefinite"/>
+      </path>
+      <path d="M -6,0 L 0,1.5 L 6,0 L 0,-1.5 Z" fill="#F1C40F">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;1;0.5" dur="1.5s" repeatCount="indefinite"/>
+      </path>
+    </g>
+    
+    <g transform="translate(130,70)">
+      <path d="M 0,-4 L 1,0 L 0,4 L -1,0 Z" fill="#E67E22">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="1.8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.4;0.9;0.4" dur="1.2s" repeatCount="indefinite"/>
+      </path>
+      <path d="M -4,0 L 0,1 L 4,0 L 0,-1 Z" fill="#E67E22">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="1.8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.4;0.9;0.4" dur="1.2s" repeatCount="indefinite"/>
+      </path>
+    </g>
+  </g>
+  
+  <!-- Text -->
+  <text x="100" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="url(#greenGradient)" filter="url(#glow)">
+    Well Done!
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Hindi subtitle -->
+  <text x="100" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#1E8449">
+    बहुत अच्छा!
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2.5s" repeatCount="indefinite"/>
+  </text>
+</svg>

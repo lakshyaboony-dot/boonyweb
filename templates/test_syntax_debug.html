@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Syntax Debug Test{% endblock %}
+
+{% block content %}
+<div class="modern-dashboard">
+    <h1>JavaScript Syntax Debug Test</h1>
+    <div id="output"></div>
+</div>
+
+<script>
+// Test the exact template variables that might be causing issues
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Starting syntax debug test...');
+    
+    try {
+        // Test template variables one by one
+        const currentUserId = {{ current_user.user_id|tojson|safe }};
+        console.log('currentUserId loaded:', currentUserId);
+        
+        const starOfDayUserId = {{ star_of_day_user_id|tojson|safe }};
+        console.log('starOfDayUserId loaded:', starOfDayUserId);
+        
+        const starOfWeekUserId = {{ star_of_week_user_id|tojson|safe }};
+        console.log('starOfWeekUserId loaded:', starOfWeekUserId);
+        
+        const currentDay = {{ day|tojson|safe }};
+        console.log('currentDay loaded:', currentDay);
+        
+        const isPracticeMode = {{ ('true' if is_practice_mode else 'false')|tojson|safe }};
+        console.log('isPracticeMode loaded:', isPracticeMode);
+        
+        const credits = {
+            listen: {{ credits.listen|tojson|safe }},
+            speak: {{ credits.speak|tojson|safe }},
+            vocabulary: {{ credits.vocabulary|tojson|safe }},
+            revision: {{ credits.revision|tojson|safe }}
+        };
+        console.log('credits loaded:', credits);
+        
+        // Test template literals that are used in dashboard
+        const testString = `Day-${currentDay}`;
+        console.log('Template literal test:', testString);
+        
+        // Test function that uses template variables
+        function testFunction() {
+            const userId = {{ current_user.user_id|tojson|safe }};
+            return `User ID: ${userId}`;
+        }
+        
+        console.log('Function test:', testFunction());
+        
+        document.getElementById('output').innerHTML = '<p style="color: green;">✅ All syntax tests passed!</p>';
+        
+    } catch (error) {
+        console.error('Syntax error caught:', error);
+        document.getElementById('output').innerHTML = `<p style="color: red;">❌ Syntax error: ${error.message}</p>`;
+    }
+});
+</script>
+{% endblock %}

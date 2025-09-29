@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test setupGuideTTS Function</title>
+</head>
+<body>
+    <h1>Testing setupGuideTTS Function</h1>
+    <div id="output"></div>
+    
+    <script>
+        console.log('Testing setupGuideTTS function...');
+        
+        // Test the setupGuideTTS function specifically
+        function setupGuideTTS() {
+            const currentAudios = new Set();
+            let isMuted = (localStorage.getItem('boony.muted') === 'true');
+            
+            window.addEventListener('boony:mute', (e) => { 
+                isMuted = !!(e.detail && e.detail.muted); 
+                if (isMuted) stopAllAudio(); 
+            });
+
+            function mapToMsVoice(p) { 
+                if (p.accent === 'en-US') return p.voice === 'female' ? 'en-US-JennyNeural' : 'en-US-GuyNeural'; 
+                return p.voice === 'female' ? 'en-IN-KavyaNeural' : 'hi-IN-PrabhatNeural'; 
+            }
+
+            function getTTSEndpoint(text) { 
+                const p = window.getPrefs ? window.getPrefs() : { voice: 'female', accent: 'en-IN', lang: 'hinglish', mode: 'auto' }; 
+                const qs = new URLSearchParams({
+                    text, 
+                    voice: p.voice, 
+                    accent: p.accent, 
+                    lang: p.lang, 
+                    voice_name: mapToMsVoice(p), 
+                    mode: p.mode
+                }); 
+                return `/tts?${qs.toString()}`; 
+            }
+
+            function stopAllAudio() { 
+                currentAudios.forEach(a => {
+                    try { a.pause(); a.src = ''; } catch (e) {} 
+                    currentAudios.delete(a); 
+                }); 
+                try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: false } })); } catch (e) {} 
+            }
+
+            async function speak(text) { 
+                if (!text || isMuted) return; 
+                stopAllAudio(); 
+                try { 
+                    const a = new Audio(getTTSEndpoint(text)); 
+                    currentAudios.add(a); 
+                    a.addEventListener('ended', () => currentAudios.delete(a), { once: true }); 
+                    a.addEventListener('error', () => currentAudios.delete(a), { once: true }); 
+                    try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: true } })); } catch (e) {} 
+                    await a.play(); 
+                } catch (e) { 
+                    console.log('TTS Error:', e);
+                } 
+            }
+            
+            // Add click handlers to guide messages
+            const guideCards = document.querySelectorAll('.guide-card');
+            guideCards.forEach(card => {
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', () => {
+                    const text = card.dataset.speak || card.querySelector('p').textContent;
+                    speak(text);
+                });
+            });
+            
+            // Auto-speak first guide message on page load
+            setTimeout(() => {
+                const firstGuide = document.querySelector('.guide-card');
+                if (firstGuide) {
+                    const text = firstGuide.dataset.speak || firstGuide.querySelector('p').textContent;
+                    speak(text);
+                }
+            }, 1500);
+        }
+        
+        // Test DOMContentLoaded with setupGuideTTS
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, calling setupGuideTTS...');
+            setupGuideTTS();
+            console.log('setupGuideTTS called successfully');
+        });
+        
+        console.log('Script loaded successfully');
+    </script>
+</body>
+</html>

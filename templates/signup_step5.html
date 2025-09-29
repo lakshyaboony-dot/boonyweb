@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width: 700px; margin: 40px auto; padding: 40px; text-align: center; background: var(--bg-secondary); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+
+    <h2 style="font-size: 28px; margin-bottom: 15px; color: var(--text-primary);" id="stepTitle">Step 5️⃣ – Create Login</h2>
+<p style="font-size: 18px; color: var(--text-secondary); margin-bottom: 25px;" id="stepDescription">
+        Choose a <b>Login ID</b> and <b>Password</b> to complete registration.
+    </p>
+
+    <form method="POST" class="signup-form">
+        <input type="text" name="login_id" id="loginIdInput" placeholder="Login ID (min 4 chars)" required>
+        <input type="password" name="password" id="passwordInput" placeholder="Password (min 6 chars)" required>
+        <button type="submit" class="btn-astra" id="finishButton">Finish ✅</button>
+    </form>
+
+    {% if errors %}
+    <div style="color: red; margin-top: 15px; font-size: 16px;" id="errorContainer">
+        {% for e in errors %}
+        <p>{{ e }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if voice_file %}
+    <audio autoplay>
+        <source src="{{ url_for('static', filename=voice_file.split('static/')[-1]) }}" type="audio/mpeg">
+    </audio>
+    {% endif %}
+</div>
+
+<style>
+    .signup-form input {
+        display: block;
+        width: 100%;
+        font-size: 20px;
+        padding: 14px 16px;
+        margin: 12px 0;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        transition: border-color 0.3s;
+    }
+
+        .signup-form input:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+    .btn-astra {
+        background: var(--accent-color);
+        color: var(--text-primary);
+        font-size: 20px;
+        font-weight: bold;
+        padding: 14px 30px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background 0.3s;
+    }
+
+        .btn-astra:hover {
+            background: var(--accent-color);
+        }
+</style>
+
+<script>
+    // Bilingual text content for Step 5 with avatar-based hints
+    const step5Texts = {
+        hinglish: {
+            title: "Step 5️⃣ – Create Login",
+            description: "Registration complete karne ke liye <b>Login ID</b> aur <b>Password</b> choose kijiye.",
+            loginIdPlaceholder: {
+                male: "Bhai, apna unique Login ID banayiye (minimum 4 characters)",
+                female: "Didi, apna unique Login ID banayiye (minimum 4 characters)"
+            },
+            passwordPlaceholder: {
+                male: "Sir, ek strong password choose kijiye (minimum 6 characters)",
+                female: "Madam, ek strong password choose kijiye (minimum 6 characters)"
+            },
+            finishButton: "Finish ✅"
+        },
+        english: {
+            title: "Step 5️⃣ – Create Login",
+            description: "Choose a <b>Login ID</b> and <b>Password</b> to complete registration.",
+            loginIdPlaceholder: {
+                male: "Sir, please create your unique Login ID (min 4 chars)",
+                female: "Ma'am, please create your unique Login ID (min 4 chars)"
+            },
+            passwordPlaceholder: {
+                male: "Sir, please choose a strong password (min 6 chars)",
+                female: "Ma'am, please choose a strong password (min 6 chars)"
+            },
+            finishButton: "Finish ✅"
+        }
+    };
+
+    // TTS and audio handling
+    const currentAudios = new Set();
+    let isMuted = (localStorage.getItem('boony.muted') === 'true');
+    
+    window.addEventListener('boony:mute', (e) => { 
+        isMuted = !!(e.detail && e.detail.muted); 
+        if (isMuted) stopAllAudio(); 
+    });
+
+    // Use global getPrefs function from base.html
+    // window.getPrefs is available globally
+
+    function mapToMsVoice(p) { 
+        if (p.accent === 'en-US') return p.voice === 'female' ? 'en-US-JennyNeural' : 'en-US-GuyNeural'; 
+        return p.voice === 'female' ? 'en-IN-KavyaNeural' : 'hi-IN-PrabhatNeural'; 
+    }
+
+    function TTS_ENDPOINT(text) { 
+        const p = window.getPrefs && window.getPrefs() || {}; 
+        const qs = new URLSearchParams({
+            text, 
+            voice: p.voice, 
+            accent: p.accent, 
+            lang: p.lang, 
+            voice_name: mapToMsVoice(p), 
+            mode: p.mode
+        }); 
+        return `/tts?${qs.toString()}`; 
+    }
+
+    function stopAllAudio() { 
+        currentAudios.forEach(a => {
+            try { a.pause(); a.src = ''; } catch (e) {} 
+            currentAudios.delete(a); 
+        }); 
+        try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: false } })); } catch (e) {} 
+    }
+
+    async function speak(text) { 
+        if (!text || isMuted) return; 
+        stopAllAudio(); 
+        try { 
+            const a = new Audio(TTS_ENDPOINT(text)); 
+            currentAudios.add(a); 
+            a.addEventListener('ended', () => currentAudios.delete(a), { once: true }); 
+            a.addEventListener('error', () => currentAudios.delete(a), { once: true }); 
+            try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: true } })); } catch (e) {} 
+            await a.play(); 
+        } catch (e) {} 
+    }
+
+    // Update UI based on language preference and avatar
+    function updateStep5UI() {
+        const prefs = window.getPrefs && window.getPrefs() || {};
+        const lang = prefs.lang || 'hinglish';
+        const voice = prefs.voice || 'male';
+        const texts = step5Texts[lang] || step5Texts.hinglish;
+        
+        // Update text elements
+        const titleEl = document.getElementById('stepTitle');
+        const descEl = document.getElementById('stepDescription');
+        const loginIdInput = document.getElementById('loginIdInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const finishButton = document.getElementById('finishButton');
+        
+        if (titleEl) titleEl.textContent = texts.title;
+        if (descEl) descEl.innerHTML = texts.description;
+        
+        // Set avatar-based placeholders
+        if (loginIdInput) loginIdInput.placeholder = texts.loginIdPlaceholder[voice] || texts.loginIdPlaceholder.male;
+        if (passwordInput) passwordInput.placeholder = texts.passwordPlaceholder[voice] || texts.passwordPlaceholder.male;
+        
+        if (finishButton) finishButton.textContent = texts.finishButton;
+    }
+
+    // Add click handlers for TTS
+    function addTTSHandlers() {
+        const titleEl = document.getElementById('stepTitle');
+        const descEl = document.getElementById('stepDescription');
+        const finishButton = document.getElementById('finishButton');
+        const guideMessage = document.querySelector('.guide-message');
+
+        if (titleEl) {
+            titleEl.style.cursor = 'pointer';
+            titleEl.addEventListener('click', () => speak(titleEl.textContent));
+        }
+        
+        if (descEl) {
+            descEl.style.cursor = 'pointer';
+            descEl.addEventListener('click', () => speak(descEl.textContent));
+        }
+        
+        if (finishButton) {
+            finishButton.addEventListener('click', () => speak(finishButton.textContent));
+        }
+        
+        // Add TTS for guide message
+        if (guideMessage) {
+            guideMessage.style.cursor = 'pointer';
+            guideMessage.addEventListener('click', () => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            });
+            
+            // Auto-speak guide message on page load
+            setTimeout(() => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            }, 1500);
+        }
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', () => {
+        updateStep5UI();
+        addTTSHandlers();
+    });
+
+    // React to preference changes from base template
+    window.addEventListener('boony:prefs', (e) => {
+        updateStep5UI();
+    });
+    
+    // React to language changes
+    window.addEventListener('boony:language-update', (e) => {
+        updateStep5UI();
+    });
+</script>
+
+{% endblock %}

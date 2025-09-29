@@ -1,0 +1,138 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="starGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFFF00;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:0.8" />
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/> 
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background sparkles -->
+  <g>
+    <circle cx="30" cy="40" r="2" fill="#FFD700" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="170" cy="60" r="1.5" fill="#FFA500" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="1.5;3;1.5" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="40" cy="160" r="2.5" fill="#FFFF00" opacity="0.7">
+      <animate attributeName="opacity" values="0.7;0.3;0.7" dur="1.8s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="2.5;5;2.5" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="160" cy="150" r="2" fill="#FFD700" opacity="0.9">
+      <animate attributeName="opacity" values="0.9;0.4;0.9" dur="2.2s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="2;4;2" dur="2.2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Main star -->
+  <g transform="translate(100,80)">
+    <polygon points="0,-25 7,-8 25,-8 12,3 18,20 0,12 -18,20 -12,3 -25,-8 -7,-8" 
+             fill="url(#starGradient)" 
+             filter="url(#glow)">
+      <animateTransform attributeName="transform" 
+                        type="rotate" 
+                        values="0;360" 
+                        dur="4s" 
+                        repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite"/>
+    </polygon>
+    
+    <!-- Inner star -->
+    <polygon points="0,-15 4,-5 15,-5 7,2 11,12 0,7 -11,12 -7,2 -15,-5 -4,-5" 
+             fill="#FFFF00" 
+             opacity="0.8">
+      <animateTransform attributeName="transform" 
+                        type="rotate" 
+                        values="360;0" 
+                        dur="3s" 
+                        repeatCount="indefinite"/>
+    </polygon>
+  </g>
+  
+  <!-- Trophy cup -->
+  <g transform="translate(100,120)">
+    <!-- Cup body -->
+    <path d="M -15,-10 L -15,10 Q -15,20 0,20 Q 15,20 15,10 L 15,-10 Z" 
+          fill="url(#goldGradient)" 
+          filter="url(#glow)">
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+    </path>
+    
+    <!-- Cup handles -->
+    <path d="M -15,-5 Q -25,-5 -25,5 Q -25,15 -15,15" 
+          stroke="url(#goldGradient)" 
+          stroke-width="3" 
+          fill="none">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 15,-5 Q 25,-5 25,5 Q 25,15 15,15" 
+          stroke="url(#goldGradient)" 
+          stroke-width="3" 
+          fill="none">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+    </path>
+    
+    <!-- Cup base -->
+    <rect x="-20" y="20" width="40" height="5" rx="2" fill="url(#goldGradient)"/>
+    
+    <!-- Cup shine -->
+    <ellipse cx="-5" cy="0" rx="3" ry="8" fill="#FFFF00" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;0.9;0.6" dur="1.5s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+  
+  <!-- Floating particles -->
+  <g>
+    <circle cx="60" cy="100" r="1" fill="#FFD700">
+      <animateTransform attributeName="transform" 
+                        type="translate" 
+                        values="0,0;10,-20;20,-40;30,-60" 
+                        dur="3s" 
+                        repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.5;0" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="140" cy="110" r="1.5" fill="#FFA500">
+      <animateTransform attributeName="transform" 
+                        type="translate" 
+                        values="0,0;-10,-25;-20,-50;-30,-75" 
+                        dur="3.5s" 
+                        repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.4;0" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="80" cy="120" r="1.2" fill="#FFFF00">
+      <animateTransform attributeName="transform" 
+                        type="translate" 
+                        values="0,0;15,-15;30,-30;45,-45" 
+                        dur="2.8s" 
+                        repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.6;0" dur="2.8s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Text -->
+  <text x="100" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="url(#goldGradient)" filter="url(#glow)">
+    Excellent!
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Hindi subtitle -->
+  <text x="100" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#B8860B">
+    बहुत बढ़िया!
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2.5s" repeatCount="indefinite"/>
+  </text>
+</svg>

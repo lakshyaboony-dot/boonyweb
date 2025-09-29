@@ -1,0 +1,488 @@
+    {% extends "base.html" %}
+    {% block content %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Boony — Antakshari Game</title>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg1: #dfefff;   /* soft light blue */
+                --bg2: #a3d8f4;   /* pastel sky blue */
+                --glass: rgba(255,255,255,0.4);
+                --accent: #0077b6;   /* deep blue for buttons */
+                --highlight: rgba(255,255,255,0.6);
+                --playagain-bg: linear-gradient(45deg, #48cae4, #90e0ef, #ade8f4, #00b4d8);
+            }
+
+            html, body {
+                height: 100%;
+                margin: 0;
+                font-family: 'Roboto', sans-serif;
+                background: linear-gradient(90deg, var(--bg1), var(--bg2));
+                color: #00334e; /* darker navy text for contrast */
+            }
+            header {
+                padding: 18px;
+                text-align: center;
+                font-size: 1.9rem;
+                font-weight: 700;
+                text-shadow: 2px 2px 6px #000;
+            }
+
+            #top-bar {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+                justify-content: space-around;
+                padding: 10px;
+                background: rgba(0,0,0,0.35);
+                margin: 0 12px;
+                border-radius: 10px;
+            }
+
+            #categories {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: center;
+                margin: 12px;
+            }
+
+                #categories button.active {
+                    background: #ff9800 !important;
+                    color: #fff;
+                }
+
+            #game-area {
+                display: flex;
+                gap: 20px;
+                padding: 18px;
+                flex: 1;
+                min-height: 420px;
+            }
+
+            .chat-column {
+                flex: 1;
+                background: var(--glass);
+                border-radius: 14px;
+                padding: 12px;
+                display: flex;
+                flex-direction: column;
+                overflow: auto;
+                max-height: 65vh;
+                transition: background 0.3s;
+            }
+
+                .chat-column.active-turn {
+                    background: var(--highlight);
+                }
+
+            .column-header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 8px;
+            }
+
+                .column-header img {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 50%;
+                    border: 2px solid rgba(255,255,255,0.12);
+                }
+
+            .word-item {
+                padding: 8px 12px;
+                border-radius: 10px;
+                margin: 6px 0;
+                max-width: 85%;
+                word-break: break-word;
+            }
+
+            .user-word.correct {
+                background: #4fc3f7;
+                align-self: flex-start;
+            }
+
+            .user-word.wrong {
+                background: #ef5350;
+                align-self: flex-start;
+            }
+
+            .user-word.repeated {
+                background: #ffeb3b;
+                color: #000;
+                align-self: flex-start;
+            }
+
+            .ai-word.correct {
+                background: #ffb74d;
+                color: #000;
+                align-self: flex-end;
+            }
+
+            #input-area {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                justify-content: center;
+                padding: 14px;
+                background: rgba(0,0,0,0.35);
+                margin: 12px;
+                border-radius: 10px;
+                flex-wrap: wrap;
+            }
+
+            #wordInput {
+                padding: 10px;
+                border-radius: 6px;
+                border: none;
+                width: 240px;
+                font-size: 1rem;
+            }
+
+            button {
+                padding: 8px 12px;
+                border-radius: 6px;
+                border: none;
+                cursor: pointer;
+                font-weight: 700;
+                background: var(--accent);
+                color: #fff;
+            }
+
+                button.secondary {
+                    background: rgba(255,255,255,0.08);
+                    color: #fff;
+                }
+
+                button:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+
+            #playAgainBtn {
+                font-size: 1.5rem;
+                font-weight: 700;
+                padding: 12px 24px;
+                border-radius: 12px;
+                background: var(--playagain-bg);
+                background-size: 400% 400%;
+                animation: gradientBG 8s ease infinite;
+                color: #000;
+                border: 2px solid #fff;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+
+                #playAgainBtn:hover {
+                    transform: scale(1.1);
+                }
+
+            @keyframes gradientBG {
+                0% {
+                    background-position: 0% 50%;
+                }
+
+                50% {
+                    background-position: 100% 50%;
+                }
+
+                100% {
+                    background-position: 0% 50%;
+                }
+            }
+
+            audio {
+                display: none;
+                margin-left: 8px;
+            }
+
+            #status {
+                font-size: 0.95rem;
+                opacity: 0.9;
+                width: 100%;
+                text-align: center;
+            }
+
+            @media(max-width:880px) {
+                #game-area {
+                    flex-direction: column;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header>Boony — Interactive Antakshari</header>
+        <div id="top-bar">
+            <div id="score">User: 0 | Boony: 0</div>
+            <div id="turn">Choose a category to start</div>
+            <div id="timer">Time Left: 10</div>
+        </div>
+        <div id="categories"></div>
+        <div id="game-area">
+            <div class="chat-column" id="user-column">
+                <div class="column-header">
+                    <img src="/static/avatars/user_avatar.png" alt="User avatar">
+                    <strong>User</strong>
+                </div>
+            </div>
+            <div class="chat-column" id="ai-column">
+                <div class="column-header">
+                    <img src="/static/avatars/boony_female_idle.png" alt="Boony avatar">
+                    <strong>Boony</strong>
+                </div>
+            </div>
+        </div>
+        <div id="input-area">
+            <input id="wordInput" type="text" placeholder="Enter word" disabled autocomplete="off" />
+            <button id="submitBtn" disabled>Submit</button>
+            <button id="recordBtn" disabled>🎤 Record</button>
+            <button id="resetBtn" class="secondary">Reset</button>
+            <button id="playAgainBtn" style="display:none;">Play Again</button>
+            <audio id="userAudio" controls></audio>
+            <div id="status"></div>
+            <button onclick="toggleMusic()" id="musicBtn">🔊 Enable Music</button>
+            <audio id="bg-music" autoplay loop hidden>
+                <source src="{{ url_for('static', filename='audio/twinkle_star.wav') }}" type="audio/mpeg">
+            </audio>
+        </div>
+
+        <script>
+            const categories = ["Animals", "Fruits & Vegetables", "Countries & Cities", "Movies / TV Shows", "Foods & Drinks"];
+            let selectedCategory = "", usedWords = new Set();
+            let userScore = 0, aiScore = 0;
+            let timerInterval = null, timeLeft = 60;
+            let mediaRecorder = null, audioChunks = [];
+
+            const catContainer = document.getElementById('categories');
+            const scoreEl = document.getElementById('score');
+            const turnEl = document.getElementById('turn');
+            const timerEl = document.getElementById('timer');
+            const wordInput = document.getElementById('wordInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const recordBtn = document.getElementById('recordBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const playAgainBtn = document.getElementById('playAgainBtn');
+            const userColumn = document.getElementById('user-column');
+            const aiColumn = document.getElementById('ai-column');
+            const userAudio = document.getElementById('userAudio');
+            const statusEl = document.getElementById('status');
+
+            function renderCategories() {
+                catContainer.innerHTML = '';
+                categories.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.innerText = cat;
+                    btn.onclick = () => startGame(cat, btn);
+                    catContainer.appendChild(btn);
+                });
+            }
+            renderCategories();
+            function toggleMusic() {
+                const audio = document.getElementById('bg-music');
+                const btn = document.getElementById('musicBtn');
+                if (audio.paused) {
+                    audio.play();
+                    audio.muted = false;
+                    btn.innerText = "🔇 Disable Music";
+                } else {
+                    audio.pause();
+                    btn.innerText = "🔊 Enable Music";
+                }
+            }
+            function setStatus(msg, timeout = 3000) {
+                statusEl.innerText = msg || '';
+                if (timeout > 0) setTimeout(() => { if (statusEl.innerText === msg) statusEl.innerText = ''; }, timeout);
+            }
+            function updateScore() { scoreEl.innerText = `User: ${userScore} | Boony: ${aiScore}`; }
+            function updateTurn(msg) { turnEl.innerText = msg; }
+            function enableInput(enable) { wordInput.disabled = !enable; submitBtn.disabled = !enable; recordBtn.disabled = !enable; if (enable) wordInput.focus(); }
+            function clearChat() { userColumn.querySelectorAll('.word-item').forEach(n => n.remove()); aiColumn.querySelectorAll('.word-item').forEach(n => n.remove()); }
+            function disableCategoryButtons(val) { catContainer.querySelectorAll('button').forEach(b => b.disabled = val); }
+            function speak(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)); } }
+            function addWordToColumn(word, who, status) {
+                const col = who === 'user' ? userColumn : aiColumn;
+                const item = document.createElement('div');
+                item.className = `${who}-word ${status} word-item`;
+                const count = col.querySelectorAll('.word-item').length + 1;
+                item.innerText = `${count}. ${word}`;
+                col.appendChild(item); col.scrollTop = col.scrollHeight;
+            }
+            function highlightTurn(who) {
+                userColumn.classList.remove('active-turn'); aiColumn.classList.remove('active-turn');
+                if (who === 'user') userColumn.classList.add('active-turn');
+                else if (who === 'ai') aiColumn.classList.add('active-turn');
+            }
+
+            function startGame(cat, btn) {
+                selectedCategory = cat; usedWords = new Set(); userScore = 0; aiScore = 0; updateScore();
+                updateTurn(`Category: ${cat} | Your turn`);
+                clearChat(); enableInput(true); disableCategoryButtons(true);
+                startTimer(); setStatus('Game started');
+                catContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active'); highlightTurn('user');
+                playAgainBtn.style.display = "none";
+            }
+
+            function resetGame() {
+                selectedCategory = ""; usedWords = new Set(); userScore = 0; aiScore = 0; updateScore();
+                updateTurn('Choose a category to start'); clearChat(); enableInput(false); disableCategoryButtons(false);
+                stopTimer(); setStatus('Game reset', 1500); catContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                highlightTurn(''); playAgainBtn.style.display = "none";
+            }
+            resetBtn.addEventListener('click', resetGame);
+            playAgainBtn.addEventListener('click', () => {
+                resetGame();
+                setStatus('Pick a category to start again');
+            });
+
+            function startTimer() {
+                stopTimer(); timeLeft = 60; timerEl.innerText = `Time Left: ${timeLeft}`;
+                timerInterval = setInterval(() => {
+                    timeLeft--; timerEl.innerText = `Time Left: ${timeLeft}`;
+                    if (timeLeft <= 0) { stopTimer(); handleTimeout(); }
+                }, 1000);
+            }
+            function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+
+            function handleTimeout() {
+                if (turnEl.innerText.includes("Your turn")) { updateTurn("⏱ Time up! You lose. Boony wins 🎉"); aiScore += 5; }
+                else { updateTurn("⏱ Time up! Boony failed. You win 🎉"); userScore += 5; }
+                updateScore(); enableInput(false); disableCategoryButtons(false); playAgainBtn.style.display = "inline-block";
+            }
+
+            async function postJSON(url, payload) {
+                try {
+                    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    return await res.json();
+                } catch (e) { console.error('fetch error', e); return { error: 'network' }; }
+            }
+
+            submitBtn.addEventListener('click', submitWord);
+            wordInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !submitBtn.disabled) submitWord(); });
+
+            async function submitWord() {
+                let raw = wordInput.value.trim(); wordInput.value = ''; if (!raw) return;
+                const word = raw.toLowerCase();
+
+                if (usedWords.has(word)) {
+                    addWordToColumn(raw, 'user', 'repeated');
+                    setStatus('Word already used! Try another.', 3000); 
+                    userScore = Math.max(0, userScore - 1); 
+                    updateScore(); 
+                    return;
+                }
+
+                const payload = { word, category: selectedCategory, usedWords: Array.from(usedWords) };
+                const res = await postJSON('/api/validate_word', payload);
+                if (res.error) { setStatus('Server error validating word'); enableInput(true); return; }
+
+                if (!res.valid) {
+                    addWordToColumn(raw, 'user', 'wrong');
+                    setStatus(res.message || 'Invalid word', 3000);
+                    userScore = Math.max(0, userScore - 1); 
+                    updateScore(); 
+                    return;
+                }
+
+                addWordToColumn(raw, 'user', 'correct');
+                usedWords.add(word); 
+                userScore += 2; 
+                updateScore();
+                enableInput(false); stopTimer(); highlightTurn('ai');
+
+                // ✅ Check if 10 words completed → add +10 credits
+                if (usedWords.size % 10 === 0) {
+                    try {
+                        const creditRes = await postJSON('/api/add_credits', {
+                            day: CURRENT_DAY,              // replace with dynamic day if available
+                            credits: 10,
+                            activity_type: "antakshari_game",
+                            statement_index: usedWords.size
+                        });
+                        if (creditRes.success) {
+                            setStatus(`🎉 10 words completed! +${creditRes.credits_added} credits added`, 3000);
+                        }
+                    } catch (err) {
+                        console.error("Credit API error", err);
+                    }
+                }
+
+                setTimeout(() => aiTurn(), 800);
+            }
+
+
+            async function aiTurn() {
+                try {
+                    const resp = await postJSON('/api/ai_word', { category: selectedCategory, usedWords: Array.from(usedWords) });
+                    if (!resp || resp.error) { setStatus('AI fetch error'); enableInput(true); return; }
+                    const aiWord = resp.word;
+                    if (!aiWord) { updateTurn('Boony cannot find a word. You win!'); enableInput(false); disableCategoryButtons(false); playAgainBtn.style.display = "inline-block"; return; }
+                    usedWords.add(aiWord.toLowerCase()); aiScore += 2; updateScore(); addWordToColumn(aiWord, 'ai', 'correct'); speak(aiWord);
+                    updateTurn(`Your turn | Boony said: ${aiWord}`); enableInput(true); startTimer(); highlightTurn('user');
+                } catch (e) { console.error('aiTurn error', e); setStatus('AI error occurred'); enableInput(true); }
+            }
+
+            // 🎤 Voice Recording Logic (unchanged)
+            recordBtn.addEventListener('click', async () => {
+                if (!navigator.mediaDevices || !window.MediaRecorder) {
+                    setStatus('Recording not supported', 4000);
+                    return;
+                }
+
+                try {
+                    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mediaRecorder = new MediaRecorder(stream); audioChunks = [];
+                        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+                        mediaRecorder.onstop = async () => {
+                            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                            userAudio.src = URL.createObjectURL(blob);
+                            userAudio.style.display = 'inline-block';
+
+                            // Convert WebM to .mp3 (optional) if needed or directly send .webm
+                            const fd = new FormData();
+                            fd.append('file', blob, 'recording.webm');
+
+                            setStatus('Uploading for transcription...');
+                            try {
+                                const r = await fetch('/api/recognize_audio', { method: 'POST', body: fd });
+                                const j = await r.json();
+                                if (j.transcript) {
+                                    wordInput.value = j.transcript;
+                                    setStatus('Transcript received', 2000);
+                                    submitWord(); // auto submit word
+                                } else if (j.error) {
+                                    setStatus(`STT Error: ${j.error}`, 3000);
+                                }
+                            } catch (err) {
+                                console.error('STT upload error', err);
+                                setStatus('STT upload failed', 3000);
+                            }
+                        };
+
+                        mediaRecorder.start();
+                        recordBtn.innerText = '⏹ Stop';
+                        setStatus('Recording...');
+                    } else {
+                        mediaRecorder.stop();
+                        recordBtn.innerText = '🎤 Record';
+                        setStatus('Processing audio...');
+                    }
+                } catch (err) {
+                    console.error('microphone error', err);
+                    setStatus('Microphone error', 3000);
+                }
+            });
+
+
+            resetGame();
+        </script>
+    </body>
+    </html>
+{% endblock %}

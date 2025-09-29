@@ -1,0 +1,116 @@
+<nav class="professional-nav">
+    <div class="nav-container">
+        <!-- Brand Section -->
+        <div class="nav-brand">
+            <a href="{{ url_for('landing') }}" class="brand-link">
+                <img id="navLogo" alt="Logo" src="{{ url_for('static', filename='icons/app.jpeg') }}" class="brand-logo" />
+                <span class="brand-text">Boony</span>
+            </a>
+            <!-- Avatar Section -->
+            <div class="nav-avatars">
+                <img id="navAvatarMale" data-voice="male"
+                     src="{{ url_for('static', filename='avatars/boony_male_idle.png') }}"
+                     alt="Male" title="Male Voice" class="avatar-img" />
+                <img id="navAvatarFemale" data-voice="female"
+                     src="{{ url_for('static', filename='avatars/boony_female_idle.png') }}"
+                     alt="Female" title="Female Voice" class="avatar-img" />
+            </div>
+        </div>
+
+        <!-- Main Navigation Menu -->
+        <div class="nav-menu">
+            <ul class="nav-links">
+                <li><a href="{{ url_for('landing') }}" class="nav-link">🏠 Home</a></li>
+                <li><a href="{{ url_for('about') }}" class="nav-link">ℹ️ About Us</a></li>
+                {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('dashboard') }}" class="nav-link">📊 Dashboard</a></li>
+                {% endif %}
+
+                <!-- Settings -->
+                <li class="dropdown">
+                    <a href="#" class="nav-link dropdown-toggle">⚙️ Settings</a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <div class="settings-panel">
+                                <div class="setting-group">
+                                    <label>🎨 Theme:</label>
+                                    <select id="pref-theme" class="setting-select">
+                                        <option value="light">☀️ Light</option>
+                                        <option value="dark">🌙 Dark</option>
+                                        <option value="dynamic">🎲 Random</option>
+                                        <option value="golden">✨ Golden</option>
+                                        <option value="pink">🌸 Pink</option>
+                                        <option value="lightblue">💎 Light Blue</option>
+                                        <option value="peach">🍑 Peach</option>
+                                        <option value="purple">💜 Purple</option>
+                                        
+                                    </select>
+                                </div>
+                                <div class="setting-group">
+                                    <label>🎤 Voice:</label>
+                                    <select id="pref-voice" class="setting-select">
+                                        <option value="male">👨 Male</option>
+                                        <option value="female">👩 Female</option>
+                                    </select>
+                                </div>
+                                <div class="setting-group">
+                                    <label>🗣️ Language:</label>
+                                    <select id="pref-lang" class="setting-select">
+                                        <option value="hinglish">Hinglish</option>
+                                        <option value="english">English</option>
+                                    </select>
+                                </div>
+                                <div class="setting-group">
+                                    <label>🌍 Accent:</label>
+                                    <select id="pref-accent" class="setting-select">
+                                        <option value="hi-IN">🇮🇳 Indian</option>
+                                        <option value="en-US">🇺🇸 American</option>
+                                    </select>
+                                </div>
+                                <div class="setting-group">
+                                    <label>🔧 Mode:</label>
+                                    <select id="pref-mode" class="setting-select" title="TTS Mode">
+                                        <option value="auto">Auto</option>
+                                        <option value="online">Online</option>
+                                        <option value="offline">Offline</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+
+                {% if current_user.is_authenticated %}
+                    <!-- Premium Features -->
+                    <li class="dropdown">
+                        <a href="#" class="nav-link dropdown-toggle">⭐ Premium Features</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('chat') }}" class="dropdown-link">🤖 Chatbot</a></li>
+                            <li><a href="{{ url_for('vocabulary_page', day='Day-1') }}" class="dropdown-link">📚 Vocabulary</a></li>
+                            <li><a href="{{ url_for('beginner_professional_speaker', day='Day-1') }}" class="dropdown-link">🎯 Beginner to Professional Speaker</a></li>
+                            <li><a href="{{ url_for('pandora_box') }}" class="dropdown-link">🎁 Pandora Box</a></li>
+                            <li><a href="{{ url_for('pdf_to_speech') }}" class="dropdown-link">📄 PDF/Image to Speech</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{{ url_for('logout') }}" class="nav-link logout-btn">🚪 Logout</a></li>
+                {% else %}
+                    <li class="dropdown">
+                        <a href="#" class="nav-link dropdown-toggle">🔑 Login</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('login') }}" class="dropdown-link">👤 User Login</a></li>
+                            <li><a href="#admin-login" class="dropdown-link">👨‍💼 Admin Login</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{{ url_for('signup_step1') }}" class="nav-link signup-btn">📝 Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <div class="mobile-menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+</nav>

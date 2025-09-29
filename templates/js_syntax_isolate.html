@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JavaScript Syntax Isolation Test</title>
+</head>
+<body>
+    <h1>Testing JavaScript Syntax Step by Step</h1>
+    <div id="output"></div>
+    
+    <script>
+        console.log('Step 1: Basic variables');
+        
+        // Test the exact same variable assignments as in dashboard
+        const currentDay = {{ day|tojson|safe }};
+        const currentUserId = {{ current_user.user_id|tojson|safe }};
+        const starOfDayUserId = {{ star_of_day_user_id|tojson|safe }};
+        const starOfWeekUserId = {{ star_of_week_user_id|tojson|safe }};
+        
+        console.log('Step 2: Credits object');
+        const credits = {
+            listen: {{ credits.listen|tojson|safe }},
+            speak: {{ credits.speak|tojson|safe }},
+            vocabulary: {{ credits.vocabulary|tojson|safe }},
+            revision: {{ credits.revision|tojson|safe }}
+        };
+        
+        console.log('Step 3: Basic operations');
+        const dayNum = parseInt(currentDay.split('-')[1]);
+        let isCompleted = credits.revision >= 20;
+        
+        console.log('Step 4: Conditional logic');
+        if (dayNum >= 7) {
+            isCompleted = isCompleted && credits.vocabulary > 0;
+        }
+        
+        console.log('All steps completed successfully!');
+        
+        document.getElementById('output').innerHTML = `
+            <p>Current Day: ${currentDay}</p>
+            <p>Day Number: ${dayNum}</p>
+            <p>Is Completed: ${isCompleted}</p>
+            <p>Credits: ${JSON.stringify(credits)}</p>
+        `;
+    </script>
+</body>
+</html>

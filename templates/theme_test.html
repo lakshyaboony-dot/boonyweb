@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Theme Test - Boony{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <h1 style="color: var(--text-primary); text-align: center; margin-bottom: 30px;">🎨 Theme Testing Page</h1>
+    
+    <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border-color);">
+        <h2 style="color: var(--text-primary); margin-bottom: 15px;">Theme Controls</h2>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button onclick="testTheme('light')" style="background: var(--accent-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">☀️ Light (Blue Fonts)</button>
+            <button onclick="testTheme('dark')" style="background: var(--accent-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">🌙 Dark</button>
+    
+            <button onclick="testTheme('vibrant')" style="background: #8b5cf6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">💜 Vibrant (Random)</button>
+            <button onclick="testTheme('dynamic')" style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">🎲 Dynamic (Random)</button>
+        </div>
+    </div>
+    
+    <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border-color);">
+        <h2 style="color: var(--text-primary); margin-bottom: 15px;">Theme Status</h2>
+        <div id="theme-status" style="font-family: monospace; font-size: 14px; color: var(--text-secondary); background: var(--bg-primary); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+            Loading theme information...
+        </div>
+    </div>
+    
+    <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border-color);">
+        <h2 style="color: var(--text-primary); margin-bottom: 15px;">Color Variables Test</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div style="background: var(--bg-primary); color: var(--text-primary); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">Primary Background</div>
+            <div style="background: var(--bg-secondary); color: var(--text-primary); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">Secondary Background</div>
+            <div style="background: var(--accent-color); color: white; padding: 15px; border-radius: 8px;">Accent Color</div>
+            <div style="background: var(--bg-primary); color: var(--text-secondary); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">Secondary Text</div>
+        </div>
+    </div>
+    
+    <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border-color);">
+        <h2 style="color: var(--text-primary); margin-bottom: 15px;">Iframe Theme Test</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 15px;">This iframe should receive theme updates automatically:</p>
+        <iframe id="test-frame" style="width: 100%; height: 200px; border: 1px solid var(--border-color); border-radius: 8px;"></iframe>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function testTheme(theme) {
+        if (window.themeManager) {
+            window.themeManager.setTheme(theme);
+        } else {
+            localStorage.setItem('boony.theme', theme);
+            applyTheme(theme);
+        }
+        updateThemeStatus();
+    }
+    
+    function updateThemeStatus() {
+        const statusDiv = document.getElementById('theme-status');
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const savedTheme = localStorage.getItem('boony.theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        statusDiv.innerHTML = 
+            '<div><strong>Applied Theme:</strong> ' + currentTheme + '</div>' +
+            '<div><strong>Saved Preference:</strong> ' + savedTheme + '</div>' +
+            '<div><strong>System Preference:</strong> ' + (systemPrefersDark ? 'dark' : 'light') + '</div>' +
+            '<div><strong>Theme Manager:</strong> ' + (window.themeManager ? 'Available' : 'Not Available') + '</div>' +
+            '<div><strong>Last Updated:</strong> ' + new Date().toLocaleTimeString() + '</div>';
+    }
+    
+    // Listen for theme changes
+    window.addEventListener('boony:theme-change', function(event) {
+        console.log('Theme changed:', event.detail);
+        updateThemeStatus();
+    });
+    
+    // Initialize status display
+    document.addEventListener('DOMContentLoaded', function() {
+        updateThemeStatus();
+        
+        // Create a simple iframe content for testing
+        const iframe = document.getElementById('test-frame');
+        const iframeContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    :root {
+                        --bg-primary: #ffffff;
+                        --bg-secondary: #f8fafc;
+                        --text-primary: #1e293b;
+                        --text-secondary: #64748b;
+                        --border-color: #e2e8f0;
+                        --accent-color: #3b82f6;
+                    }
+                    
+                    [data-theme="dark"] {
+                        --bg-primary: #0f172a;
+                        --bg-secondary: #1e293b;
+                        --text-primary: #f1f5f9;
+                        --text-secondary: #cbd5e1;
+                        --border-color: #334155;
+                        --accent-color: #60a5fa;
+                    }
+                    
+
+                    
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        background: var(--bg-primary);
+                        color: var(--text-primary);
+                        margin: 0;
+                        padding: 10px;
+                        transition: all 0.3s ease;
+                    }
+                </style>
+            </head>
+            <body>
+                <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <strong>Iframe Content</strong>
+                    <div style="color: var(--text-secondary); margin-top: 5px;">This content should change with the theme.</div>
+                    <div id="iframe-status" style="font-size: 12px; margin-top: 10px; font-family: monospace;"></div>
+                </div>
+                
+                <script>
+                    function updateIframeStatus() {
+                        const theme = document.documentElement.getAttribute('data-theme') || 'default';
+                        document.getElementById('iframe-status').textContent = 'Current theme: ' + theme;
+                    }
+                    
+                    window.addEventListener('message', function(event) {
+                        if (event.data && event.data.type === 'theme-change') {
+                            const theme = event.data.theme;
+                            document.documentElement.setAttribute('data-theme', theme);
+                            document.body.setAttribute('data-theme', theme);
+                            updateIframeStatus();
+                        }
+                    });
+                    
+                    updateIframeStatus();
+                <\/script>
+            </body>
+            </html>
+        `;
+        
+        iframe.srcdoc = iframeContent;
+    });
+});
+</script>
+{% endblock %}

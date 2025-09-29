@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width: 700px; margin: 40px auto; padding: 40px; text-align: center; background: var(--bg-secondary); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+
+    <h2 style="font-size: 28px; margin-bottom: 15px; color: var(--text-primary);" id="stepTitle">Step 2️⃣ – Extra Info (Optional)</h2>
+<p style="font-size: 18px; color: var(--text-secondary); margin-bottom: 25px;" id="stepDescription">
+        You can add <b>Email, Date of Birth, State, City</b>. Or skip this step.
+    </p>
+
+    <form method="POST" class="signup-form" id="signupStep2Form" novalidate>
+        <input type="email" name="email" id="email" placeholder="Email (optional)"
+               data-hinglish="Agar aap chahen to email likh sakte hain."
+               data-english="You may enter your email if you like.">
+        <input type="date" name="dob" id="dob" placeholder="Date of Birth"
+               data-hinglish="Apni date of birth select kijiye (optional)."
+               data-english="Select your date of birth (optional).">
+        <input type="text" name="state" id="state" placeholder="State"
+               data-hinglish="Apna state likhiye (optional)."
+               data-english="Enter your state (optional).">
+        <input type="text" name="city" id="city" placeholder="City"
+               data-hinglish="Apna city likhiye (optional)."
+               data-english="Enter your city (optional).">
+
+        <div id="hintBox" class="hint" style="margin-top:6px; color: var(--text-secondary); text-align:left; opacity:.9;"></div>
+
+        <button type="submit" class="btn-astra" id="nextButton">Next →</button>
+        <button type="submit" name="skip" value="1" class="btn-astra" id="skipButton" style="background: var(--text-secondary);">Skip →</button>
+    </form>
+
+    {% if voice_file %}
+    <audio autoplay>
+        <source src="{{ url_for('static', filename=voice_file.split('static/')[-1]) }}" type="audio/mpeg">
+    </audio>
+    {% endif %}
+</div>
+
+<style>
+    .signup-form input {
+        display: block;
+        width: 100%;
+        font-size: 20px;
+        padding: 14px 16px;
+        margin: 12px 0;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        transition: border-color 0.3s;
+    }
+
+        .signup-form input:focus {
+            background: var(--bg-primary);
+            outline: none;
+        }
+
+    .btn-astra {
+        background: var(--accent-color);
+        color: var(--text-primary);
+        font-size: 20px;
+        font-weight: bold;
+        padding: 14px 30px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin: 12px 8px;
+        transition: background 0.3s;
+        
+    }
+
+        .btn-astra:hover {
+            background: var(--accent-color);
+        }
+</style>
+
+<script>
+    // Bilingual text content for Step 2 with avatar-based hints
+    const step2Texts = {
+        hinglish: {
+            title: "Step 2️⃣ – Extra Info (Optional)",
+            description: "Aap <b>Email, Date of Birth, State, City</b> add kar sakte hain. Ya is step ko skip kar sakte hain.",
+            emailPlaceholder: {
+                male: "Bhai, agar chahiye to email address likhiye (optional)",
+                female: "Didi, agar chahiye to email address likhiye (optional)"
+            },
+            dobPlaceholder: {
+                male: "Apni date of birth select kijiye, sir (optional)",
+                female: "Apni date of birth select kijiye, madam (optional)"
+            },
+            statePlaceholder: {
+                male: "Aap kis state se hain, bhai? (optional)",
+                female: "Aap kis state se hain, didi? (optional)"
+            },
+            cityPlaceholder: {
+                male: "Apna city batayiye, sir (optional)",
+                female: "Apna city batayiye, madam (optional)"
+            },
+            nextButton: "Next →",
+            skipButton: "Skip →"
+        },
+        english: {
+            title: "Step 2️⃣ – Extra Info (Optional)",
+            description: "You can add <b>Email, Date of Birth, State, City</b>. Or skip this step.",
+            emailPlaceholder: {
+                male: "Sir, please enter your email if needed (optional)",
+                female: "Ma'am, please enter your email if needed (optional)"
+            },
+            dobPlaceholder: {
+                male: "Please select your date of birth, sir (optional)",
+                female: "Please select your date of birth, ma'am (optional)"
+            },
+            statePlaceholder: {
+                male: "Which state are you from, sir? (optional)",
+                female: "Which state are you from, ma'am? (optional)"
+            },
+            cityPlaceholder: {
+                male: "Please tell us your city, sir (optional)",
+                female: "Please tell us your city, ma'am (optional)"
+            },
+            nextButton: "Next →",
+            skipButton: "Skip →"
+        }
+    };
+
+    // TTS and audio handling
+    const currentAudios = new Set();
+    let isMuted = (localStorage.getItem('boony.muted') === 'true');
+    
+    window.addEventListener('boony:mute', (e) => { 
+        isMuted = !!(e.detail && e.detail.muted); 
+        if (isMuted) stopAllAudio(); 
+    });
+
+    // Use global getPrefs function from base.html
+    // window.getPrefs is available globally
+
+    function mapToMsVoice(p) { 
+        if (p.accent === 'en-US') return p.voice === 'female' ? 'en-US-JennyNeural' : 'en-US-GuyNeural'; 
+        return p.voice === 'female' ? 'en-IN-KavyaNeural' : 'hi-IN-PrabhatNeural'; 
+    }
+
+    function TTS_ENDPOINT(text) { 
+        const p = window.getPrefs && window.getPrefs() || {}; 
+        const qs = new URLSearchParams({
+            text, 
+            voice: p.voice, 
+            accent: p.accent, 
+            lang: p.lang, 
+            voice_name: mapToMsVoice(p), 
+            mode: p.mode
+        }); 
+        return `/tts?${qs.toString()}`; 
+    }
+
+    function stopAllAudio() { 
+        currentAudios.forEach(a => {
+            try { a.pause(); a.src = ''; } catch (e) {} 
+            currentAudios.delete(a); 
+        }); 
+        try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: false } })); } catch (e) {} 
+    }
+
+    async function speak(text) { 
+        if (!text || isMuted) return; 
+        stopAllAudio(); 
+        try { 
+            const a = new Audio(TTS_ENDPOINT(text)); 
+            currentAudios.add(a); 
+            a.addEventListener('ended', () => currentAudios.delete(a), { once: true }); 
+            a.addEventListener('error', () => currentAudios.delete(a), { once: true }); 
+            try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: true } })); } catch (e) {} 
+            await a.play(); 
+        } catch (e) {} 
+    }
+
+    // Update UI based on language preference and avatar
+    function updateStep2UI() {
+        const prefs = window.getPrefs && window.getPrefs() || {};
+        const lang = prefs.lang || 'hinglish';
+        const voice = prefs.voice || 'male';
+        const texts = step2Texts[lang] || step2Texts.hinglish;
+        
+        // Update text elements
+        const titleEl = document.getElementById('stepTitle');
+        const descEl = document.getElementById('stepDescription');
+        const emailInput = document.getElementById('email');
+        const dobInput = document.getElementById('dob');
+        const stateInput = document.getElementById('state');
+        const cityInput = document.getElementById('city');
+        const nextButton = document.getElementById('nextButton');
+        const skipButton = document.getElementById('skipButton');
+        
+        if (titleEl) titleEl.textContent = texts.title;
+        if (descEl) descEl.innerHTML = texts.description;
+        
+        // Set avatar-based placeholders
+        if (emailInput) emailInput.placeholder = texts.emailPlaceholder[voice] || texts.emailPlaceholder.male;
+        if (dobInput) dobInput.placeholder = texts.dobPlaceholder[voice] || texts.dobPlaceholder.male;
+        if (stateInput) stateInput.placeholder = texts.statePlaceholder[voice] || texts.statePlaceholder.male;
+        if (cityInput) cityInput.placeholder = texts.cityPlaceholder[voice] || texts.cityPlaceholder.male;
+        
+        if (nextButton) nextButton.textContent = texts.nextButton;
+        if (skipButton) skipButton.textContent = texts.skipButton;
+    }
+
+    // Add click handlers for TTS
+    function addTTSHandlers() {
+        const titleEl = document.getElementById('stepTitle');
+        const descEl = document.getElementById('stepDescription');
+        const nextButton = document.getElementById('nextButton');
+        const skipButton = document.getElementById('skipButton');
+        const guideMessage = document.querySelector('.guide-message');
+
+        if (titleEl) {
+            titleEl.style.cursor = 'pointer';
+            titleEl.addEventListener('click', () => speak(titleEl.textContent));
+        }
+        
+        if (descEl) {
+            descEl.style.cursor = 'pointer';
+            descEl.addEventListener('click', () => speak(descEl.textContent));
+        }
+        
+        if (nextButton) {
+            nextButton.addEventListener('click', () => speak(nextButton.textContent));
+        }
+        
+        if (skipButton) {
+            skipButton.addEventListener('click', () => speak(skipButton.textContent));
+        }
+        
+        // Add TTS for guide message
+        if (guideMessage) {
+            guideMessage.style.cursor = 'pointer';
+            guideMessage.addEventListener('click', () => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            });
+            
+            // Auto-speak guide message on page load
+            setTimeout(() => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            }, 1500);
+        }
+    }
+
+    // Existing hint functionality
+    const hintBox = document.getElementById('hintBox');
+    const fields = ['email','dob','state','city'].map(id=>document.getElementById(id)).filter(Boolean);
+    
+    function hintFor(el) { 
+        const lang = (window.getPrefs && window.getPrefs().lang || 'hinglish').toLowerCase(); 
+        return el.getAttribute(lang === 'english' ? 'data-english' : 'data-hinglish') || ''; 
+    }
+    
+    function showHint(text) { 
+        if (!hintBox) return; 
+        const lang = (window.getPrefs && window.getPrefs().lang || 'hinglish').toLowerCase(); 
+        const lbl = lang === 'english' ? 'Hint' : 'Sanket'; 
+        hintBox.textContent = (lbl + ': ' + text); 
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', () => {
+        updateStep2UI();
+        addTTSHandlers();
+        
+        // Add focus handlers for hints
+        fields.forEach(el => { 
+            el.addEventListener('focus', () => { 
+                const t = hintFor(el); 
+                showHint(t); 
+                speak(t); 
+            }); 
+        });
+    });
+
+    // React to preference changes from base template
+    window.addEventListener('boony:prefs', (e) => {
+        updateStep2UI();
+    });
+    
+    // React to language changes
+    window.addEventListener('boony:language-update', (e) => {
+        updateStep2UI();
+    });
+</script>
+
+{% endblock %}

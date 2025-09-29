@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Minimal Test</title>
+</head>
+<body>
+    <h1>Testing Dashboard JavaScript Minimal</h1>
+    <div id="output"></div>
+    
+    <script>
+        console.log('Starting minimal dashboard test...');
+        
+        // Test DOMContentLoaded structure
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            
+            // Test template variables
+            const isPracticeMode = {{ ('true' if is_practice_mode else 'false')|tojson|safe }};
+            console.log('isPracticeMode:', isPracticeMode);
+            
+            // Test function calls
+            try {
+                populateDaySelector();
+                checkStarStatus();
+                checkDayCompletion();
+            } catch (error) {
+                console.error('Function call error:', error);
+            }
+        });
+        
+        // Test function definitions
+        function populateDaySelector() {
+            const currentDay = {{ day|tojson|safe }};
+            console.log('populateDaySelector - currentDay:', currentDay);
+        }
+        
+        function checkStarStatus() {
+            const currentUserId = {{ current_user.user_id|tojson|safe }};
+            const starOfDayUserId = {{ star_of_day_user_id|tojson|safe }};
+            const starOfWeekUserId = {{ star_of_week_user_id|tojson|safe }};
+            console.log('checkStarStatus - IDs:', currentUserId, starOfDayUserId, starOfWeekUserId);
+        }
+        
+        function checkDayCompletion() {
+            const currentDay = {{ day|tojson|safe }};
+            const credits = {
+                listen: {{ credits.listen|tojson|safe }},
+                speak: {{ credits.speak|tojson|safe }},
+                vocabulary: {{ credits.vocabulary|tojson|safe }},
+                revision: {{ credits.revision|tojson|safe }}
+            };
+            console.log('checkDayCompletion - currentDay:', currentDay, 'credits:', credits);
+        }
+        
+        console.log('All functions defined successfully');
+    </script>
+</body>
+</html>

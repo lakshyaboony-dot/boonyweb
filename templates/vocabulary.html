@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Vocabulary - {{ current_day or "Day-1" }}{% endblock %}
+
+{% block content %}
+<body data-day="{{ current_day or 'Day-1' }}">
+    <div class="vocab-page">
+
+        <!-- Top header -->
+        <header class="vocab-top centered">
+            <h1 class="main-heading">Vocabulary Learning – {{ current_day or "Day-1" }}</h1>
+        </header>
+
+        <main class="vocab-main-grid">
+            <!-- LEFT: words -->
+            <aside class="word-list" id="word-list-box">
+                <div class="list-header">
+                    <strong>Words</strong>
+                    <span class="count" id="word-count">0</span>
+                </div>
+                <ul id="word-list"></ul>
+            </aside>
+
+            <!-- CENTER: active word card -->
+            <section class="active-card fancy-card" id="active-card">
+                <div class="card-body">
+                    <h1 id="current-word" class="word-text">Click a word to start</h1>
+                    <p id="word-meaning" class="word-detail hindi-support"></p>
+                    <p id="word-antonyms" class="word-detail"></p>
+                    <p id="word-synonyms" class="word-detail"></p>
+                    <p id="word-example" class="word-detail example"></p>
+
+                    <!-- Practice Section -->
+                    <div id="practice-section" class="practice-box">
+                        <h3 id="practice-instruction">🎤 Click Start Recording and make a sentence using the word.</h3>
+
+                        <button id="record-btn" class="btn accent">🎙 Start Recording</button>
+
+                        <div id="practice-result" style="display:none; margin-top:15px;">
+                            <p><strong>Your Sentence:</strong> <span id="transcribed-text"></span></p>
+                            <p><strong>Feedback:</strong> <span id="ai-feedback"></span></p>
+                            <p><strong>Score:</strong> <span id="score-display"></span></p>
+                            <button id="play-feedback" class="btn success">🔊 Play Feedback</button>
+                            <button id="stop-feedback" class="btn warn">⏹ Stop</button>
+                        </div>
+
+                        <button id="next-word-btn" class="btn success" style="display:none;">➡ Next Word</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT: progress & credits -->
+            <aside class="right-panel">
+                <h3>Progress</h3>
+                <div class="progress-bar">
+                    <div id="progress-fill"></div>
+                </div>
+                <h3>Credits</h3>
+                <div id="vocab-credits">0</div>
+            </aside>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/vocab.js') }}?v=10"></script>
+
+    <style>
+        .vocab-main-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr 220px;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .word-list {
+            background: var(--bg-secondary);
+            padding: 14px;
+            border-radius: 12px;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        #word-list li {
+            padding: 10px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+        }
+
+            #word-list li .play-icon {
+                margin-right: 10px;
+                color: var(--accent-color);
+                font-weight: bold;
+            }
+
+            #word-list li:hover {
+                background: var(--accent-color);
+                color: #fff;
+            }
+
+            #word-list li.active {
+                background: var(--accent-color);
+                color: #fff;
+            }
+
+        .active-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 8px 26px var(--surface-hover);
+        }
+
+        .word-text {
+            font-size: 42px;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .word-detail {
+            font-size: 22px;
+            margin: 10px 0;
+        }
+
+        .example {
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .practice-box {
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+            .btn.accent {
+                background: var(--accent-color);
+                color: #fff;
+            }
+
+            .btn.warn {
+                background: var(--error-color);
+                color: #fff;
+            }
+
+            .btn.success {
+                background: var(--success-color);
+                color: #fff;
+            }
+
+            .btn:hover {
+                transform: scale(1.05);
+            }
+
+        .progress-bar {
+            width: 100%;
+            height: 16px;
+            background: #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        #progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-color);
+            border-radius: 8px;
+            transition: width 0.5s ease;
+        }
+        #word-list li.disabled {
+            color: #aaa;
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        #word-list li.enabled {
+            cursor: pointer;
+        }
+
+        #word-list li.active {
+            font-weight: bold;
+            color: #2196f3;
+        }
+        .play-icon {
+            margin-left: 5px;
+            color: #1a73e8;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .hindi-support {
+            font-family: 'Noto Sans Devanagari', 'Arial Unicode MS', sans-serif;
+            line-height: 1.6;
+        }
+
+        .hindi-text {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+
+    </style>
+    {% endblock %}

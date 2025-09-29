@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width: 700px; margin: 40px auto; padding: 40px; text-align: center; background: var(--bg-secondary); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+
+    <h2 style="font-size: 28px; margin-bottom: 15px; color: var(--text-primary);" id="stepTitle">Step 1️⃣ – Basic Information</h2>
+<p style="font-size: 18px; color: var(--text-secondary); margin-bottom: 25px;" id="stepDescription">
+        Let's begin! Please provide your <b>Full Name</b>, <b>Mobile Number</b>, and <b>Gender</b>.
+    </p>
+    
+    <!-- AI Guide Message -->
+    {% if guide_message %}
+    <div class="guide-message" style="background: var(--bg-secondary); color: var(--text-primary); padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; text-align: left; backdrop-filter: blur(10px);">
+        <div style="display: flex; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 18px; margin-right: 8px;">🤖</span>
+            <strong>Boony Guide</strong>
+        </div>
+        <div>{{ guide_message }}</div>
+    </div>
+    {% endif %}
+
+    <form method="POST" class="signup-form">
+        <!-- Full Name -->
+        <input type="text" name="full_name" id="fullNameInput" placeholder="Enter your Full Name" required>
+
+        <!-- Mobile -->
+        <input type="text" name="mobile" id="mobileInput" placeholder="Enter 10-digit Mobile Number" required maxlength="10">
+
+        <!-- Gender -->
+        <select name="gender" id="genderSelect" required>
+            <option value="" id="genderPlaceholder">Select Gender</option>
+            <option value="Male" id="maleOption">Male</option>
+            <option value="Female" id="femaleOption">Female</option>
+        </select>
+
+        <button type="submit" class="btn-astra" id="nextButton">Next →</button>
+    </form>
+
+    {% if errors %}
+    <div style="color: red; margin-top: 15px; font-size: 16px;" id="errorContainer">
+        {% for e in errors %}
+        <p>{{ e }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if voice_file %}
+    <audio autoplay>
+        <source src="{{ url_for('static', filename=voice_file.split('static/')[-1]) }}" type="audio/mpeg">
+    </audio>
+    {% endif %}
+</div>
+
+<style>
+    .signup-form input, .signup-form select {
+        display: block;
+        width: 100%;
+        font-size: 20px;
+        padding: 14px 16px;
+        margin: 12px 0;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        transition: border-color 0.3s;
+    }
+
+        .signup-form input:focus, .signup-form select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+    .btn-astra {
+        background: var(--accent-color);
+        color: var(--text-primary);
+        font-size: 20px;
+        font-weight: bold;
+        padding: 14px 30px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background 0.3s;
+    }
+
+        .btn-astra:hover {
+            background: var(--accent-color);
+        }
+</style>
+
+<script>
+    // Bilingual text content for Step 1 with avatar-based hints
+    const step1Texts = {
+        hinglish: {
+            title: "Step 1️⃣ – Basic Information",
+            description: "Chaliye shuru karte hain! Apna <b>Full Name</b>, <b>Mobile Number</b>, aur <b>Gender</b> provide kijiye.",
+            fullNamePlaceholder: {
+                male: "Jaise: Rahul Kumar, Amit Sharma - apna pura naam likhiye",
+                female: "Jaise: Priya Singh, Anita Gupta - apna pura naam likhiye"
+            },
+            mobilePlaceholder: {
+                male: "Bhai, apna 10-digit mobile number likhiye",
+                female: "Didi, apna 10-digit mobile number likhiye"
+            },
+            genderPlaceholder: "Gender select kijiye",
+            maleOption: "Male",
+            femaleOption: "Female",
+            nextButton: "Next →"
+        },
+        english: {
+            title: "Step 1️⃣ – Basic Information",
+            description: "Let's begin! Please provide your <b>Full Name</b>, <b>Mobile Number</b>, and <b>Gender</b>.",
+            fullNamePlaceholder: {
+                male: "e.g., John Smith, David Johnson - enter your full name",
+                female: "e.g., Sarah Wilson, Emma Davis - enter your full name"
+            },
+            mobilePlaceholder: {
+                male: "Sir, please enter your 10-digit mobile number",
+                female: "Ma'am, please enter your 10-digit mobile number"
+            },
+            genderPlaceholder: "Select Gender",
+            maleOption: "Male",
+            femaleOption: "Female",
+            nextButton: "Next →"
+        }
+    };
+
+    // TTS and audio handling
+    const currentAudios = new Set();
+    let isMuted = (localStorage.getItem('boony.muted') === 'true');
+    
+    window.addEventListener('boony:mute', (e) => { 
+        isMuted = !!(e.detail && e.detail.muted); 
+        if (isMuted) stopAllAudio(); 
+    });
+
+    // Use global getPrefs function from base.html
+    // window.getPrefs is available globally
+
+    function mapToMsVoice(p) { 
+        if (p.accent === 'en-US') return p.voice === 'female' ? 'en-US-JennyNeural' : 'en-US-GuyNeural'; 
+        return p.voice === 'female' ? 'en-IN-KavyaNeural' : 'hi-IN-PrabhatNeural'; 
+    }
+
+    function TTS_ENDPOINT(text) { 
+        const p = window.getPrefs && window.getPrefs() || {}; 
+        const qs = new URLSearchParams({
+            text, 
+            voice: p.voice, 
+            accent: p.accent, 
+            lang: p.lang, 
+            voice_name: mapToMsVoice(p), 
+            mode: p.mode
+        }); 
+        return `/tts?${qs.toString()}`; 
+    }
+
+    function stopAllAudio() { 
+        currentAudios.forEach(a => {
+            try { a.pause(); a.src = ''; } catch (e) {} 
+            currentAudios.delete(a); 
+        }); 
+        try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: false } })); } catch (e) {} 
+    }
+
+    async function speak(text) { 
+        if (!text || isMuted) return; 
+        stopAllAudio(); 
+        try { 
+            const a = new Audio(TTS_ENDPOINT(text)); 
+            currentAudios.add(a); 
+            a.addEventListener('ended', () => currentAudios.delete(a), { once: true }); 
+            a.addEventListener('error', () => currentAudios.delete(a), { once: true }); 
+            try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: true } })); } catch (e) {} 
+            await a.play(); 
+        } catch (e) {} 
+    }
+
+    // Update UI based on language preference and selected avatar
+    function updateStep1UI() {
+        const prefs = window.getPrefs && window.getPrefs() || {};
+        const lang = prefs.lang || 'hinglish';
+        const voice = prefs.voice || 'male';
+        const texts = step1Texts[lang] || step1Texts.hinglish;
+        
+        // Update text elements
+        const titleEl = document.getElementById('stepTitle');
+        const descEl = document.getElementById('stepDescription');
+        const fullNameInput = document.getElementById('fullNameInput');
+        const mobileInput = document.getElementById('mobileInput');
+        const genderPlaceholder = document.getElementById('genderPlaceholder');
+        const maleOption = document.getElementById('maleOption');
+        const femaleOption = document.getElementById('femaleOption');
+        const nextButton = document.getElementById('nextButton');
+        
+        if (titleEl) titleEl.textContent = texts.title;
+        if (descEl) descEl.innerHTML = texts.description;
+        
+        // Set avatar-based dynamic placeholders
+        if (fullNameInput) {
+            fullNameInput.placeholder = typeof texts.fullNamePlaceholder === 'object' ? 
+                texts.fullNamePlaceholder[voice] : texts.fullNamePlaceholder;
+        }
+        if (mobileInput) {
+            mobileInput.placeholder = typeof texts.mobilePlaceholder === 'object' ? 
+                texts.mobilePlaceholder[voice] : texts.mobilePlaceholder;
+        }
+        
+        if (genderPlaceholder) genderPlaceholder.textContent = texts.genderPlaceholder;
+        if (maleOption) maleOption.textContent = texts.maleOption;
+        if (femaleOption) femaleOption.textContent = texts.femaleOption;
+        if (nextButton) nextButton.textContent = texts.nextButton;
+    }
+
+    // Add click handlers for TTS
+    function addTTSHandlers() {
+        const titleEl = document.getElementById('stepTitle');
+        const descEl = document.getElementById('stepDescription');
+        const nextButton = document.getElementById('nextButton');
+        const guideMessage = document.querySelector('.guide-message');
+
+        if (titleEl) {
+            titleEl.style.cursor = 'pointer';
+            titleEl.addEventListener('click', () => speak(titleEl.textContent));
+        }
+        
+        if (descEl) {
+            descEl.style.cursor = 'pointer';
+            descEl.addEventListener('click', () => speak(descEl.textContent));
+        }
+        
+        if (nextButton) {
+            nextButton.addEventListener('click', () => speak(nextButton.textContent));
+        }
+        
+        // Add TTS for guide message
+        if (guideMessage) {
+            guideMessage.style.cursor = 'pointer';
+            guideMessage.addEventListener('click', () => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            });
+            
+            // Auto-speak guide message on page load
+            setTimeout(() => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            }, 1500);
+        }
+    }
+
+    // Listen for avatar/preference changes from base.html
+    window.addEventListener('boony:prefs', (e) => {
+        updateStep1UI(); // Update hints when avatar changes
+    });
+    
+    window.addEventListener('boony:language-update', (e) => {
+        updateStep1UI(); // Update hints when language changes
+    });
+
+    // Initialize on page load
+    window.addEventListener('load', () => {
+        updateStep1UI();
+        addTTSHandlers();
+    });
+
+    // React to preference changes from base template
+    window.addEventListener('boony:prefs', (e) => {
+        const { lang } = e.detail || {};
+        if (lang) {
+            updateStep1UI();
+            addTTSHandlers(); // Re-add handlers with new text
+        }
+    });
+</script>
+
+{% endblock %}

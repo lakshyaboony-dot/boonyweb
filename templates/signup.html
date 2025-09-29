@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+{% block title %}Sign Up | Boony{% endblock %}
+{% block content %}
+
+<div class="signup-container">
+    <!-- Boony Header -->
+    <div class="signup-header">
+        <img src="{{ url_for('static', filename='icons/app.jpeg') }}" alt="Boony Logo" class="boony-logo">
+        <h1>Boony के साथ जुड़ें</h1>
+        <p>आपकी English learning journey शुरू करने के लिए account बनाएं</p>
+    </div>
+
+    <!-- Boony Avatar Guide -->
+    <div class="avatar-guide">
+        <img src="{{ url_for('static', filename='gifs/boony_female.gif') }}" alt="Boony Avatar" class="boony-avatar">
+        <div class="guide-bubble">
+            <p id="guideText">आइए आपकी जानकारी लेते हैं ताकि मैं आपके लिए perfect learning plan बना सकूं!</p>
+        </div>
+    </div>
+
+    <div class="card signup-card">
+        <form method="POST" id="signupForm" onsubmit="return handleSignup(event)">
+            <!-- Personal Information Section -->
+            <div class="form-section">
+                <h3><span class="section-icon">👤</span> व्यक्तिगत जानकारी</h3>
+                
+                <div class="input-group">
+                    <label for="full_name">पूरा नाम *</label>
+                    <input class="input" id="full_name" name="full_name" placeholder="आपका पूरा नाम" required>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="user_id">User ID *</label>
+                        <input class="input" id="user_id" name="user_id" placeholder="Unique User ID" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="username">Username *</label>
+                        <input class="input" id="username" name="username" placeholder="Login Username" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Password *</label>
+                    <input class="input" id="password" type="password" name="password" placeholder="Strong Password" required>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="mobile">Mobile Number</label>
+                        <input class="input" id="mobile" name="mobile" placeholder="आपका Mobile Number" type="tel">
+                    </div>
+                    <div class="input-group">
+                        <label for="email">Email ID</label>
+                        <input class="input" id="email" type="email" name="email" placeholder="आपका Email Address">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="dob">Date of Birth</label>
+                    <input class="input" id="dob" type="date" name="dob">
+                </div>
+            </div>
+
+            <!-- Location Information Section -->
+            <div class="form-section">
+                <h3><span class="section-icon">🌍</span> स्थान की जानकारी</h3>
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="state">राज्य / State *</label>
+                        <select class="input" id="state" name="state" required onchange="updateCities()">
+                            <option value="">राज्य चुनें</option>
+                            <option value="Andhra Pradesh">Andhra Pradesh</option>
+                            <option value="Bihar">Bihar</option>
+                            <option value="Delhi">Delhi</option>
+                            <option value="Gujarat">Gujarat</option>
+                            <option value="Haryana">Haryana</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Kerala">Kerala</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Punjab">Punjab</option>
+                            <option value="Rajasthan">Rajasthan</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            <option value="West Bengal">West Bengal</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="city">शहर / City *</label>
+                        <select class="input" id="city" name="city" required>
+                            <option value="">पहले राज्य चुनें</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="language_preference">मुख्य भाषा / Primary Language</label>
+                    <select class="input" id="language_preference" name="language_preference">
+                        <option value="hindi">हिंदी (Hindi)</option>
+                        <option value="english">English</option>
+                        <option value="hinglish" selected>Hinglish (हिंदी + English)</option>
+                        <option value="bengali">বাংলা (Bengali)</option>
+                        <option value="tamil">தமிழ் (Tamil)</option>
+                        <option value="telugu">తెలుగు (Telugu)</option>
+                        <option value="marathi">मराठी (Marathi)</option>
+                        <option value="gujarati">ગુજરાતી (Gujarati)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Preferences Section -->
+            <div class="form-section">
+                <h3><span class="section-icon">⚙️</span> व्यक्तिगत पसंद</h3>
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="gender">Gender</label>
+                        <select class="input" id="gender" name="gender">
+                            <option value="Female" selected>Female</option>
+                            <option value="Male">Male</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="voice">Voice Preference</label>
+                        <select class="input" id="voice" name="voice">
+                            <option value="Female" selected>Female Voice</option>
+                            <option value="Male">Male Voice</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="learning_goal">Learning Goal</label>
+                    <select class="input" id="learning_goal" name="learning_goal">
+                        <option value="basic_conversation">Basic Conversation</option>
+                        <option value="business_english">Business English</option>
+                        <option value="exam_preparation">Exam Preparation</option>
+                        <option value="fluency_improvement">Fluency Improvement</option>
+                        <option value="pronunciation">Pronunciation</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-actions">
+                <button type="submit" class="btn-signup">
+                    <span class="btn-icon">✨</span>
+                    Account बनाएं
+                </button>
+                
+                <p class="login-link">
+                    पहले से account है? <a href="{{ url_for('login') }}">Login करें</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+        <!-- 🔥 Astra button applied -->
+        <button class="btn-astra" type="submit">🚀 Sign Up</button>
+    </form>
+
+    {% if error %}
+    <p class="notice" style="margin-top:8px">{{ error }}</p>
+    {% endif %}
+</div>
+
+<style>
+.signup-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.signup-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.boony-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+}
+
+.signup-header h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 2.2em;
+}
+
+.signup-header p {
+    color: #7f8c8d;
+    font-size: 1.1em;
+}
+
+.avatar-guide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
+.boony-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
+.guide-bubble {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 20px;
+    position: relative;
+    max-width: 400px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.guide-bubble::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 10px solid transparent;
+    border-right-color: #667eea;
+}
+
+.signup-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.form-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.form-section h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.3em;
+}
+
+.section-icon {
+    font-size: 1.2em;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #34495e;
+    font-weight: 500;
+}
+
+.input-group .input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ecf0f1;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.input-group .input:focus {
+    border-color: #667eea;
+    outline: none;
+}
+
+.form-actions {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.btn-signup {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 25px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-signup:hover {
+    transform: translateY(-2px);
+}
+
+.btn-icon {
+    font-size: 1.2em;
+}
+
+.login-link {
+    margin-top: 20px;
+    color: #7f8c8d;
+}
+
+.login-link a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .input-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .avatar-guide {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .guide-bubble::before {
+        display: none;
+    }
+}
+</style>
+
+<script>
+// State-City mapping for Indian states
+const stateCityMap = {
+    "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Rajahmundry", "Tirupati"],
+    "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga", "Bihar Sharif"],
+    "Delhi": ["New Delhi", "Central Delhi", "North Delhi", "South Delhi", "East Delhi", "West Delhi"],
+    "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar", "Gandhinagar"],
+    "Haryana": ["Gurgaon", "Faridabad", "Panipat", "Ambala", "Yamunanagar", "Rohtak", "Hisar"],
+    "Karnataka": ["Bangalore", "Mysore", "Hubli", "Mangalore", "Belgaum", "Gulbarga", "Davanagere"],
+    "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Palakkad", "Alappuzha"],
+    "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Thane", "Nashik", "Aurangabad", "Solapur"],
+    "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Mohali", "Firozpur"],
+    "Rajasthan": ["Jaipur", "Jodhpur", "Kota", "Bikaner", "Ajmer", "Udaipur", "Bhilwara"],
+    "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli", "Erode"],
+    "Uttar Pradesh": ["Lucknow", "Kanpur", "Ghaziabad", "Agra", "Varanasi", "Meerut", "Allahabad"],
+    "West Bengal": ["Kolkata", "Howrah", "Durgapur", "Asansol", "Siliguri", "Malda", "Bardhaman"]
+};
+
+function updateCities() {
+    const stateSelect = document.getElementById('state');
+    const citySelect = document.getElementById('city');
+    const selectedState = stateSelect.value;
+    
+    // Clear existing options
+    citySelect.innerHTML = '<option value="">शहर चुनें</option>';
+    
+    if (selectedState && stateCityMap[selectedState]) {
+        stateCityMap[selectedState].forEach(city => {
+            const option = document.createElement('option');
+            option.value = city;
+            option.textContent = city;
+            citySelect.appendChild(option);
+        });
+    }
+}
+
+function handleSignup(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const userData = {};
+    
+    // Collect form data
+    for (let [key, value] of formData.entries()) {
+        userData[key] = value;
+    }
+    
+    // Add timestamp
+    userData.created_at = new Date().toISOString();
+    
+    // Save to localStorage
+    try {
+        localStorage.setItem('boony_user_data', JSON.stringify(userData));
+        localStorage.setItem('boony_signup_completed', 'true');
+        console.log('User data saved to localStorage');
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+    }
+    
+    // Submit form normally to Flask backend
+    event.target.submit();
+    
+    return true;
+}
+
+// Auto-fill username with user_id for convenience
+document.getElementById('user_id').addEventListener('input', function() {
+    const usernameField = document.getElementById('username');
+    if (!usernameField.value) {
+        usernameField.value = this.value;
+    }
+});
+</script>
+
+{% endblock %}

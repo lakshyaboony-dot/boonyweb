@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="listen-page">
+
+    <!-- Top header -->
+    <header class="listen-top">
+        <h1 class="main-heading text-center">
+            {% if ui_lang == "hinglish" %}
+            Din {{ day }} — Sunne ki Kshamata Sudharein
+            {% else %}
+            Day {{ day }} — Improve Listening
+            {% endif %}
+        </h1>
+    </header>
+
+    <main class="listen-main-grid">
+        <!-- LEFT: list of sentences -->
+        <aside class="sentence-list" id="sentence-list">
+            <div class="list-header">
+                <strong>
+                    {% if ui_lang == "hinglish" %}Vakya{% else %}Sentences{% endif %}
+                </strong>
+                <span class="count">{{ statements|length }}</span>
+            </div>
+            <ul>
+                {% for stmt in statements %}
+                <li class="sentence-item {% if loop.index0 == 0 %}active{% endif %}"
+                    data-index="{{ loop.index0 }}"
+                    id="list-item-{{ loop.index0 }}">
+                    <div class="item-left">#{{ loop.index }}</div>
+                    <div class="item-body">
+                        <div class="item-text">{{ stmt.text|truncate(80) }}</div>
+                        <div class="item-hindi">{{ stmt.hindi|truncate(80) }}</div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </aside>
+
+        <!-- RIGHT: active card -->
+        <section class="active-card fancy-card" id="active-card">
+
+            <!-- Credits + Progress -->
+            <div class="credits-section">
+                <div class="credit-label">
+                    {% if ui_lang == "hinglish" %}Credits{% else %}Credits{% endif %}:
+                    <span id="listen-credits">{{ initial_credits|default(0) }}</span>
+                </div>
+                <div class="progress-bar-outer">
+                    <div class="progress-bar-inner" id="credit-progress" style="width:0%"></div>
+                </div>
+            </div>
+
+            <div class="card-header">
+                <div class="card-no" id="card-no">Sentence 1 / {{ statements|length }}</div>
+            </div>
+
+            <div class="card-body">
+                <div class="sentence-box">
+                    <h2 id="sentence-english">{{ statements[0].text if statements|length>0 else "No statement" }}</h2>
+                    <p id="sentence-pronunciation" class="muted">{{ statements[0].pronunciation if statements|length>0 else "" }}</p>
+                    <p id="sentence-hindi" class="muted">{{ statements[0].hindi if statements|length>0 else "" }}</p>
+                </div>
+
+                <div class="controls-info">
+                    {% if ui_lang == "hinglish" %}
+                    Niche diye gaye buttons ka use karke auto play shuru karein ya pause/resume karein.
+                    {% else %}
+                    Use the buttons below to start auto play or pause/resume listening.
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="controls-area">
+                    <button class="modern-btn accent" id="autoplay-btn">
+                        ▶ {% if ui_lang == "hinglish" %}Auto Play Shuru{% else %}Start Auto Play{% endif %}
+                    </button>
+                    <button class="modern-btn primary" id="pause-resume-btn" disabled>
+                        ⏸ {% if ui_lang == "hinglish" %}Ruko / Dobara Chalu Karo{% else %}Pause / Resume{% endif %}
+                    </button>
+                    <button class="modern-btn warn" id="stop-autoplay-btn" style="display:none;">
+                        ⏹ {% if ui_lang == "hinglish" %}Ruko{% else %}Stop{% endif %}
+                    </button>
+                </div>
+
+                <div id="completion-msg" style="display:none;">
+                    ✨ {% if ui_lang == "hinglish" %}Shandar! Din {{ day }} ki listening complete!{% else %}Congratulations! Day {{ day }} listening complete!{% endif %}
+                    <br>
+                    <small>{% if ui_lang == "hinglish" %}Listening Test ki taraf jaa rahe hain...{% else %}Redirecting to Listen Test...{% endif %}</small>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+  const LISTEN_STATEMENTS = {{ statements|tojson }};
+  const CURRENT_DAY = {{ day }};   // int value
+  const UI_LANG = "{{ ui_lang }}";
+  let initialCredits = parseInt("{{ initial_credits or 0 }}");
+</script>
+<script src="{{ url_for('static', filename='js/listen.js') }}?v=24"></script>
+
+<style>
+    .listen-main-grid {
+        display: grid;
+        grid-template-columns: 420px 1fr;
+        gap: 24px;
+    }
+
+    /* Left Sentence List */
+    .sentence-list {
+        background: var(--bg-secondary);
+        padding: 14px;
+        border-radius: 12px;
+        max-height: 75vh;
+        overflow-y: auto;
+    }
+
+    .sentence-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.2s, transform 0.15s;
+    }
+
+        .sentence-item.active {
+            background: var(--hover-bg);
+            box-shadow: 0 4px 10px var(--surface-hover);
+        }
+
+    .item-left {
+        width: 40px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-align: center;
+    }
+
+    .item-body {
+        flex: 1;
+        padding: 0 12px;
+    }
+
+    .item-text {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .item-hindi {
+        font-size: 16px;
+        color: var(--text-muted);
+    }
+
+    /* Right Active Card */
+    .active-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 28px;
+        text-align: center;
+        box-shadow: 0 8px 26px var(--surface-hover);
+        font-size: 1.3rem; /* bada font */
+    }
+
+    /* Credits + Progress */
+    .credits-section {
+        margin-bottom: 20px;
+    }
+
+    .credit-label {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .progress-bar-outer {
+        height: 14px;
+        background: var(--bg-secondary);
+        border-radius: 8px;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .progress-bar-inner {
+        background: linear-gradient(90deg, #4CAF50, #2E7D32);
+        height: 100%;
+        width: 0%;
+        transition: width 0.5s ease;
+    }
+
+    /* Modern Buttons */
+    .modern-btn {
+        padding: 14px 26px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 14px;
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        color: white;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+        transition: all 0.3s ease;
+    }
+
+        .modern-btn:hover {
+            background: linear-gradient(135deg, #66BB6A, #388E3C);
+            transform: translateY(-2px);
+        }
+
+        .modern-btn:active {
+            transform: scale(0.95);
+        }
+
+    .controls-area {
+        margin-top: 22px;
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+    }
+
+    #completion-msg {
+        margin-top: 22px;
+        font-size: 19px;
+        font-weight: 600;
+        color: var(--success-color);
+    }
+
+    .main-heading {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}

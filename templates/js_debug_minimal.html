@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>JavaScript Debug - Minimal Test</h1>
+    <div id="output"></div>
+</div>
+
+<script>
+console.log('Starting JavaScript debug...');
+
+try {
+    // Test 1: Basic template variable
+    const day = {{ day|tojson|safe }};
+    console.log('Day variable:', day);
+    document.getElementById('output').innerHTML += '<p>Day: ' + day + '</p>';
+} catch (e) {
+    console.error('Error with day variable:', e);
+    document.getElementById('output').innerHTML += '<p style="color:red">Error with day: ' + e.message + '</p>';
+}
+
+try {
+    // Test 2: User ID
+    const userId = {{ current_user.user_id|tojson|safe }};
+    console.log('User ID:', userId);
+    document.getElementById('output').innerHTML += '<p>User ID: ' + userId + '</p>';
+} catch (e) {
+    console.error('Error with user ID:', e);
+    document.getElementById('output').innerHTML += '<p style="color:red">Error with user ID: ' + e.message + '</p>';
+}
+
+try {
+    // Test 3: Credits object
+    const credits = {
+        listen: {{ credits.listen|tojson|safe }},
+        speak: {{ credits.speak|tojson|safe }},
+        vocabulary: {{ (credits.vocabulary if credits.vocabulary else 0)|tojson|safe }},
+        revision: {{ credits.revision|tojson|safe }}
+    };
+    console.log('Credits:', credits);
+    document.getElementById('output').innerHTML += '<p>Credits: ' + JSON.stringify(credits) + '</p>';
+} catch (e) {
+    console.error('Error with credits:', e);
+    document.getElementById('output').innerHTML += '<p style="color:red">Error with credits: ' + e.message + '</p>';
+}
+
+try {
+    // Test 4: Star variables
+    const starOfDayUserId = {{ star_of_day_user_id|tojson|safe }};
+    const starOfWeekUserId = {{ star_of_week_user_id|tojson|safe }};
+    console.log('Star variables:', starOfDayUserId, starOfWeekUserId);
+    document.getElementById('output').innerHTML += '<p>Star of Day: ' + starOfDayUserId + ', Star of Week: ' + starOfWeekUserId + '</p>';
+} catch (e) {
+    console.error('Error with star variables:', e);
+    document.getElementById('output').innerHTML += '<p style="color:red">Error with star variables: ' + e.message + '</p>';
+}
+
+console.log('JavaScript debug completed.');
+</script>
+{% endblock %}

@@ -1,0 +1,609 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - Boony{% endblock %}
+
+{% block content %}
+<style>
+.about-hero {
+    background: var(--accent-color);
+    padding: 80px 0;
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.avatar-selector {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 40px 0;
+}
+
+.avatar-card {
+    background: var(--surface-secondary);
+    border-radius: 20px;
+    padding: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.avatar-card:hover {
+    transform: translateY(-10px);
+    background: var(--surface-hover);
+    border-color: var(--border-color);
+}
+
+/* Avatar Tooltip */
+.avatar-tooltip {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.avatar-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.9);
+}
+
+.avatar-tooltip.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Speaking Animation */
+.avatar-card.speaking {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.introduction-text-container {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    padding: 25px 30px;
+    margin: 15px 0 10px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    color: white;
+    font-size: 22px;
+    line-height: 1.5;
+    text-align: center;
+    min-height: 80px;
+    max-width: 95%;
+    margin-left: auto;
+    margin-right: auto;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.animated-word {
+    display: inline-block;
+    margin: 2px;
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.animated-word:nth-child(odd) {
+    color: var(--accent-color);
+}
+
+.animated-word:nth-child(even) {
+    color: var(--text-secondary);
+}
+
+.avatar-card.active {
+    transform: scale(1.1);
+    background: var(--surface-hover);
+    border-color: var(--accent-color);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.avatar-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.avatar-card.active .avatar-img {
+    width: 150px;
+    height: 150px;
+}
+
+.features-section {
+    padding: 80px 0;
+    background: var(--bg-primary);
+}
+
+.feature-card {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    padding: 40px;
+    margin: 20px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.achievement-badge {
+    background: var(--accent-color);
+    color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: 25px;
+    display: inline-block;
+    margin: 10px;
+    font-weight: bold;
+}
+
+.tech-stack {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 60px 0;
+}
+
+.tech-item {
+    background: var(--surface-secondary);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 10px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.tech-item:hover {
+    background: var(--surface-hover);
+    transform: scale(1.05);
+}
+</style>
+
+<div class="about-hero">
+    <div class="container">
+        <h1 class="display-3 mb-4">Meet Boony</h1>
+        <p class="lead mb-5">आपका AI English Learning Companion</p>
+        
+        <div class="avatar-selector">
+            <div class="avatar-card" id="femaleCard" 
+                 onmouseover="showAvatarMessage('female')" 
+                 onmouseout="hideAvatarMessage()" 
+                 onclick="speakIntroduction('female')">
+                <img src="{{ url_for('static', filename='avatars/boony_female_idle.png') }}" alt="Boony Female" class="avatar-img">
+                <h4>Boony (Female)</h4>
+                <p>American English Expert</p>
+                <div class="avatar-tooltip" id="femaleTooltip">Click me to hear my introduction! 🎤</div>
+            </div>
+            <div class="avatar-card active" id="maleCard" 
+                 onmouseover="showAvatarMessage('male')" 
+                 onmouseout="hideAvatarMessage()" 
+                 onclick="speakIntroduction('male')">
+                <img src="{{ url_for('static', filename='avatars/boony_male_idle.png') }}" alt="Boony Male" class="avatar-img">
+                <h4>Boony (Male)</h4>
+                <p>Hindi-English Specialist</p>
+                <div class="avatar-tooltip" id="maleTooltip">Click me to hear my introduction! 🎤</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-4 mb-4">🏆 Boony की Achievements</h2>
+                <div class="achievements">
+                    <span class="achievement-badge">🎯 95% Accuracy in Pronunciation</span>
+                    <span class="achievement-badge">🚀 10,000+ Happy Learners</span>
+                    <span class="achievement-badge">🌟 AI-Powered Learning</span>
+                    <span class="achievement-badge">🎵 Interactive Voice Training</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="feature-card text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-microphone fa-3x text-primary"></i>
+                    </div>
+                    <h4>🎤 Advanced Speech Recognition</h4>
+                    <p>हमारा AI आपकी आवाज़ को समझता है और real-time में pronunciation को correct करता है। Microsoft Azure और Google की latest technology का उपयोग करके हम 99% accuracy देते हैं।</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-brain fa-3x text-success"></i>
+                    </div>
+                    <h4>🧠 Personalized Learning</h4>
+                    <p>हर student के लिए customized learning path बनाते हैं। आपकी mistakes को track करके targeted practice sessions देते हैं जो आपकी कमजोरियों को strength में बदल देते हैं।</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-comments fa-3x text-warning"></i>
+                    </div>
+                    <h4>💬 Interactive Conversations</h4>
+                    <p>Real-life scenarios में English practice करें। हमारे AI avatars के साथ natural conversations करके confidence build करें। Daily life situations से लेकर professional meetings तक।</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <div class="feature-card">
+                    <h4>🎯 Key Features</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> <strong>Pronunciation Analysis:</strong> हर word का detailed analysis</li>
+                        <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> <strong>Voice Cloning:</strong> आपकी पसंदीदा आवाज़ में सीखें</li>
+                        <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> <strong>Progress Tracking:</strong> Daily improvement को measure करें</li>
+                        <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> <strong>Gamification:</strong> Fun के साथ learning</li>
+                        <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> <strong>Offline Mode:</strong> Internet के बिना भी practice करें</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="feature-card">
+                    <h4>🔬 Special Techniques</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-3"><i class="fas fa-star text-warning me-2"></i> <strong>Phonetic Mapping:</strong> IPA symbols के साथ pronunciation guide</li>
+                        <li class="mb-3"><i class="fas fa-star text-warning me-2"></i> <strong>Stress Pattern Recognition:</strong> Word stress को perfectly समझें</li>
+                        <li class="mb-3"><i class="fas fa-star text-warning me-2"></i> <strong>Accent Training:</strong> American, British, Indian accents में master करें</li>
+                        <li class="mb-3"><i class="fas fa-star text-warning me-2"></i> <strong>Emotion Detection:</strong> आपके mood के according learning adjust करें</li>
+                        <li class="mb-3"><i class="fas fa-star text-warning me-2"></i> <strong>Contextual Learning:</strong> Situation-based vocabulary building</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tech-stack">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-12 mb-5">
+                <h2 class="display-4 mb-4">🚀 Technology Stack</h2>
+                <p class="lead">हमारे पीछे की powerful technology</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="tech-item">
+                    <i class="fab fa-python fa-2x mb-3"></i>
+                    <h5>Python + Flask</h5>
+                    <p>Backend Development</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="tech-item">
+                    <i class="fas fa-cloud fa-2x mb-3"></i>
+                    <h5>Microsoft Azure</h5>
+                    <p>Speech Services</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="tech-item">
+                    <i class="fas fa-robot fa-2x mb-3"></i>
+                    <h5>OpenAI GPT</h5>
+                    <p>AI Conversations</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="tech-item">
+                    <i class="fas fa-database fa-2x mb-3"></i>
+                    <h5>PostgreSQL</h5>
+                    <p>Data Management</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12 text-center">
+            <h2 class="mb-4">🎯 Why Choose Boony?</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-graduation-cap fa-3x text-primary"></i>
+                            </div>
+                            <h5>Expert Guidance</h5>
+                            <p>Professional English teachers की expertise के साथ AI की power</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-clock fa-3x text-success"></i>
+                            </div>
+                            <h5>24/7 Available</h5>
+                            <p>कभी भी, कहीं भी practice करें। आपका personal English tutor हमेशा ready</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card border-0 shadow">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-chart-line fa-3x text-warning"></i>
+                            </div>
+                            <h5>Proven Results</h5>
+                            <p>हजारों students ने अपनी English improve की है। आप भी कर सकते हैं!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Avatar hover and click functionality
+function showAvatarMessage(gender) {
+    const tooltip = document.getElementById(gender + 'Tooltip');
+    tooltip.classList.add('show');
+}
+
+function hideAvatarMessage() {
+    document.querySelectorAll('.avatar-tooltip').forEach(tooltip => {
+        tooltip.classList.remove('show');
+    });
+}
+
+function speakIntroduction(gender) {
+    const avatar = document.getElementById(gender + 'Card');
+    avatar.classList.add('speaking');
+    
+    // Boony's impressive introduction
+    const introductions = {
+        female: "Hello! I'm Boony, your AI English teacher. I use advanced speech recognition and natural language processing to help you master English pronunciation. With my interactive teaching methods, personalized feedback, and gamified learning approach, I make English learning fun and effective. I can detect your pronunciation errors in real-time and provide instant corrections. Let's embark on this exciting English learning journey together!",
+        male: "Namaste! Main Boony hun, aapka AI English learning companion. Main aapki help karunga English pronunciation, vocabulary aur conversation skills improve karne mein with personalized guidance and interactive lessons. Chaliye saath mein English seekhte hain!"
+    };
+    
+    // Start animated text display
+    animateIntroductionText(introductions[gender], gender);
+    
+    // Create speech synthesis
+    const utterance = new SpeechSynthesisUtterance(introductions[gender]);
+    
+    // Set voice properties based on gender
+    const voices = speechSynthesis.getVoices();
+    if (gender === 'female') {
+        // Try to find American English female voice - prioritize Microsoft voices
+        const femaleVoice = voices.find(voice => 
+            voice.name.includes('Microsoft Zira') && voice.lang.includes('en-US')
+        ) || voices.find(voice => 
+            voice.name.includes('Microsoft Aria') && voice.lang.includes('en-US')
+        ) || voices.find(voice => 
+            voice.lang.includes('en-US') && (voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('woman'))
+        ) || voices.find(voice => voice.lang.includes('en-US')) || voices[0];
+        if (femaleVoice) utterance.voice = femaleVoice;
+    } else {
+        // Try to find Indian English or Microsoft Ravi voice
+        const maleVoice = voices.find(voice => 
+            voice.name.includes('Microsoft Ravi') && voice.lang.includes('en-IN')
+        ) || voices.find(voice => 
+            voice.lang.includes('en-IN') || voice.lang.includes('hi-IN')
+        ) || voices.find(voice => 
+            voice.name.toLowerCase().includes('male') && voice.lang.includes('en')
+        ) || voices[0];
+        if (maleVoice) utterance.voice = maleVoice;
+    }
+    
+    utterance.rate = 0.9;
+    utterance.pitch = gender === 'female' ? 1.1 : 0.9;
+    utterance.volume = 1;
+    
+    // Handle speech end
+    utterance.onend = function() {
+        avatar.classList.remove('speaking');
+        showNotification(`Thanks for listening to my introduction! 🎉`);
+    };
+    
+    // Handle speech error
+    utterance.onerror = function() {
+        avatar.classList.remove('speaking');
+        showNotification('Sorry, speech is not available right now. 😔');
+    };
+    
+    // Speak the introduction
+    speechSynthesis.speak(utterance);
+    
+    // Show speaking notification
+    showNotification(`${gender.charAt(0).toUpperCase() + gender.slice(1)} Boony is introducing herself! 🎤`);
+}
+
+function animateIntroductionText(text, gender) {
+    // Create or get text container
+    let textContainer = document.getElementById('introductionText');
+    if (!textContainer) {
+        textContainer = document.createElement('div');
+        textContainer.id = 'introductionText';
+        textContainer.className = 'introduction-text-container';
+        textContainer.style.display = 'none';
+        // Insert after avatars section
+        const avatarsSection = document.querySelector('.avatars-section');
+        if (avatarsSection) {
+            avatarsSection.insertAdjacentElement('afterend', textContainer);
+        } else {
+            document.querySelector('.about-hero .container').appendChild(textContainer);
+        }
+    }
+    
+    textContainer.innerHTML = '';
+    textContainer.style.display = 'block';
+    
+    const words = text.split(' ');
+    let wordIndex = 0;
+    
+    function showNextWord() {
+        if (wordIndex < words.length) {
+            const wordSpan = document.createElement('span');
+            wordSpan.textContent = words[wordIndex] + ' ';
+            wordSpan.className = 'animated-word';
+            wordSpan.style.opacity = '0';
+            wordSpan.style.transform = 'translateY(20px)';
+            wordSpan.style.display = 'inline-block';
+            wordSpan.style.transition = 'all 0.3s ease';
+            
+            textContainer.appendChild(wordSpan);
+            
+            // Animate word appearance
+            setTimeout(() => {
+                wordSpan.style.opacity = '1';
+                wordSpan.style.transform = 'translateY(0)';
+            }, 50);
+            
+            wordIndex++;
+            setTimeout(showNextWord, 300); // Show next word after 300ms
+        }
+    }
+    
+    showNextWord();
+}
+
+function selectAvatar(gender) {
+    // Remove active class from all cards
+    document.querySelectorAll('.avatar-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    
+    // Add active class to selected card
+    const selectedCard = gender === 'female' ? document.getElementById('femaleCard') : document.getElementById('maleCard');
+    selectedCard.classList.add('active');
+    
+    // Update voice preferences
+    if (window.setVoice) {
+        window.setVoice(gender);
+    }
+    
+    // Show selection feedback
+    const avatarName = gender === 'female' ? 'Boony (Female) - American English Expert' : 'Boony (Male) - Hindi-English Specialist';
+    
+    // Create temporary notification
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--accent-color);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        font-weight: bold;
+        z-index: 10000;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease;
+    `;
+    notification.innerHTML = `✨ ${avatarName} Selected!`;
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }
+    }, 3000);
+}
+
+function showNotification(message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        padding: 15px 25px;
+        border-radius: 10px;
+        font-weight: bold;
+        z-index: 10000;
+        box-shadow: 0 10px 25px var(--accent-shadow);
+        border: 1px solid var(--border-color);
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Hide and remove notification
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }
+    }, 3000);
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// Initialize with male avatar selected by default
+document.addEventListener('DOMContentLoaded', function() {
+    // Load user preferences if available
+    if (window.getPrefs) {
+        const prefs = window.getPrefs() || {};
+        selectAvatar(prefs.voice || 'male');
+    }
+    
+    // Ensure voices are loaded for speech synthesis
+    if (speechSynthesis.getVoices().length === 0) {
+        speechSynthesis.addEventListener('voiceschanged', function() {
+            console.log('Voices loaded:', speechSynthesis.getVoices().length);
+        });
+    }
+});
+</script>
+{% endblock %}

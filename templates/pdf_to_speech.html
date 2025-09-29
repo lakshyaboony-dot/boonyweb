@@ -1,0 +1,1004 @@
+{% extends "base.html" %}
+
+{% block title %}📄 PDF/Image to Speech - Professional Edition{% endblock %}
+
+{% block content %}
+<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Override base styles for this page */
+        .page {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .pdf-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            min-height: calc(100vh - 200px);
+        }
+
+        .main-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .upload-section {
+            background: linear-gradient(135deg, #f8f9ff, #e8f0ff);
+            border: 2px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-section:hover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, #f0f4ff, #e0ebff);
+            transform: translateY(-2px);
+        }
+
+        .upload-section.dragover {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, #f0fff0, #e8f5e8);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .file-preview {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            color: #667eea;
+        }
+
+        .file-details h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .file-details p {
+            margin: 5px 0 0 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .control-btn.pause {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        .control-btn.stop {
+            background: linear-gradient(135deg, #ff4757, #c44569);
+        }
+
+        .right-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .panel-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .panel-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .panel-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .words-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .word-item {
+            background: linear-gradient(135deg, #f8f9ff, #e8f0ff);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .word-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .word-english {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .word-pronunciation {
+            font-size: 0.9rem;
+            color: #667eea;
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+
+        .word-hindi {
+            font-size: 1rem;
+            color: #666;
+            font-family: 'Noto Sans Devanagari', 'Mangal', 'Kruti Dev 010', sans-serif;
+            font-weight: 500;
+            margin-top: 5px;
+            padding: 5px 10px;
+            background: linear-gradient(135deg, #fff8e1, #f3e5ab);
+            border-radius: 8px;
+            border-left: 3px solid #ff9800;
+        }
+
+        .file-previews-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .previews-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .preview-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .preview-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .preview-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .preview-icon {
+            font-size: 1.5rem;
+            color: #667eea;
+        }
+
+        .preview-filename {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .preview-content {
+            margin-top: 10px;
+        }
+
+        .preview-image {
+            width: 100%;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .preview-text {
+            font-size: 0.8rem;
+            color: #666;
+            line-height: 1.4;
+            max-height: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .preview-info {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .status-text {
+            font-weight: 600;
+            color: #2e7d32;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ffe8e8, #fff0f0);
+            border: 1px solid #ff6b6b;
+            color: #c44569;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #e8f5e8, #f0fff0);
+            border: 1px solid #4CAF50;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .main-content, .right-panel {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .upload-section {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+
+    <div class="pdf-container">
+        <div class="main-content">
+            <div class="header">
+                <h1>📄 PDF/Image to Speech</h1>
+                <p>Upload your PDF documents or images and get instant English text-to-speech conversion</p>
+                <div class="status-indicator" id="statusIndicator" style="display: none;">
+                    <div class="status-dot"></div>
+                    <span class="status-text" id="statusText">Ready to process</span>
+                </div>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="upload-text">Drag & Drop your files here</div>
+                <div class="upload-subtext">
+                    Support: PDF, JPG, PNG, JPEG | Max: 10 pages/images | Max size: 50MB
+                </div>
+                <input type="file" id="fileInput" class="file-input" multiple accept=".pdf,.jpg,.jpeg,.png">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-upload"></i> Choose Files
+                </button>
+            </div>
+
+            <div class="file-preview" id="filePreview">
+                <div class="file-info">
+                    <div class="file-icon">
+                        <i class="fas fa-file-pdf" id="fileIcon"></i>
+                    </div>
+                    <div class="file-details">
+                        <h3 id="fileName">document.pdf</h3>
+                        <p id="fileSize">2.5 MB • 5 pages</p>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div id="progressText">Processing... 0%</div>
+            </div>
+
+            <!-- File Previews Section -->
+            <div class="file-previews-section" id="filePreviewsSection" style="display: none;">
+                <h3 style="margin-bottom: 15px; color: #333;">📄 File Previews</h3>
+                <div class="previews-container" id="previewsContainer">
+                    <!-- File previews will be populated here -->
+                </div>
+            </div>
+
+            <div class="loading-spinner" id="loadingSpinner"></div>
+
+            <div class="control-buttons" id="controlButtons" style="display: none;">
+                <button class="control-btn" id="playBtn">
+                    <i class="fas fa-play"></i> Play
+                </button>
+                <button class="control-btn pause" id="pauseBtn" style="display: none;">
+                    <i class="fas fa-pause"></i> Pause
+                </button>
+                <button class="control-btn stop" id="stopBtn">
+                    <i class="fas fa-stop"></i> Stop
+                </button>
+                <button class="control-btn" id="downloadBtn">
+                    <i class="fas fa-download"></i> Download Audio
+                </button>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="panel-header">
+                <h2>📚 Important Words</h2>
+                <p>Key vocabulary with pronunciation & Hindi meaning</p>
+            </div>
+            <div class="words-list" id="wordsList">
+                <!-- Words will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Professional PDF/Image to Speech System
+        class PDFToSpeechEngine {
+            constructor() {
+                this.currentAudio = null;
+                this.isPlaying = false;
+                this.isPaused = false;
+                this.extractedText = '';
+                this.importantWords = [];
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                const fileInput = document.getElementById('fileInput');
+                const uploadSection = document.getElementById('uploadSection');
+                const playBtn = document.getElementById('playBtn');
+                const pauseBtn = document.getElementById('pauseBtn');
+                const stopBtn = document.getElementById('stopBtn');
+                const downloadBtn = document.getElementById('downloadBtn');
+
+                // File input change
+                fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+
+                // Drag and drop
+                uploadSection.addEventListener('dragover', (e) => this.handleDragOver(e));
+                uploadSection.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+                uploadSection.addEventListener('drop', (e) => this.handleDrop(e));
+
+                // Control buttons
+                playBtn.addEventListener('click', () => this.playAudio());
+                pauseBtn.addEventListener('click', () => this.pauseAudio());
+                stopBtn.addEventListener('click', () => this.stopAudio());
+                downloadBtn.addEventListener('click', () => this.downloadAudio());
+            }
+
+            handleDragOver(e) {
+                e.preventDefault();
+                document.getElementById('uploadSection').classList.add('dragover');
+            }
+
+            handleDragLeave(e) {
+                e.preventDefault();
+                document.getElementById('uploadSection').classList.remove('dragover');
+            }
+
+            handleDrop(e) {
+                e.preventDefault();
+                document.getElementById('uploadSection').classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                this.processFiles(files);
+            }
+
+            handleFileSelect(e) {
+                const files = e.target.files;
+                this.processFiles(files);
+            }
+
+            async processFiles(files) {
+                if (files.length === 0) return;
+
+                // Validate files
+                const validFiles = this.validateFiles(files);
+                if (validFiles.length === 0) return;
+
+                // Show file preview
+                this.showFilePreview(validFiles[0]);
+                
+                // Start processing
+                await this.extractTextFromFiles(validFiles);
+            }
+
+            validateFiles(files) {
+                const validFiles = [];
+                const maxSize = 50 * 1024 * 1024; // 50MB
+                const maxFiles = 10;
+
+                if (files.length > maxFiles) {
+                    this.showError(`Maximum ${maxFiles} files allowed`);
+                    return [];
+                }
+
+                for (let file of files) {
+                    if (file.size > maxSize) {
+                        this.showError(`File ${file.name} is too large. Maximum size: 50MB`);
+                        continue;
+                    }
+
+                    const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+                    if (!validTypes.includes(file.type)) {
+                        this.showError(`File ${file.name} is not supported. Use PDF, JPG, or PNG files.`);
+                        continue;
+                    }
+
+                    validFiles.push(file);
+                }
+
+                return validFiles;
+            }
+
+            showFilePreview(file) {
+                const preview = document.getElementById('filePreview');
+                const fileName = document.getElementById('fileName');
+                const fileSize = document.getElementById('fileSize');
+                const fileIcon = document.getElementById('fileIcon');
+
+                fileName.textContent = file.name;
+                fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+
+                // Set appropriate icon
+                if (file.type === 'application/pdf') {
+                    fileIcon.className = 'fas fa-file-pdf';
+                } else {
+                    fileIcon.className = 'fas fa-file-image';
+                }
+
+                preview.style.display = 'block';
+                this.updateProgress(0);
+            }
+
+            async extractTextFromFiles(files) {
+                this.showStatus('Processing files...', true);
+                this.showLoading(true);
+
+                try {
+                    const formData = new FormData();
+                    for (let file of files) {
+                        formData.append('files', file);
+                    }
+
+                    const response = await fetch('/api/extract-text', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to extract text from files');
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.extractedText = result.text;
+                        this.importantWords = result.important_words || [];
+                        
+                        // Display file previews if available
+                        if (result.file_previews && result.file_previews.length > 0) {
+                            this.displayFilePreviews(result.file_previews);
+                        }
+                        
+                        this.updateProgress(50);
+                        await this.convertToSpeech(this.extractedText);
+                        
+                        this.populateWordsList(this.importantWords);
+                        this.showSuccess('Files processed successfully!');
+                        this.showControls(true);
+                    } else {
+                        throw new Error(result.error || 'Failed to process files');
+                    }
+
+                } catch (error) {
+                    console.error('Error processing files:', error);
+                    this.showError('Error processing files: ' + error.message);
+                } finally {
+                    this.showLoading(false);
+                    this.showStatus('Ready', false);
+                }
+            }
+
+            async convertToSpeech(text) {
+                this.updateProgress(75);
+                
+                try {
+                    console.log('🔊 Converting text to speech...');
+                    const response = await fetch('/api/text-to-speech', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text: text })
+                    });
+
+                    console.log('📡 TTS Response status:', response.status);
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error('❌ TTS Error:', errorData);
+                        throw new Error(errorData.error || 'Failed to convert text to speech');
+                    }
+
+                    const audioBlob = await response.blob();
+                    console.log('🎵 Audio blob size:', audioBlob.size, 'bytes');
+                    
+                    if (audioBlob.size === 0) {
+                        throw new Error('Received empty audio file');
+                    }
+                    
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    console.log('🔗 Audio URL created:', audioUrl);
+                    
+                    this.currentAudio = new Audio(audioUrl);
+                    
+                    // Add more event listeners for debugging
+                    this.currentAudio.addEventListener('loadstart', () => {
+                        console.log('🎵 Audio loading started');
+                    });
+                    
+                    this.currentAudio.addEventListener('canplay', () => {
+                        console.log('✅ Audio can play');
+                    });
+                    
+                    this.currentAudio.addEventListener('error', (e) => {
+                        console.error('❌ Audio error:', e);
+                        this.showError('Audio playback error: ' + e.message);
+                    });
+                    
+                    this.currentAudio.addEventListener('ended', () => {
+                        console.log('🏁 Audio playback ended');
+                        this.isPlaying = false;
+                        this.updatePlayButton();
+                    });
+
+                    this.updateProgress(100);
+                    console.log('✅ TTS conversion complete');
+                    
+                } catch (error) {
+                    console.error('❌ Error converting to speech:', error);
+                    this.showError('Failed to convert text to speech: ' + error.message);
+                    throw error;
+                }
+            }
+
+            displayFilePreviews(previews) {
+                const previewsSection = document.getElementById('filePreviewsSection');
+                const previewsContainer = document.getElementById('previewsContainer');
+                
+                // Clear existing previews
+                previewsContainer.innerHTML = '';
+                
+                previews.forEach(preview => {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'preview-item';
+                    
+                    let content = '';
+                    if (preview.type === 'image') {
+                        content = `
+                            <div class="preview-header">
+                                <i class="${preview.icon} preview-icon"></i>
+                                <span class="preview-filename">${preview.filename}</span>
+                            </div>
+                            <div class="preview-content">
+                                <img src="${preview.preview_data}" alt="${preview.filename}" class="preview-image">
+                                <div class="preview-info">
+                                    ${preview.width} × ${preview.height} pixels
+                                </div>
+                            </div>
+                        `;
+                    } else if (preview.type === 'pdf') {
+                        content = `
+                            <div class="preview-header">
+                                <i class="${preview.icon} preview-icon"></i>
+                                <span class="preview-filename">${preview.filename}</span>
+                            </div>
+                            <div class="preview-content">
+                                <div class="preview-text">${preview.preview_text}</div>
+                                <div class="preview-info">
+                                    ${preview.page_count} pages
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    previewItem.innerHTML = content;
+                    previewsContainer.appendChild(previewItem);
+                });
+                
+                // Show the previews section
+                previewsSection.style.display = 'block';
+            }
+
+            populateWordsList(words) {
+                const wordsList = document.getElementById('wordsList');
+                wordsList.innerHTML = '';
+
+                words.forEach(word => {
+                    const wordItem = document.createElement('div');
+                    wordItem.className = 'word-item';
+                    wordItem.innerHTML = `
+                        <div class="word-english">${word.word}</div>
+                        <div class="word-pronunciation">/${word.pronunciation || 'N/A'}/</div>
+                        <div class="word-hindi">हिंदी: ${word.hindi_meaning || 'अर्थ उपलब्ध नहीं'}</div>
+                    `;
+                    
+                    wordItem.addEventListener('click', () => {
+                        this.speakWord(word.english);
+                    });
+                    
+                    wordsList.appendChild(wordItem);
+                });
+            }
+
+            async speakWord(word) {
+                try {
+                    console.log('🗣️ Speaking word:', word);
+                    const response = await fetch('/api/speak-word', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ word: word })
+                    });
+
+                    console.log('📡 Speak word response status:', response.status);
+
+                    if (response.ok) {
+                        const audioBlob = await response.blob();
+                        console.log('🎵 Word audio blob size:', audioBlob.size, 'bytes');
+                        
+                        if (audioBlob.size === 0) {
+                            console.error('❌ Received empty audio file for word');
+                            return;
+                        }
+                        
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        console.log('🔗 Word audio URL created:', audioUrl);
+                        
+                        const audio = new Audio(audioUrl);
+                        
+                        audio.addEventListener('error', (e) => {
+                            console.error('❌ Word audio error:', e);
+                        });
+                        
+                        audio.addEventListener('canplay', () => {
+                            console.log('✅ Word audio can play');
+                        });
+                        
+                        console.log('▶️ Playing word audio...');
+                        await audio.play();
+                        console.log('✅ Word audio played successfully');
+                    } else {
+                        const errorData = await response.json();
+                        console.error('❌ Speak word error:', errorData);
+                    }
+                } catch (error) {
+                    console.error('❌ Error speaking word:', error);
+                }
+            }
+
+            playAudio() {
+                if (!this.currentAudio) {
+                    console.warn('⚠️ No audio available to play');
+                    this.showError('No audio available. Please convert text first.');
+                    return;
+                }
+
+                console.log('▶️ Playing audio...');
+                
+                if (this.isPaused) {
+                    console.log('⏯️ Resuming paused audio');
+                    this.currentAudio.play().then(() => {
+                        console.log('✅ Audio resumed successfully');
+                    }).catch((error) => {
+                        console.error('❌ Error resuming audio:', error);
+                        this.showError('Failed to resume audio: ' + error.message);
+                    });
+                    this.isPaused = false;
+                } else {
+                    console.log('🔄 Restarting audio from beginning');
+                    this.currentAudio.currentTime = 0;
+                    this.currentAudio.play().then(() => {
+                        console.log('✅ Audio started successfully');
+                    }).catch((error) => {
+                        console.error('❌ Error playing audio:', error);
+                        this.showError('Failed to play audio: ' + error.message);
+                    });
+                }
+                
+                this.isPlaying = true;
+                this.updatePlayButton();
+            }
+
+            pauseAudio() {
+                if (this.currentAudio && this.isPlaying) {
+                    this.currentAudio.pause();
+                    this.isPlaying = false;
+                    this.isPaused = true;
+                    this.updatePlayButton();
+                }
+            }
+
+            stopAudio() {
+                if (this.currentAudio) {
+                    this.currentAudio.pause();
+                    this.currentAudio.currentTime = 0;
+                    this.isPlaying = false;
+                    this.isPaused = false;
+                    this.updatePlayButton();
+                }
+            }
+
+            updatePlayButton() {
+                const playBtn = document.getElementById('playBtn');
+                const pauseBtn = document.getElementById('pauseBtn');
+
+                if (this.isPlaying) {
+                    playBtn.style.display = 'none';
+                    pauseBtn.style.display = 'flex';
+                } else {
+                    playBtn.style.display = 'flex';
+                    pauseBtn.style.display = 'none';
+                }
+            }
+
+            downloadAudio() {
+                if (this.currentAudio) {
+                    const a = document.createElement('a');
+                    a.href = this.currentAudio.src;
+                    a.download = 'converted_audio.mp3';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+            }
+
+            updateProgress(percentage) {
+                const progressFill = document.getElementById('progressFill');
+                const progressText = document.getElementById('progressText');
+                
+                progressFill.style.width = percentage + '%';
+                progressText.textContent = `Processing... ${percentage}%`;
+                
+                if (percentage === 100) {
+                    progressText.textContent = 'Complete!';
+                }
+            }
+
+            showStatus(text, isActive) {
+                const statusIndicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+                
+                statusText.textContent = text;
+                statusIndicator.style.display = isActive ? 'flex' : 'none';
+            }
+
+            showLoading(show) {
+                const spinner = document.getElementById('loadingSpinner');
+                spinner.style.display = show ? 'block' : 'none';
+            }
+
+            showControls(show) {
+                const controls = document.getElementById('controlButtons');
+                controls.style.display = show ? 'flex' : 'none';
+            }
+
+            showError(message) {
+                const errorDiv = document.getElementById('errorMessage');
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 5000);
+            }
+
+            showSuccess(message) {
+                const successDiv = document.getElementById('successMessage');
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+                setTimeout(() => {
+                    successDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Initialize the PDF to Speech Engine
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 PDF to Speech Engine initializing...');
+            const pdfToSpeech = new PDFToSpeechEngine();
+            console.log('✅ PDF to Speech Engine ready!');
+        });
+    </script>
+{% endblock %}
+
+{% block scripts %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+{% endblock %}

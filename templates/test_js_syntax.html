@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}JS Syntax Test{% endblock %}
+
+{% block content %}
+<h1>JavaScript Syntax Test</h1>
+<div id="test-output"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Testing JavaScript variables...');
+    
+    try {
+        const currentUserId = {{ current_user.user_id|tojson|safe }};
+        console.log('currentUserId:', currentUserId);
+    } catch (e) {
+        console.error('Error with currentUserId:', e);
+    }
+    
+    try {
+        const starOfDayUserId = {{ star_of_day_user_id|tojson|safe }};
+        console.log('starOfDayUserId:', starOfDayUserId);
+    } catch (e) {
+        console.error('Error with starOfDayUserId:', e);
+    }
+    
+    try {
+        const starOfWeekUserId = {{ star_of_week_user_id|tojson|safe }};
+        console.log('starOfWeekUserId:', starOfWeekUserId);
+    } catch (e) {
+        console.error('Error with starOfWeekUserId:', e);
+    }
+    
+    try {
+        const currentDay = {{ day|tojson|safe }};
+        console.log('currentDay:', currentDay);
+    } catch (e) {
+        console.error('Error with currentDay:', e);
+    }
+    
+    try {
+        const credits = {
+            listen: {{ credits.listen|tojson|safe }},
+            speak: {{ credits.speak|tojson|safe }},
+            vocabulary: {{ credits.vocabulary|tojson|safe }},
+            revision: {{ credits.revision|tojson|safe }}
+        };
+        console.log('credits:', credits);
+    } catch (e) {
+        console.error('Error with credits:', e);
+    }
+    
+    document.getElementById('test-output').innerHTML = 'Check console for JavaScript variable test results';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Speak Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-info { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Debug Speak Page</h1>
+    
+    <div class="debug-info">
+        <h3>Test Results:</h3>
+        <div id="test-results"></div>
+    </div>
+    
+    <button onclick="testTTS()">Test TTS</button>
+    <button onclick="testMicrophone()">Test Microphone</button>
+    <button onclick="testAnalyzeEndpoint()">Test Analyze Endpoint</button>
+    
+    <audio id="test-audio" controls style="display:block; margin: 10px 0;"></audio>
+    
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            results.appendChild(div);
+            console.log(message);
+        }
+        
+        function testTTS() {
+            log('Testing TTS endpoint...');
+            const audio = document.getElementById('test-audio');
+            const testText = 'Hello, this is a test';
+            const url = `/tts?text=${encodeURIComponent(testText)}&voice=en`;
+            
+            audio.src = url;
+            audio.onloadeddata = () => {
+                log('✅ TTS endpoint working - audio loaded', 'success');
+                audio.play();
+            };
+            audio.onerror = (error) => {
+                log('❌ TTS endpoint failed: ' + error, 'error');
+            };
+        }
+        
+        function testMicrophone() {
+            log('Testing microphone access...');
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    log('✅ Microphone access granted', 'success');
+                    stream.getTracks().forEach(track => track.stop());
+                })
+                .catch(error => {
+                    log('❌ Microphone access failed: ' + error.message, 'error');
+                });
+        }
+        
+        function testAnalyzeEndpoint() {
+            log('Testing analyze speech endpoint...');
+            
+            // Create a dummy audio blob for testing
+            const canvas = document.createElement('canvas');
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('audio', blob, 'test.wav');
+                formData.append('sentence', 'Hello world');
+                formData.append('expected_text', 'Hello world');
+                
+                fetch('/api/analyze_speech', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    log(`Analyze endpoint response status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    log('✅ Analyze endpoint response: ' + JSON.stringify(data), 'success');
+                })
+                .catch(error => {
+                    log('❌ Analyze endpoint failed: ' + error.message, 'error');
+                });
+            }, 'audio/wav');
+        }
+        
+        // Auto-run basic tests on page load
+        window.onload = function() {
+            log('🚀 Debug page loaded');
+            log('Testing basic functionality...');
+            
+            // Test if fetch is available
+            if (typeof fetch !== 'undefined') {
+                log('✅ Fetch API available', 'success');
+            } else {
+                log('❌ Fetch API not available', 'error');
+            }
+            
+            // Test if MediaDevices is available
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                log('✅ MediaDevices API available', 'success');
+            } else {
+                log('❌ MediaDevices API not available', 'error');
+            }
+        };
+    </script>
+</body>
+</html>

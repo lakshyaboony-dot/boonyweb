@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Fun Practice Zone - {{ day }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>🎉 Fun Practice Zone - {{ day }}</h1>
+
+    <!-- Guide messages -->
+    <div class="guide-messages">
+        {% for msg_type, msg_text in guide_messages.items() %}
+            <p><strong>{{ msg_type }}:</strong> {{ msg_text }}</p>
+        {% endfor %}
+    </div>
+
+    <!-- Practice activities -->
+    <div class="practice-activities">
+        <h2>Activities</h2>
+        <ul>
+            {% for activity, points in practice_activities.items() %}
+                <li>
+                    {{ activity }} 
+                    {% if points > 0 %}
+                        ✅ Completed
+                    {% else %}
+                        ❌ Not Done
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
+ 

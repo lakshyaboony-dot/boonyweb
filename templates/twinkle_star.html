@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twinkle Twinkle Little Star - Interactive Poem</title>
+    <style>
+        :root {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #fff;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --accent-color: #007bff;
+            --border-color: #ddd;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .stars-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(2px 2px at 160px 30px, #fff, transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: twinkle 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 90vw;
+            width: 100%;
+            margin: 20px auto;
+            box-sizing: border-box;
+        }
+
+        .title {
+            font-size: 3rem;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px #FFD700; }
+            to { text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px #FFD700, 0 0 30px #FFD700; }
+        }
+
+        .poem-container {
+            margin: 30px 0;
+            line-height: 1.8;
+        }
+
+        .poem-line {
+            font-size: 2.5rem;
+            color: #FFFFFF;
+            margin: 15px 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        .word {
+            display: inline-block;
+            margin: 0 8px;
+            padding: 5px 10px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .word.highlight {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.6);
+            animation: bounce 0.6s ease;
+        }
+
+        .word.word-singing {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53, #FF6B6B);
+            background-size: 200% 200%;
+            animation: singing-glow 1.5s ease-in-out infinite;
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .word.word-rainbow {
+            animation: word-rainbow 1.5s ease-in-out infinite;
+        }
+
+        .word.word-fade-out {
+            opacity: 0.7;
+            transform: scale(0.95);
+            transition: all 0.3s ease-out;
+        }
+
+        @keyframes singing-glow {
+            0% {
+                background-position: 0% 50%;
+                box-shadow: 0 4px 20px rgba(255, 107, 107, 0.8), 0 0 30px rgba(255, 142, 83, 0.6);
+            }
+            50% {
+                background-position: 100% 50%;
+                box-shadow: 0 6px 25px rgba(255, 142, 83, 0.9), 0 0 40px rgba(255, 107, 107, 0.7);
+            }
+            100% {
+                background-position: 0% 50%;
+                box-shadow: 0 4px 20px rgba(255, 107, 107, 0.8), 0 0 30px rgba(255, 142, 83, 0.6);
+            }
+        }
+
+        @keyframes word-rainbow {
+            0% {
+                background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                transform: rotateY(0deg) scale(1.2);
+                text-shadow: 0 0 15px rgba(255, 107, 107, 0.7);
+                filter: hue-rotate(0deg) brightness(1.2);
+            }
+            25% {
+                background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                transform: rotateY(90deg) scale(1.3);
+                text-shadow: 0 0 20px rgba(78, 205, 196, 0.8);
+                filter: hue-rotate(90deg) brightness(1.4);
+            }
+            50% {
+                background: linear-gradient(45deg, #45b7d1, #96ceb4);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                transform: rotateY(180deg) scale(1.4);
+                text-shadow: 0 0 25px rgba(69, 183, 209, 0.9);
+                filter: hue-rotate(180deg) brightness(1.6);
+            }
+            75% {
+                background: linear-gradient(45deg, #96ceb4, #feca57);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                transform: rotateY(270deg) scale(1.3);
+                text-shadow: 0 0 20px rgba(150, 206, 180, 0.8);
+                filter: hue-rotate(270deg) brightness(1.4);
+            }
+            100% {
+                background: linear-gradient(45deg, #feca57, #ff6b6b);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                transform: rotateY(360deg) scale(1.2);
+                text-shadow: 0 0 15px rgba(254, 202, 87, 0.7);
+                filter: hue-rotate(360deg) brightness(1.2);
+            }
+        }
+        
+
+
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0) scale(1.1); }
+            40% { transform: translateY(-10px) scale(1.1); }
+            80% { transform: translateY(-5px) scale(1.1); }
+        }
+
+        .controls {
+            margin: 40px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-play {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn-sing {
+            background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+            color: white;
+        }
+
+
+
+        .btn-record {
+            background: linear-gradient(45deg, #f44336, #da190b);
+            color: white;
+        }
+
+        .btn-listen {
+            background: linear-gradient(45deg, #2196F3, #0b7dda);
+            color: white;
+        }
+
+        .btn-stop {
+            background: linear-gradient(45deg, #FF9800, #e68900);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin: 20px 0;
+            font-size: 1.3rem;
+            color: #FFD700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            min-height: 30px;
+        }
+
+        .recording-indicator {
+            display: none;
+            color: #ff4444;
+            font-size: 1.1rem;
+            margin: 10px 0;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Large screens */
+        @media (min-width: 1200px) {
+            .container { max-width: 1000px; padding: 30px; }
+            .title { font-size: 3.5rem; }
+            .poem-line { font-size: 2.8rem; }
+        }
+
+        /* Medium screens */
+        @media (max-width: 1024px) {
+            .container { max-width: 85vw; padding: 25px; }
+            .title { font-size: 2.8rem; }
+            .poem-line { font-size: 2.2rem; }
+            .word { margin: 0 6px; padding: 4px 8px; }
+        }
+
+        /* Tablets */
+        @media (max-width: 768px) {
+            .container { max-width: 95vw; padding: 20px; margin: 15px auto; }
+            .title { font-size: 2.2rem; }
+            .poem-line { font-size: 1.8rem; }
+            .word { margin: 0 4px; padding: 3px 6px; font-size: 0.9rem; }
+            .btn { padding: 12px 20px; font-size: 0.95rem; }
+            .controls { gap: 12px; flex-wrap: wrap; }
+        }
+
+        /* Mobile phones */
+        @media (max-width: 480px) {
+            .container { max-width: 98vw; padding: 15px; margin: 10px auto; }
+            .title { font-size: 1.8rem; margin-bottom: 20px; }
+            .poem-line { font-size: 1.4rem; margin: 10px 0; }
+            .word { margin: 0 2px; padding: 2px 4px; font-size: 0.85rem; }
+            .btn { padding: 10px 16px; font-size: 0.9rem; }
+            .controls { gap: 8px; justify-content: center; }
+        }
+
+        /* Very small screens */
+        @media (max-width: 320px) {
+            .container { padding: 10px; }
+            .title { font-size: 1.5rem; }
+            .poem-line { font-size: 1.2rem; line-height: 1.6; }
+            .word { margin: 0 1px; padding: 1px 3px; font-size: 0.8rem; }
+            .btn { padding: 8px 12px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars-background"></div>
+    
+    <button class="back-btn" onclick="window.history.back()">← Back</button>
+    
+    <div class="container">
+        <h1 class="title">🌟 Twinkle Twinkle Little Star 🌟</h1>
+        
+        <div class="poem-container" id="poemContainer">
+            <div class="poem-line">
+                <span class="word" data-time="0">Twinkle,</span>
+                <span class="word" data-time="0.1">twinkle,</span>
+                <span class="word" data-time="0.2">little</span>
+                <span class="word" data-time="0.3">star,</span>
+            </div>
+            <div class="poem-line">
+                <span class="word" data-time="0.4">How</span>
+                <span class="word" data-time="0.45">I</span>
+                <span class="word" data-time="0.51">wonder</span>
+                <span class="word" data-time="0.6">what</span>
+                <span class="word" data-time="0.65">you</span>
+                <span class="word" data-time="0.71">are.</span>
+            </div>
+            <div class="poem-line">
+                <span class="word" data-time="0.8">Up</span>
+                <span class="word" data-time="0.85">above</span>
+                <span class="word" data-time="0.95">the</span>
+                <span class="word" data-time="1.0">world</span>
+                <span class="word" data-time="1.05">so</span>
+                <span class="word" data-time="1.11">high,</span>
+            </div>
+            <div class="poem-line">
+                <span class="word" data-time="1.2">Like</span>
+                <span class="word" data-time="1.25">a</span>
+                <span class="word" data-time="1.31">diamond</span>
+                <span class="word" data-time="1.4">in</span>
+                <span class="word" data-time="1.45">the</span>
+                <span class="word" data-time="1.51">sky.</span>
+            </div>
+            <div class="poem-line">
+                <span class="word" data-time="1.6">Twinkle,</span>
+                <span class="word" data-time="1.7">twinkle,</span>
+                <span class="word" data-time="1.8">little</span>
+                <span class="word" data-time="1.9">star,</span>
+            </div>
+            <div class="poem-line">
+                <span class="word" data-time="2.0">How</span>
+                <span class="word" data-time="2.05">I</span>
+                <span class="word" data-time="2.11">wonder</span>
+                <span class="word" data-time="2.2">what</span>
+                <span class="word" data-time="2.25">you</span>
+                <span class="word" data-time="2.31">are.</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="playBtn" class="btn btn-play" onclick="playTune()">🎵 Play Tune</button>
+            <button id="singBtn" class="btn btn-sing" onclick="singPoem()">🎵 Play Poem</button>
+            <button id="recordBtn" class="btn btn-record" onclick="toggleRecording()">🎤 Record</button>
+
+            <button id="listenBtn" class="btn btn-listen" onclick="playRecording()" disabled>🎧 Listen</button>
+            <button id="stopBtn" class="btn btn-stop" onclick="stopAll()" disabled>⏹️ Stop</button>
+        </div>
+        
+        <div class="status" id="status">Click "Play Tune" to start the interactive poem!</div>
+        <div class="recording-indicator" id="recordingIndicator">🔴 Recording...</div>
+    </div>
+
+    <audio id="backgroundMusic" loop preload="auto">
+        <source src="/static/audio/twinkle_star.wav" type="audio/wav">
+        <source src="/static/audio/twinkle_star.mp3" type="audio/mpeg">
+        <source src="/static/audio/twinkle_star.ogg" type="audio/ogg">
+        <!-- Fallback: No audio file needed, will work with highlighting only -->
+    </audio>
+
+    <script>
+        let isPlaying = false;
+        let isRecording = false;
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordedAudio;
+        let backgroundMusicGain;
+        let recordingWithMusic = false;
+        let highlightInterval;
+        let currentWordIndex = 0;
+        let words;
+        let backgroundMusic;
+        let audioContext;
+        let isAudioSupported = false;
+
+        // TTS variables
+        let isSinging = false;
+        let currentTTSAudio = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            words = document.querySelectorAll('.word');
+            backgroundMusic = document.getElementById('backgroundMusic');
+            
+            // Set volume for background music
+            backgroundMusic.volume = 0.3;
+            
+            // Preload audio and handle loading states
+            backgroundMusic.addEventListener('canplaythrough', function() {
+                console.log('Audio is ready to play');
+            });
+            
+            backgroundMusic.addEventListener('error', function(e) {
+                console.log('Audio loading error:', e);
+                document.getElementById('status').textContent = 'Ready to highlight words! (Audio not available)';
+            });
+            
+            // Try to preload audio
+            backgroundMusic.load();
+            
+            // Initialize Web Audio API for fallback tune
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                isAudioSupported = true;
+                console.log('Web Audio API initialized');
+            } catch (e) {
+                console.log('Web Audio API not supported:', e);
+                isAudioSupported = false;
+            }
+            
+            // Auto-play poem when page loads
+            setTimeout(() => {
+                document.getElementById('status').textContent = 'Auto-starting the magical Twinkle Star poem! 🌟✨';
+                singPoem();
+            }, 1500); // Small delay to let page fully load
+        });
+        
+            
+            // Enable record button immediately
+            document.getElementById('recordBtn').disabled = false;
+
+        function playTune() {
+            if (isPlaying) return;
+            
+            isPlaying = true;
+            currentWordIndex = 0;
+            
+            // Clear any existing highlights
+            words.forEach(word => word.classList.remove('highlight'));
+            
+            if (backgroundMusic.readyState >= 2) {
+                // Audio is loaded and ready
+                backgroundMusic.currentTime = 0;
+                backgroundMusic.play().then(() => {
+                    console.log('Background music started');
+                    updateUIForPlaying();
+                    
+                    // Start highlighting after a delay to sync with audio
+                    setTimeout(() => {
+                        startWordHighlighting();
+                    }, 1000); // 1 second delay as requested
+                }).catch(error => {
+                    console.error('Error playing audio:', error);
+                    playFallbackTune();
+                });
+            } else {
+                // Audio not available, use fallback
+                playFallbackTune();
+            }
+        }
+        
+        function playFallbackTune() {
+            console.log('Using fallback tune generation');
+            updateUIForPlaying();
+            
+            if (isAudioSupported) {
+                // Play simple melody using Web Audio API
+                playSimpleMelody();
+            }
+            
+            // Start highlighting after 1 second delay
+            setTimeout(() => {
+                startWordHighlighting();
+            }, 1000);
+        }
+        
+        function updateUIForPlaying() {
+            document.getElementById('playBtn').disabled = true;
+            document.getElementById('recordBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = false; // Keep stop button enabled during playback
+            document.getElementById('status').textContent = 'Playing tune... Listen and sing along!';
+        }
+        
+        function playSimpleMelody() {
+            if (!audioContext) return;
+            
+            // Complete melody notes for Twinkle Twinkle Little Star
+            // Twinkle twinkle little star, How I wonder what you are
+            // Up above the world so high, Like a diamond in the sky
+            // Twinkle twinkle little star, How I wonder what you are
+            const notes = [
+                // Twinkle twinkle little star
+                261.63, 261.63, 391.95, 391.95, 440, 440, 391.95,
+                // How I wonder what you are
+                349.23, 349.23, 329.63, 329.63, 293.66, 293.66, 261.63,
+                // Up above the world so high
+                391.95, 391.95, 349.23, 349.23, 329.63, 329.63, 293.66,
+                // Like a diamond in the sky
+                391.95, 391.95, 349.23, 349.23, 329.63, 329.63, 293.66,
+                // Twinkle twinkle little star
+                261.63, 261.63, 391.95, 391.95, 440, 440, 391.95,
+                // How I wonder what you are
+                349.23, 349.23, 329.63, 329.63, 293.66, 293.66, 261.63
+            ];
+            
+            const noteDuration = 0.6; // seconds per note
+            
+            notes.forEach((frequency, index) => {
+                setTimeout(() => {
+                    playTone(frequency, noteDuration);
+                }, index * noteDuration * 1000);
+            });
+        }
+        
+        function playTone(frequency, duration, destination = null) {
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            
+            // Connect to specified destination or default audio output
+            if (destination) {
+                gainNode.connect(destination);
+            } else {
+                gainNode.connect(audioContext.destination);
+            }
+            
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+        
+        function playSimpleMelodyForRecording(destination) {
+            if (!audioContext) return;
+            
+            // Same complete melody but routed to recording destination
+            const notes = [
+                // Twinkle twinkle little star
+                261.63, 261.63, 391.95, 391.95, 440, 440, 391.95,
+                // How I wonder what you are
+                349.23, 349.23, 329.63, 329.63, 293.66, 293.66, 261.63,
+                // Up above the world so high
+                391.95, 391.95, 349.23, 349.23, 329.63, 329.63, 293.66,
+                // Like a diamond in the sky
+                391.95, 391.95, 349.23, 349.23, 329.63, 329.63, 293.66,
+                // Twinkle twinkle little star
+                261.63, 261.63, 391.95, 391.95, 440, 440, 391.95,
+                // How I wonder what you are
+                349.23, 349.23, 329.63, 329.63, 293.66, 293.66, 261.63
+            ];
+            
+            const noteDuration = 0.6;
+            
+            notes.forEach((frequency, index) => {
+                setTimeout(() => {
+                    playToneForRecording(frequency, noteDuration, destination);
+                }, index * noteDuration * 1000);
+            });
+        }
+        
+        function playToneForRecording(frequency, duration, destination) {
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(destination); // Connect to recording destination
+            gainNode.connect(audioContext.destination); // Also play through speakers
+            
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            oscillator.type = 'sine';
+            
+            // Lower volume for background music during recording
+            gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function syncWordHighlighting(audioCurrentTime) {
+            let activeWordFound = false;
+            
+            words.forEach((word, index) => {
+                const wordTime = parseFloat(word.dataset.time);
+                const wordDuration = 0.8; // Fine-tuned duration for optimal karaoke timing
+                const wordEndTime = wordTime + wordDuration;
+                
+                // Remove all classes first
+                word.classList.remove('highlight', 'word-singing', 'word-rainbow', 'word-fade-out');
+                
+                if (audioCurrentTime >= wordTime && audioCurrentTime < wordEndTime && !activeWordFound) {
+                    // Current word being sung
+                    word.classList.add('highlight', 'word-singing', 'word-rainbow');
+                    activeWordFound = true;
+                } else if (audioCurrentTime >= wordEndTime) {
+                    // Word already sung
+                    word.classList.add('word-fade-out');
+                }
+            });
+        }
+        
+        function startWordHighlighting() {
+            const startTime = Date.now();
+            
+            highlightInterval = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                
+                // Remove previous highlights with smooth transition
+                words.forEach(word => {
+                    word.classList.remove('highlight', 'word-singing', 'word-rainbow');
+                    word.classList.add('word-fade-out');
+                });
+                
+                // Find current word to highlight
+                let currentWord = null;
+                for (let i = 0; i < words.length; i++) {
+                    const wordTime = parseFloat(words[i].dataset.time);
+                    if (elapsed >= wordTime && (i === words.length - 1 || elapsed < parseFloat(words[i + 1].dataset.time))) {
+                        currentWord = words[i];
+                        currentWordIndex = i;
+                        break;
+                    }
+                }
+                
+                if (currentWord) {
+                    // Highlight current word with professional singing effects
+                    currentWord.classList.remove('word-fade-out');
+                    currentWord.classList.add('highlight', 'word-singing', 'word-rainbow');
+                }
+                
+                // Stop when all words are done (fine-tuned timing)
+                if (elapsed > 6.4) {
+                    stopAll();
+                }
+            }, 50); // Increased update rate for smoother highlighting
+        }
+
+        async function toggleRecording() {
+            // Immediate UI feedback
+            const recordBtn = document.getElementById('recordBtn');
+            const status = document.getElementById('status');
+            
+            if (!isRecording) {
+                // Show immediate feedback
+                recordBtn.disabled = true;
+                status.textContent = 'Starting recording...';
+                
+                // Small delay for UI update, then start recording
+                setTimeout(async () => {
+                    await startRecording();
+                }, 50);
+            } else {
+                stopRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // Create audio context for mixing if not exists
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                // Create media stream source from microphone
+                const micSource = audioContext.createMediaStreamSource(stream);
+                
+                // Create destination for recording
+                const dest = audioContext.createMediaStreamDestination();
+                
+                // Connect microphone to destination
+                micSource.connect(dest);
+                
+                // If background music is playing, mix it with recording
+                if (isPlaying && backgroundMusic && !backgroundMusic.paused) {
+                    const musicSource = audioContext.createMediaElementSource(backgroundMusic);
+                    const musicGain = audioContext.createGain();
+                    musicGain.gain.setValueAtTime(0.3, audioContext.currentTime); // Lower volume for background
+                    
+                    musicSource.connect(musicGain);
+                    musicGain.connect(dest);
+                    musicGain.connect(audioContext.destination); // Also play through speakers
+                    recordingWithMusic = true;
+                } else if (isAudioSupported) {
+                    // Start background melody during recording
+                    playSimpleMelodyForRecording(dest);
+                    recordingWithMusic = true;
+                }
+                
+                mediaRecorder = new MediaRecorder(dest.stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    recordedAudio = new Audio(URL.createObjectURL(audioBlob));
+                    document.getElementById('listenBtn').disabled = false;
+                    const statusText = recordingWithMusic ? 
+                        'Recording with background music saved! You can now listen to it.' :
+                        'Recording saved! You can now listen to it.';
+                    document.getElementById('status').textContent = statusText;
+                    recordingWithMusic = false;
+                };
+                
+                mediaRecorder.start();
+                isRecording = true;
+                
+                // Update UI immediately after starting
+                const recordBtn = document.getElementById('recordBtn');
+                recordBtn.disabled = false;
+                recordBtn.textContent = '⏹️ Stop Recording';
+                recordBtn.classList.remove('btn-record');
+                recordBtn.classList.add('btn-stop');
+                document.getElementById('recordingIndicator').style.display = 'block';
+                document.getElementById('status').textContent = 'Recording your voice with background music... Sing along!';
+                
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                document.getElementById('recordBtn').disabled = false;
+                document.getElementById('status').textContent = 'Error: Could not access microphone.';
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+                
+                document.getElementById('recordBtn').textContent = '🎤 Record';
+                document.getElementById('recordBtn').classList.remove('btn-stop');
+                document.getElementById('recordBtn').classList.add('btn-record');
+                document.getElementById('recordingIndicator').style.display = 'none';
+            }
+        }
+
+        function playRecording() {
+            if (recordedAudio) {
+                recordedAudio.currentTime = 0;
+                recordedAudio.play();
+                document.getElementById('status').textContent = 'Playing your recording...';
+                
+                // Enable stop button during playback
+                document.getElementById('stopBtn').disabled = false;
+                
+                recordedAudio.onended = () => {
+                    document.getElementById('status').textContent = 'Great job singing! 🌟';
+                    // Disable stop button when playback ends
+                    document.getElementById('stopBtn').disabled = true;
+                };
+            }
+        }
+
+        async function singPoem() {
+            if (isSinging) {
+                // Stop singing
+                if (currentTTSAudio) {
+                    currentTTSAudio.pause();
+                    currentTTSAudio = null;
+                }
+                stopAll();
+                isSinging = false;
+                document.getElementById('singBtn').textContent = '🎵 Play Poem';
+                document.getElementById('status').textContent = 'Playback stopped.';
+                return;
+            }
+            
+            try {
+                isSinging = true;
+                document.getElementById('singBtn').textContent = '⏹️ Stop Playing';
+                document.getElementById('status').textContent = 'Starting poem playback... 🎵';
+                
+                // Get the poem text
+                const poemText = "Twinkle, twinkle, little star, How I wonder what you are! Up above the world so high, Like a diamond in the sky. Twinkle, twinkle, little star, How I wonder what you are!";
+                
+                // Request TTS from server using GET method with query parameters
+                // Create more melodic text with better pauses for singing
+                const melodicText = poemText
+                    .replace(/[.!?]/g, '... ') // Longer pauses at sentence ends
+                    .replace(/,/g, ', ') // Short pauses at commas
+                    .replace(/;/g, '; ') // Medium pauses at semicolons
+                    .replace(/:/g, ': '); // Medium pauses at colons
+                
+                const ttsParams = new URLSearchParams({
+                    text: melodicText,
+                    voice: 'Female',
+                    accent: 'en-US',
+                    lang: 'english',
+                    voice_name: 'en-US-JennyNeural', // Child-friendly cartoon voice
+                    mode: 'online',
+                    rate: '0.7', // Much slower for childish singing style
+                    pitch: '+5Hz' // Higher pitch for cartoon/childish effect
+                });
+                
+                document.getElementById('status').textContent = 'Loading audio... ⏳';
+                const response = await fetch(`/tts?${ttsParams.toString()}`);
+                
+                if (!response.ok) {
+                    throw new Error('TTS request failed');
+                }
+                
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                currentTTSAudio = new Audio(audioUrl);
+                
+                document.getElementById('status').textContent = 'Ready to play! 🎵';
+                
+                // Start background music
+                if (backgroundMusic) {
+                    backgroundMusic.currentTime = 0;
+                    backgroundMusic.volume = 0.2; // Lower volume for background
+                    backgroundMusic.play();
+                }
+                
+                // Play TTS audio with enhanced synchronization
+                currentTTSAudio.volume = 0.8;
+                
+                // Start highlighting with audio sync
+                currentTTSAudio.addEventListener('loadeddata', () => {
+                    console.log('Audio loaded, starting synchronized playback');
+                });
+                
+                currentTTSAudio.addEventListener('timeupdate', () => {
+                    // Real-time sync with audio playback
+                    const currentTime = currentTTSAudio.currentTime;
+                    syncWordHighlighting(currentTime);
+                });
+                
+                currentTTSAudio.play();
+                
+                // Fallback highlighting in case timeupdate doesn't work perfectly
+                setTimeout(() => {
+                    startWordHighlighting();
+                }, 200);
+                
+                document.getElementById('status').textContent = 'Playing the poem! 🎵';
+                
+                currentTTSAudio.onended = () => {
+                    isSinging = false;
+                    document.getElementById('singBtn').textContent = '🎵 Play Poem';
+                    stopAll();
+                    document.getElementById('status').textContent = 'Poem playback completed! 🌟';
+                };
+                
+                currentTTSAudio.onerror = () => {
+                    isSinging = false;
+                    document.getElementById('singBtn').textContent = '🎵 Play Poem';
+                    document.getElementById('status').textContent = 'Error playing poem.';
+                };
+                
+            } catch (error) {
+                console.error('Error with TTS:', error);
+                isSinging = false;
+                document.getElementById('singBtn').textContent = '🎵 Play Poem';
+                document.getElementById('status').textContent = 'Error: Could not load poem audio.';
+            }
+        }
+        
+        function stopAll() {
+            isPlaying = false;
+            isSinging = false;
+            
+            // Stop TTS singing
+            if (currentTTSAudio && !currentTTSAudio.paused) {
+                currentTTSAudio.pause();
+                currentTTSAudio.currentTime = 0;
+            }
+            
+            // Stop background music
+            if (backgroundMusic && !backgroundMusic.paused) {
+                backgroundMusic.pause();
+                backgroundMusic.currentTime = 0;
+            }
+            
+            // Stop Web Audio API context if needed
+            if (audioContext && audioContext.state === 'running') {
+                // Note: We don't close the context as it might be needed again
+                console.log('Web Audio API context suspended');
+            }
+            
+            // Stop word highlighting
+            if (highlightInterval) {
+                clearInterval(highlightInterval);
+                highlightInterval = null;
+            }
+            
+            // Remove all highlights and singing effects
+            words.forEach(word => {
+                word.classList.remove('highlight', 'word-singing', 'word-rainbow', 'word-fade-out');
+            });
+            
+            
+            // Stop recording if active
+            if (isRecording) {
+                stopRecording();
+            }
+            
+            // Stop recorded audio if playing
+            if (recordedAudio && !recordedAudio.paused) {
+                recordedAudio.pause();
+                recordedAudio.currentTime = 0;
+            }
+            
+            // Reset buttons
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('singBtn').textContent = '🎵 Play Poem';
+            document.getElementById('status').textContent = 'Click "Play Tune" to start the interactive poem!';
+        }
+
+
+        
+
+        
+
+
+        // Function to play word pronunciation
+        async function playWordPronunciation(word) {
+            try {
+                const ttsParams = new URLSearchParams({
+                    text: word,
+                    voice: 'Female',
+                    accent: 'en-US',
+                    lang: 'english',
+                    voice_name: 'en-US-AriaNeural',
+                    mode: 'online'
+                });
+                
+                const response = await fetch(`/tts?${ttsParams.toString()}`);
+                
+                if (response.ok) {
+                    const audioBlob = await response.blob();
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                }
+            } catch (error) {
+                console.error('Error with word pronunciation:', error);
+            }
+        }
+
+        // Add click event to words for manual highlighting
+        document.addEventListener('DOMContentLoaded', function() {
+            words.forEach(word => {
+                word.addEventListener('click', function() {
+                    if (!isPlaying && !isSinging && !isRecording) {
+                        // Remove other highlights
+                        words.forEach(w => w.classList.remove('highlight'));
+                        // Highlight clicked word
+                        this.classList.add('highlight');
+                        
+                        // Play pronunciation of the clicked word
+                        const wordText = this.textContent.replace(/[^a-zA-Z]/g, '');
+                        playWordPronunciation(wordText);
+                        
+                        setTimeout(() => {
+                            this.classList.remove('highlight');
+                        }, 1000);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

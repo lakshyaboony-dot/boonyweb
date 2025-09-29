@@ -1,0 +1,780 @@
+{% extends "base.html" %}
+{% block title %}Beginner to Professional Speaker - Boony{% endblock %}
+{% block content %}
+
+<style>
+/* Beginner to Professional Speaker Styles */
+.speaker-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: var(--bg-primary);
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif;
+}
+
+.header-section {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--text-primary);
+}
+
+.header-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    background: linear-gradient(45deg, var(--accent-color), #ff6b6b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header-section p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+.current-day-topic {
+    background: var(--bg-secondary);
+    padding: 15px 25px;
+    border-radius: 15px;
+    display: inline-block;
+    font-weight: bold;
+    border: 2px solid var(--accent-color);
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+    align-items: start;
+}
+
+/* Avatar Section */
+.avatar-section {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: sticky;
+    top: 20px;
+}
+
+.avatar-container {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 5px solid var(--accent-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+}
+
+.avatar-container.speaking {
+    animation: avatarPulse 1.5s infinite;
+    border-color: #ff6b6b;
+}
+
+@keyframes avatarPulse {
+    0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    50% { 
+        transform: scale(1.05); 
+        box-shadow: 0 15px 40px var(--accent-glow);
+    }
+}
+
+.avatar-gif {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.avatar-status {
+    background: var(--accent-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    margin-top: 15px;
+    display: inline-block;
+    min-width: 120px;
+}
+
+/* Content Section */
+.content-section {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.level-selector {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    justify-content: center;
+}
+
+.level-btn {
+    flex: 1;
+    max-width: 200px;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 2px solid transparent;
+}
+
+.level-btn:hover {
+    background: var(--accent-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.level-btn.active {
+    background: var(--accent-color);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.content-display {
+    background: var(--bg-primary);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    min-height: 300px;
+    border: 2px solid var(--accent-color);
+}
+
+.content-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.content-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    text-align: justify;
+}
+
+.beginner-content {
+    font-style: italic;
+    color: #e67e22;
+}
+
+.professional-content {
+    font-weight: 500;
+    color: #27ae60;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.action-btn {
+    min-width: 180px;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.generate-btn {
+    background: linear-gradient(45deg, var(--accent-color), #ff6b6b);
+}
+
+.generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.generate-btn:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.speak-btn {
+    background: linear-gradient(45deg, #27ae60, #2ecc71);
+}
+
+.speak-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.speak-btn:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.stop-btn {
+    background: linear-gradient(45deg, #e74c3c, #c0392b);
+}
+
+.stop-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.loading-spinner {
+    display: none;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid var(--accent-color);
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-content {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.loading-content i {
+    font-size: 24px;
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.loading-content p {
+    font-size: 16px;
+    margin: 0;
+}
+
+.error-content {
+    text-align: center;
+    padding: 40px 20px;
+    color: #e74c3c;
+}
+
+.error-content i {
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+.error-content p {
+    font-size: 16px;
+    margin: 0;
+}
+
+.error-message {
+    background: #e74c3c;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    text-align: center;
+    display: none;
+}
+
+.success-message {
+    background: #27ae60;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    text-align: center;
+    display: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .avatar-container {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .level-selector {
+        flex-direction: column;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .action-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+</style>
+
+<div class="speaker-container">
+    <!-- Header Section -->
+    <div class="header-section">
+        <h1>🎯 Beginner to Professional Speaker</h1>
+        <p>Experience the journey from beginner to professional English speaking</p>
+        <div class="current-day-topic">
+            📅 Day {{ day }}: <span id="currentTopic">{{ current_topic or 'Loading...' }}</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Avatar Section -->
+        <div class="avatar-section">
+            <div class="avatar-container" id="avatarContainer">
+                <img id="avatarGif" class="avatar-gif" src="{{ url_for('static', filename='avatars/boony_male_idle.png') }}" alt="Boony Avatar">
+            </div>
+            <div class="avatar-status" id="avatarStatus">Ready to Speak</div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="content-section">
+            <!-- Level Selector -->
+            <div class="level-selector">
+                <button class="level-btn active" id="beginnerBtn" data-level="beginner">
+                    🌱 Beginner Level
+                </button>
+                <button class="level-btn" id="professionalBtn" data-level="professional">
+                    🏆 Professional Level
+                </button>
+            </div>
+
+            <!-- Content Display -->
+            <div class="content-display">
+                <div class="content-title" id="contentTitle">Select a level to generate content</div>
+                <div class="content-text" id="contentText">
+                    Choose between Beginner or Professional level to see how the same topic is approached differently.
+                    <br><br>
+                    <strong>Beginner Level:</strong> Shows how an Indian learner would speak - slowly, thoughtfully, with natural pauses and "hmm" sounds.
+                    <br><br>
+                    <strong>Professional Level:</strong> Demonstrates fluent, confident English speaking after mastering the language.
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="action-btn speak-btn" id="speakBtn" disabled>
+                    🎤 Speak Again
+                </button>
+                <button class="action-btn stop-btn" id="stopBtn" style="display: none;">
+                    ⏹️ Stop Speaking
+                </button>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+                <p>Generating content...</p>
+            </div>
+
+            <!-- Messages -->
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global variables
+let currentLevel = 'beginner';
+let currentContent = '';
+let isGenerating = false;
+let isSpeaking = false;
+let currentAudio = null;
+let currentTopic = '{{ current_topic or "" }}';
+let currentDay = '{{ day }}';
+
+// DOM elements
+const elements = {
+    beginnerBtn: document.getElementById('beginnerBtn'),
+    professionalBtn: document.getElementById('professionalBtn'),
+    generateBtn: document.getElementById('generateBtn'),
+    speakBtn: document.getElementById('speakBtn'),
+    stopBtn: document.getElementById('stopBtn'),
+    contentTitle: document.getElementById('contentTitle'),
+    contentText: document.getElementById('contentText'),
+    avatarContainer: document.getElementById('avatarContainer'),
+    avatarGif: document.getElementById('avatarGif'),
+    avatarStatus: document.getElementById('avatarStatus'),
+    loadingSpinner: document.getElementById('loadingSpinner'),
+    errorMessage: document.getElementById('errorMessage'),
+    successMessage: document.getElementById('successMessage'),
+    currentTopicSpan: document.getElementById('currentTopic')
+};
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    initializeFeature();
+    setupEventListeners();
+    loadCurrentTopic();
+});
+
+function initializeFeature() {
+    console.log('Initializing Beginner to Professional Speaker feature');
+    updateAvatarFromPrefs();
+    
+    // Listen for voice preference changes
+    window.addEventListener('boony:prefs', function(event) {
+        updateAvatarFromPrefs();
+    });
+    
+    // Listen for mute changes
+    window.addEventListener('boony:mute', function(event) {
+        if (event.detail.muted && isSpeaking) {
+            stopSpeaking();
+        }
+    });
+}
+
+function setupEventListeners() {
+    // Level selection
+    elements.beginnerBtn.addEventListener('click', () => selectLevel('beginner'));
+    elements.professionalBtn.addEventListener('click', () => selectLevel('professional'));
+    
+    // Action buttons
+    elements.speakBtn.addEventListener('click', startSpeaking);
+    elements.stopBtn.addEventListener('click', stopSpeaking);
+}
+
+function selectLevel(level) {
+    currentLevel = level;
+    
+    // Update button states
+    elements.beginnerBtn.classList.toggle('active', level === 'beginner');
+    elements.professionalBtn.classList.toggle('active', level === 'professional');
+    
+    // Reset content
+    currentContent = '';
+    elements.speakBtn.disabled = true;
+    
+    // Update content display
+    if (level === 'beginner') {
+        elements.contentTitle.textContent = '🌱 Beginner Level Content';
+        elements.contentText.innerHTML = 'Generating beginner level content...';
+    } else {
+        elements.contentTitle.textContent = '🏆 Professional Level Content';
+        elements.contentText.innerHTML = 'Generating professional level content...';
+    }
+    
+    // Auto-generate and speak content
+    generateAndSpeakContent();
+}
+
+function loadCurrentTopic() {
+    if (!currentTopic) {
+        // Fetch current day's topic from syllabus
+        fetch(`/api/get-daily-topic?day=${currentDay}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentTopic = data.topic;
+                    elements.currentTopicSpan.textContent = currentTopic;
+                } else {
+                    showError('Failed to load daily topic');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading topic:', error);
+                showError('Error loading daily topic');
+            });
+    }
+}
+
+function generateAndSpeakContent() {
+    if (isGenerating || !currentTopic) {
+        return;
+    }
+    
+    isGenerating = true;
+    elements.loadingSpinner.style.display = 'block';
+    hideMessages();
+    
+    const requestData = {
+        topic: currentTopic,
+        level: currentLevel,
+        day: currentDay
+    };
+    
+    fetch('/api/generate-speaker-content', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            currentContent = data.content;
+            displayGeneratedContent(data.content, data.title);
+            elements.speakBtn.disabled = false;
+            showSuccess('Content generated successfully!');
+            
+            // Auto-speak the generated content
+            setTimeout(() => {
+                startSpeaking();
+            }, 500);
+        } else {
+            showError(data.error || 'Failed to generate content');
+        }
+    })
+    .catch(error => {
+        console.error('Error generating content:', error);
+        showError('Error generating content. Please try again.');
+    })
+    .finally(() => {
+        isGenerating = false;
+        elements.loadingSpinner.style.display = 'none';
+    });
+}
+
+function displayGeneratedContent(content, title) {
+    elements.contentTitle.textContent = title || `${currentLevel === 'beginner' ? '🌱 Beginner' : '🏆 Professional'} Level Content`;
+    elements.contentText.innerHTML = content;
+    elements.contentText.className = `content-text ${currentLevel}-content`;
+}
+
+function startSpeaking() {
+    if (isSpeaking || !currentContent) {
+        return;
+    }
+    
+    isSpeaking = true;
+    elements.speakBtn.style.display = 'none';
+    elements.stopBtn.style.display = 'inline-block';
+    elements.avatarStatus.textContent = 'Speaking...';
+    elements.avatarContainer.classList.add('speaking');
+    
+    // Update avatar to speaking state
+    updateAvatarSpeaking(true);
+    
+    // Use the global TTS system
+    speakText(currentContent);
+}
+
+function stopSpeaking() {
+    if (!isSpeaking) {
+        return;
+    }
+    
+    isSpeaking = false;
+    elements.speakBtn.style.display = 'inline-block';
+    elements.stopBtn.style.display = 'none';
+    elements.avatarStatus.textContent = 'Ready to Speak';
+    elements.avatarContainer.classList.remove('speaking');
+    
+    // Stop current audio
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+    }
+    
+    // Update avatar to idle state
+    updateAvatarSpeaking(false);
+    
+    // Dispatch stop audio event
+    window.dispatchEvent(new CustomEvent('boony:audio', { 
+        detail: { playing: false } 
+    }));
+}
+
+function updateAvatarFromPrefs() {
+    if (typeof window.getPrefs === 'function') {
+        const prefs = window.getPrefs();
+        const voice = prefs.voice || 'male';
+        const idleSrc = voice === 'female' 
+            ? '/static/avatars/boony_female_idle.png' 
+            : '/static/avatars/boony_male_idle.png';
+        elements.avatarGif.src = idleSrc;
+    }
+}
+
+function updateAvatarSpeaking(speaking) {
+    if (typeof window.getPrefs === 'function') {
+        const prefs = window.getPrefs();
+        const voice = prefs.voice || 'male';
+        
+        if (speaking) {
+            const speakingSrc = voice === 'female' 
+                ? '/static/avatars/boony_female_speaking.gif' 
+                : '/static/avatars/boony_male_speaking.gif';
+            elements.avatarGif.src = speakingSrc;
+        } else {
+            const idleSrc = voice === 'female' 
+                ? '/static/avatars/boony_female_idle.png' 
+                : '/static/avatars/boony_male_idle.png';
+            elements.avatarGif.src = idleSrc;
+        }
+    }
+}
+
+function speakText(text) {
+    // Check if muted
+    const isMuted = localStorage.getItem('boony.muted') === 'true';
+    if (isMuted) {
+        stopSpeaking();
+        showError('Audio is muted. Click the mute button to enable sound.');
+        return;
+    }
+    
+    // Dispatch audio start event
+    window.dispatchEvent(new CustomEvent('boony:audio', { 
+        detail: { playing: true } 
+    }));
+    
+    // Use the global TTS system from base.html
+    if (typeof window.getPrefs === 'function') {
+        const prefs = window.getPrefs();
+        
+        // Use the global mapToMsVoice function if available
+        const mapToMsVoice = window.mapToMsVoice || function(p) { 
+            if (p.accent === 'en-US') return p.voice === 'female' ? 'en-US-JennyNeural' : 'en-US-GuyNeural'; 
+            return p.voice === 'female' ? 'en-IN-KavyaNeural' : 'hi-IN-PrabhatNeural'; 
+        };
+        
+        // Create TTS request parameters
+        const params = new URLSearchParams({
+            text: text,
+            voice: prefs.voice,
+            accent: prefs.accent,
+            lang: prefs.lang,
+            voice_name: mapToMsVoice(prefs),
+            mode: prefs.mode || 'auto',
+            rate: currentLevel === 'beginner' ? '0.6' : '1.0' // Much slower for beginner
+        });
+        
+        // Make TTS request
+        fetch(`/tts?${params.toString()}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`TTS request failed: ${response.status}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const audioUrl = URL.createObjectURL(blob);
+                currentAudio = new Audio(audioUrl);
+                
+                currentAudio.onplay = () => {
+                    updateAvatarSpeaking(true);
+                    window.dispatchEvent(new CustomEvent('boony:audio', {
+                        detail: { playing: true }
+                    }));
+                };
+                
+                currentAudio.onended = () => {
+                    stopSpeaking();
+                    URL.revokeObjectURL(audioUrl);
+                };
+                
+                currentAudio.onerror = () => {
+                    console.error('Audio playback error');
+                    stopSpeaking();
+                    showError('Audio playback failed');
+                    URL.revokeObjectURL(audioUrl);
+                };
+                
+                currentAudio.play().catch(error => {
+                    console.error('Audio play error:', error);
+                    stopSpeaking();
+                    showError('Failed to play audio');
+                });
+            })
+            .catch(error => {
+                console.error('TTS Error:', error);
+                stopSpeaking();
+                
+                // Show user-friendly error message
+                if (window.showVoiceErrorMessage) {
+                    window.showVoiceErrorMessage({
+                        error: 'Speech Generation Failed',
+                        message: 'आवाज़ बनाने में समस्या हुई।',
+                        suggested_action: 'Please check your internet connection and try again'
+                    });
+                } else {
+                    showError('Speech generation failed. Please try again.');
+                }
+            });
+    } else {
+        // Fallback to browser TTS
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = currentLevel === 'beginner' ? 0.6 : 1.0;
+            utterance.lang = 'en-IN';
+            utterance.onend = () => stopSpeaking();
+            utterance.onerror = () => {
+                stopSpeaking();
+                showError('Speech synthesis failed');
+            };
+            speechSynthesis.speak(utterance);
+        } else {
+            stopSpeaking();
+            showError('Text-to-speech not supported');
+        }
+    }
+}
+
+function showError(message) {
+    elements.errorMessage.textContent = message;
+    elements.errorMessage.style.display = 'block';
+    elements.successMessage.style.display = 'none';
+    setTimeout(() => {
+        elements.errorMessage.style.display = 'none';
+    }, 5000);
+}
+
+function showSuccess(message) {
+    elements.successMessage.textContent = message;
+    elements.successMessage.style.display = 'block';
+    elements.errorMessage.style.display = 'none';
+    setTimeout(() => {
+        elements.successMessage.style.display = 'none';
+    }, 3000);
+}
+
+function hideMessages() {
+    elements.errorMessage.style.display = 'none';
+    elements.successMessage.style.display = 'none';
+}
+</script>
+
+{% endblock %}

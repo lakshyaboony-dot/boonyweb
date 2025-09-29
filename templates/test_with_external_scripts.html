@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Test with External Scripts{% endblock %}
+
+{% block content %}
+<div class="modern-dashboard">
+    <h1>Testing Dashboard with External Scripts</h1>
+    <div id="output"></div>
+    
+    <!-- Test elements that dashboard uses -->
+    <div id="daySelector"></div>
+    <div id="starNotification" class="star-notification" style="display: none;">
+        <div class="star-content">
+            <div class="star-icon">🌟</div>
+            <div class="star-text">
+                <h3 id="starTitle">Congratulations!</h3>
+                <p id="starMessage">You are the Star!</p>
+            </div>
+            <div class="star-close" onclick="closeStarNotification()">×</div>
+        </div>
+    </div>
+    
+    <div id="congratulationsModal" class="modal" style="display: none;">
+        <div class="modal-content congratulations">
+            <div class="congrats-icon">🎉</div>
+            <h2>बधाई हो! Congratulations!</h2>
+            <p>आपने <strong id="completedDayText">Day-1</strong> को सफलतापूर्वक पूरा कर लिया है!<br>
+            You have successfully completed <strong>Day-1</strong>!</p>
+            <div class="modal-actions">
+                <button onclick="progressToNextDay()" class="btn primary">🚀 अगले दिन जाएं (Next Day)</button>
+                <button onclick="closeCongratulationsModal()" class="btn secondary">बाद में (Later)</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Test the exact same JavaScript as dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, testing with external scripts...');
+    
+    // Test template variables
+    const isPracticeMode = {{ ('true' if is_practice_mode else 'false')|tojson|safe }};
+    const currentDay = {{ day|tojson|safe }};
+    const currentUserId = {{ current_user.user_id|tojson|safe }};
+    const starOfDayUserId = {{ star_of_day_user_id|tojson|safe }};
+    const starOfWeekUserId = {{ star_of_week_user_id|tojson|safe }};
+    const credits = {
+        listen: {{ credits.listen|tojson|safe }},
+        speak: {{ credits.speak|tojson|safe }},
+        vocabulary: {{ credits.vocabulary|tojson|safe }},
+        revision: {{ credits.revision|tojson|safe }}
+    };
+    
+    console.log('Template variables loaded successfully:', {
+        isPracticeMode,
+        currentDay,
+        currentUserId,
+        starOfDayUserId,
+        starOfWeekUserId,
+        credits
+    });
+    
+    // Test functions that are called by onclick handlers
+    window.closeStarNotification = function() {
+        console.log('closeStarNotification called');
+        const notification = document.getElementById('starNotification');
+        if (notification) {
+            notification.style.display = 'none';
+        }
+    };
+    
+    window.closeCongratulationsModal = function() {
+        console.log('closeCongratulationsModal called');
+        const modal = document.getElementById('congratulationsModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    };
+    
+    window.progressToNextDay = function() {
+        console.log('progressToNextDay called');
+        const currentDay = {{ day|tojson|safe }};
+        const currentDayNum = parseInt(currentDay.split('-')[1]);
+        const nextDay = `Day-${currentDayNum + 1}`;
+        console.log('progressToNextDay completed:', { currentDay, nextDay });
+    };
+    
+    console.log('All functions defined successfully!');
+    console.log('Test completed - no syntax errors detected!');
+});
+</script>
+{% endblock %}

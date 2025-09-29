@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Null Values</title>
+</head>
+<body>
+    <h1>Testing Null Values in JavaScript</h1>
+    <div id="output"></div>
+    
+    <script>
+        console.log('Testing null values...');
+        
+        // Test the exact same variables as in dashboard
+        const currentUserId = {{ current_user.user_id|tojson|safe }};
+        const starOfDayUserId = {{ star_of_day_user_id|tojson|safe }};
+        const starOfWeekUserId = {{ star_of_week_user_id|tojson|safe }};
+        
+        console.log('currentUserId:', currentUserId);
+        console.log('starOfDayUserId:', starOfDayUserId);
+        console.log('starOfWeekUserId:', starOfWeekUserId);
+        
+        // Test comparisons that might cause syntax errors
+        let isStarOfDay = false;
+        let isStarOfWeek = false;
+        
+        if (starOfDayUserId && starOfDayUserId !== 'None' && currentUserId === starOfDayUserId) {
+            isStarOfDay = true;
+        }
+        
+        if (starOfWeekUserId && starOfWeekUserId !== 'None' && currentUserId === starOfWeekUserId) {
+            isStarOfWeek = true;
+        }
+        
+        document.getElementById('output').innerHTML = `
+            <p>Current User ID: ${currentUserId}</p>
+            <p>Star of Day User ID: ${starOfDayUserId}</p>
+            <p>Star of Week User ID: ${starOfWeekUserId}</p>
+            <p>Is Star of Day: ${isStarOfDay}</p>
+            <p>Is Star of Week: ${isStarOfWeek}</p>
+        `;
+        
+        console.log('Test completed successfully');
+    </script>
+</body>
+</html>

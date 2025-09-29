@@ -1,0 +1,23 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<h2>Revision — {{ day }}</h2>
+
+<!-- Speak Button -->
+<p>
+    <button class="btn-astra" onclick="speakText(document.getElementById('para').textContent)">▶ Play Paragraph</button>
+</p>
+
+<!-- Paragraph -->
+<div id="para" class="card">
+    {{ paragraph }}
+</div>
+
+<h3>Your Transcription</h3>
+<textarea id="transcribed" rows="6" class="input"></textarea>
+
+<!-- Recording Controls -->
+<p>
+    <button class="btn-astra" onclick="startRecording()">🎙 Start</button>
+    <button class="btn-astra" onclick="stopRecording()">⏹ Stop</button>
+</p>
+{% endblock %}

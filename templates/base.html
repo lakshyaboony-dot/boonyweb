@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Boony{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='icons/app.ico') }}" type="image/x-icon">
+</head>
+<body data-theme="light">
+
+    <!-- ✅ Navigation -->
+    {% include "nav.html" %}
+
+    <!-- ✅ Page Content -->
+    <main class="container page">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ✅ Bottom bar -->
+    {% include "bottombar.html" %}
+
+    <!-- ✅ Global Scripts -->
+    <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/guide.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

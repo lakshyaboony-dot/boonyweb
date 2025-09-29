@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width: 700px; margin: 40px auto; padding: 40px; text-align: center; background: var(--bg-secondary); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+
+    <h2 style="font-size: 28px; margin-bottom: 15px; color: var(--accent-color);" id="welcomeTitle">🎉 Welcome, {{ user.full_name }}!</h2>
+<p style="font-size: 18px; color: var(--text-secondary); margin-bottom: 25px;" id="welcomeMessage">
+        Your profile has been created successfully.<br>
+        Your temporary password is: <b>{{ password }}</b>
+    </p>
+
+    <a href="{{ url_for('signup_step5') }}" class="btn-astra" id="continueButton">Continue →</a>
+
+    {% if voice_file %}
+    <audio autoplay>
+        <source src="{{ url_for('static', filename=voice_file.split('static/')[-1]) }}" type="audio/mpeg">
+    </audio>
+    {% endif %}
+</div>
+
+<style>
+    .btn-astra {
+        background: var(--accent-color);
+        color: var(--text-primary);
+        font-size: 20px;
+        font-weight: bold;
+        padding: 14px 30px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+        .btn-astra:hover {
+            background: var(--accent-color);
+        }
+</style>
+
+<script>
+    // Bilingual text content for Step 4
+    const step4Texts = {
+        hinglish: {
+            welcomeTitle: "🎉 Swagat hai, {{ user.full_name }}!",
+            welcomeMessage: "Aapka profile successfully create ho gaya hai.<br>Aapka temporary password hai: <b>{{ password }}</b>",
+            continueButton: "Continue →"
+        },
+        english: {
+            welcomeTitle: "🎉 Welcome, {{ user.full_name }}!",
+            welcomeMessage: "Your profile has been created successfully.<br>Your temporary password is: <b>{{ password }}</b>",
+            continueButton: "Continue →"
+        }
+    };
+
+    // TTS and audio handling
+    const currentAudios = new Set();
+    let isMuted = (localStorage.getItem('boony.muted') === 'true');
+    
+    window.addEventListener('boony:mute', (e) => { 
+        isMuted = !!(e.detail && e.detail.muted); 
+        if (isMuted) stopAllAudio(); 
+    });
+
+    // Use global getPrefs function from base.html
+    // window.getPrefs is available globally
+
+    function mapToMsVoice(p) { 
+        if (p.accent === 'en-US') return p.voice === 'female' ? 'en-US-JennyNeural' : 'en-US-GuyNeural'; 
+        return p.voice === 'female' ? 'en-IN-KavyaNeural' : 'hi-IN-PrabhatNeural'; 
+    }
+
+    function TTS_ENDPOINT(text) { 
+        const p = window.getPrefs && window.getPrefs() || {}; 
+        const qs = new URLSearchParams({
+            text, 
+            voice: p.voice, 
+            accent: p.accent, 
+            lang: p.lang, 
+            voice_name: mapToMsVoice(p), 
+            mode: p.mode
+        }); 
+        return `/tts?${qs.toString()}`; 
+    }
+
+    function stopAllAudio() { 
+        currentAudios.forEach(a => {
+            try { a.pause(); a.src = ''; } catch (e) {} 
+            currentAudios.delete(a); 
+        }); 
+        try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: false } })); } catch (e) {} 
+    }
+
+    async function speak(text) { 
+        if (!text || isMuted) return; 
+        stopAllAudio(); 
+        try { 
+            const a = new Audio(TTS_ENDPOINT(text)); 
+            currentAudios.add(a); 
+            a.addEventListener('ended', () => currentAudios.delete(a), { once: true }); 
+            a.addEventListener('error', () => currentAudios.delete(a), { once: true }); 
+            try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: true } })); } catch (e) {} 
+            await a.play(); 
+        } catch (e) {} 
+    }
+
+    // Update UI based on language preference
+    function updateStep4UI() {
+        const lang = (window.getPrefs && window.getPrefs().lang) || 'hinglish';
+        const texts = step4Texts[lang] || step4Texts.hinglish;
+        
+        // Update text elements
+        const titleEl = document.getElementById('welcomeTitle');
+        const messageEl = document.getElementById('welcomeMessage');
+        const continueButton = document.getElementById('continueButton');
+        
+        if (titleEl) {
+            // Replace the user name in the title
+            const userName = '{{ user.full_name }}';
+            titleEl.innerHTML = texts.welcomeTitle.replace('{{ user.full_name }}', userName);
+        }
+        if (messageEl) {
+            // Replace the password in the message
+            const password = '{{ password }}';
+            messageEl.innerHTML = texts.welcomeMessage.replace('{{ password }}', password);
+        }
+        if (continueButton) continueButton.textContent = texts.continueButton;
+    }
+
+    // Add click handlers for TTS
+    function addTTSHandlers() {
+        const titleEl = document.getElementById('welcomeTitle');
+        const messageEl = document.getElementById('welcomeMessage');
+        const continueButton = document.getElementById('continueButton');
+        const guideMessage = document.querySelector('.guide-message');
+
+        if (titleEl) {
+            titleEl.style.cursor = 'pointer';
+            titleEl.addEventListener('click', () => speak(titleEl.textContent));
+        }
+        
+        if (messageEl) {
+            messageEl.style.cursor = 'pointer';
+            messageEl.addEventListener('click', () => speak(messageEl.textContent));
+        }
+        
+        if (continueButton) {
+            continueButton.addEventListener('click', () => speak(continueButton.textContent));
+        }
+        
+        // Add TTS for guide message
+        if (guideMessage) {
+            guideMessage.style.cursor = 'pointer';
+            guideMessage.addEventListener('click', () => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            });
+            
+            // Auto-speak guide message on page load
+            setTimeout(() => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            }, 1500);
+        }
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', () => {
+        updateStep4UI();
+        addTTSHandlers();
+    });
+
+    // React to preference changes from base template
+    window.addEventListener('boony:prefs', (e) => {
+        const { lang } = e.detail || {};
+        if (lang) {
+            updateStep4UI();
+            addTTSHandlers(); // Re-add handlers with new text
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Null Values Debug Test{% endblock %}
+
+{% block content %}
+<div class="modern-dashboard">
+    <h1>Testing Null Values in JavaScript</h1>
+    <div id="output"></div>
+</div>
+
+<script>
+// Test what happens when template variables are null/None
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Testing null values...');
+    
+    try {
+        // Test with potentially null values
+        const starOfDayUserId = {{ star_of_day_user_id|tojson|safe }};
+        const starOfWeekUserId = {{ star_of_week_user_id|tojson|safe }};
+        
+        console.log('starOfDayUserId:', starOfDayUserId, 'type:', typeof starOfDayUserId);
+        console.log('starOfWeekUserId:', starOfWeekUserId, 'type:', typeof starOfWeekUserId);
+        
+        // Test comparisons with null values (this might cause issues)
+        const currentUserId = {{ current_user.user_id|tojson|safe }};
+        console.log('currentUserId:', currentUserId, 'type:', typeof currentUserId);
+        
+        // Test the exact comparison logic from dashboard
+        let isStarOfDay = false;
+        let isStarOfWeek = false;
+        
+        if (starOfDayUserId !== null && starOfDayUserId !== undefined) {
+            isStarOfDay = (currentUserId === starOfDayUserId);
+        }
+        
+        if (starOfWeekUserId !== null && starOfWeekUserId !== undefined) {
+            isStarOfWeek = (currentUserId === starOfWeekUserId);
+        }
+        
+        console.log('isStarOfDay:', isStarOfDay);
+        console.log('isStarOfWeek:', isStarOfWeek);
+        
+        // Test template literals with null values
+        const testString = `User ${currentUserId} - Star of Day: ${starOfDayUserId}, Star of Week: ${starOfWeekUserId}`;
+        console.log('Template literal with nulls:', testString);
+        
+        document.getElementById('output').innerHTML = '<p style="color: green;">✅ Null values test passed!</p>';
+        
+    } catch (error) {
+        console.error('Error with null values:', error);
+        document.getElementById('output').innerHTML = `<p style="color: red;">❌ Error: ${error.message}</p>`;
+    }
+});
+</script>
+{% endblock %}

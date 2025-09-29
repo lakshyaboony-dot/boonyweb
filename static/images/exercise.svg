@@ -1,0 +1,59 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="white" stroke="#333" stroke-width="2"/>
+  
+  <!-- Ground -->
+  <rect x="0" y="250" width="400" height="50" fill="#90EE90"/>
+  
+  <!-- Gym equipment -->
+  <rect x="50" y="200" width="80" height="50" fill="#696969" rx="5"/>
+  <rect x="55" y="180" width="70" height="20" fill="#2F4F4F" rx="10"/>
+  
+  <!-- Rabbit body -->
+  <ellipse cx="200" cy="220" rx="40" ry="30" fill="#F5DEB3"/>
+  
+  <!-- Rabbit head -->
+  <circle cx="200" cy="180" r="25" fill="#F5DEB3"/>
+  
+  <!-- Rabbit ears -->
+  <ellipse cx="190" cy="160" rx="8" ry="20" fill="#F5DEB3"/>
+  <ellipse cx="210" cy="160" rx="8" ry="20" fill="#F5DEB3"/>
+  <ellipse cx="190" cy="160" rx="4" ry="15" fill="#FFB6C1"/>
+  <ellipse cx="210" cy="160" rx="4" ry="15" fill="#FFB6C1"/>
+  
+  <!-- Rabbit eyes -->
+  <circle cx="195" cy="175" r="3" fill="#000"/>
+  <circle cx="205" cy="175" r="3" fill="#000"/>
+  
+  <!-- Rabbit nose -->
+  <ellipse cx="200" cy="185" rx="2" ry="1" fill="#FFB6C1"/>
+  
+  <!-- Rabbit arms (exercising) -->
+  <ellipse cx="170" cy="200" rx="15" ry="8" fill="#F5DEB3" transform="rotate(-30 170 200)"/>
+  <ellipse cx="230" cy="200" rx="15" ry="8" fill="#F5DEB3" transform="rotate(30 230 200)"/>
+  
+  <!-- Rabbit legs -->
+  <ellipse cx="185" cy="240" rx="8" ry="15" fill="#F5DEB3"/>
+  <ellipse cx="215" cy="240" rx="8" ry="15" fill="#F5DEB3"/>
+  
+  <!-- Dumbbells -->
+  <rect x="150" y="195" width="20" height="5" fill="#2F4F4F"/>
+  <circle cx="145" cy="197" r="8" fill="#696969"/>
+  <circle cx="175" cy="197" r="8" fill="#696969"/>
+  
+  <rect x="230" y="195" width="20" height="5" fill="#2F4F4F"/>
+  <circle cx="225" cy="197" r="8" fill="#696969"/>
+  <circle cx="255" cy="197" r="8" fill="#696969"/>
+  
+  <!-- Sweat drops -->
+  <circle cx="180" cy="165" r="2" fill="#87CEEB"/>
+  <circle cx="220" cy="170" r="2" fill="#87CEEB"/>
+  
+  <!-- Speech bubble -->
+  <ellipse cx="300" cy="120" rx="80" ry="40" fill="#FFF" stroke="#000" stroke-width="2"/>
+  <polygon points="250,140 240,150 250,150" fill="#FFF" stroke="#000" stroke-width="2"/>
+  
+  <!-- Text -->
+  <text x="300" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#000">I exercise</text>
+  <text x="300" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#000">every day!</text>
+</svg>

@@ -1,0 +1,85 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#357ABD;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E5F99;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.3)"/>
+    </filter>
+  </defs>
+  
+  <!-- Background wave -->
+  <path d="M0,100 Q50,80 100,100 T200,100 L200,200 L0,200 Z" fill="url(#blueGradient)" opacity="0.3">
+    <animate attributeName="d" values="M0,100 Q50,80 100,100 T200,100 L200,200 L0,200 Z;M0,100 Q50,120 100,100 T200,100 L200,200 L0,200 Z;M0,100 Q50,80 100,100 T200,100 L200,200 L0,200 Z" dur="4s" repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Waving hand -->
+  <g transform="translate(100,80)">
+    <!-- Palm -->
+    <ellipse cx="0" cy="10" rx="20" ry="25" fill="#FDBCB4" filter="url(#shadow)">
+      <animateTransform attributeName="transform" type="rotate" values="-15;15;-15" dur="1s" repeatCount="indefinite"/>
+    </ellipse>
+    
+    <!-- Fingers -->
+    <g>
+      <!-- Thumb -->
+      <ellipse cx="-15" cy="-5" rx="6" ry="12" fill="#FDBCB4">
+        <animateTransform attributeName="transform" type="rotate" values="-10;10;-10" dur="1s" repeatCount="indefinite"/>
+      </ellipse>
+      
+      <!-- Index finger -->
+      <ellipse cx="-8" cy="-15" rx="5" ry="15" fill="#FDBCB4">
+        <animateTransform attributeName="transform" type="rotate" values="-20;20;-20" dur="1s" repeatCount="indefinite"/>
+      </ellipse>
+      
+      <!-- Middle finger -->
+      <ellipse cx="0" cy="-18" rx="5" ry="18" fill="#FDBCB4">
+        <animateTransform attributeName="transform" type="rotate" values="-15;15;-15" dur="1s" repeatCount="indefinite"/>
+      </ellipse>
+      
+      <!-- Ring finger -->
+      <ellipse cx="8" cy="-15" rx="5" ry="15" fill="#FDBCB4">
+        <animateTransform attributeName="transform" type="rotate" values="-10;10;-10" dur="1s" repeatCount="indefinite"/>
+      </ellipse>
+      
+      <!-- Pinky -->
+      <ellipse cx="15" cy="-10" rx="4" ry="12" fill="#FDBCB4">
+        <animateTransform attributeName="transform" type="rotate" values="-5;5;-5" dur="1s" repeatCount="indefinite"/>
+      </ellipse>
+    </g>
+  </g>
+  
+  <!-- Sparkles around hand -->
+  <g>
+    <circle cx="60" cy="60" r="3" fill="#FFD700">
+      <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="scale" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="140" cy="70" r="2" fill="#FFD700">
+      <animate attributeName="opacity" values="1;0;1" dur="1.5s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="scale" values="1;0;1" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="80" cy="40" r="2.5" fill="#FFD700">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="2.5s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="scale" values="0.5;1;0.5" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="120" cy="45" r="2" fill="#FFD700">
+      <animate attributeName="opacity" values="1;0.3;1" dur="1.8s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="scale" values="1;0.3;1" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Hello text -->
+  <text x="100" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="url(#blueGradient)" filter="url(#shadow)">
+    Hello!
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="100" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">
+    नमस्ते!
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+  </text>
+</svg>

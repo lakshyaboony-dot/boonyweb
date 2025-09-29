@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}Login | Boony{% endblock %}
+{% block content %}
+
+<div class="astra-bg" style="min-height:100vh; display:flex; align-items:center; justify-content:center;">
+    <div class="card" style="max-width:440px; width:100%; text-align:center;">
+
+        <h2 style="margin-bottom:10px;" id="loginTitle">🔑 Login</h2>
+        
+        <!-- AI Guide Message -->
+        {% if guide_message %}
+        <div class="guide-message" style="background: var(--accent-color); color: white; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; text-align: left;">
+            <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 18px; margin-right: 8px;">🤖</span>
+                <strong>Boony Guide</strong>
+            </div>
+            <div>{{ guide_message }}</div>
+        </div>
+        {% endif %}
+
+        <form method="POST" id="login-form">
+            <input class="input" name="username" id="usernameInput" placeholder="User ID / Username / Email" required>
+            <small class="hint" id="usernameHint">👉 Apna User ID ya Email daalo (Enter your User ID or Email)</small>
+            <div style="height:12px"></div>
+
+            <input class="input" type="password" name="password" id="passwordInput" placeholder="Password" required>
+            <small class="hint" id="passwordHint">👉 Password type karo (Enter your password)</small>
+            <div style="height:16px"></div>
+
+            <button class="btn-astra" type="submit" id="loginButton">🚀 Login</button>
+        </form>
+
+        {% if error %}
+        <p class="notice" style="margin-top:8px" id="errorMessage">{{ error }}</p>
+        {% endif %}
+
+        <!-- Forgot Password -->
+        <div style="margin-top:16px;">
+            <a href="{{ url_for('forgot_password') }}" class="forgot-link" id="forgotPasswordLink">❓ Forgot Password?</a>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .hint {
+        display: block;
+        font-size: 13px;
+        color: var(--text-secondary);
+        text-align: left;
+        margin-top: 4px;
+    }
+
+    .forgot-link {
+        font-size: 14px;
+        color: var(--accent-color); /* Lighter, more visible color */
+        text-decoration: underline;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .forgot-link:hover {
+        color: var(--accent-color); /* Even lighter on hover */
+        opacity: 0.8;
+    }
+</style>
+
+<script>
+    // Bilingual text content
+    const loginTexts = {
+        hinglish: {
+            title: "🔑 Login",
+            usernamePlaceholder: "User ID / Username / Email",
+            usernameHint: "👉 Apna User ID ya Email daalo",
+            passwordPlaceholder: "Password", 
+            passwordHint: "👉 Password type karo",
+            loginButton: "🚀 Login",
+            forgotPassword: "❓ Password bhool gaye?"
+        },
+        english: {
+            title: "🔑 Login",
+            usernamePlaceholder: "User ID / Username / Email",
+            usernameHint: "👉 Enter your User ID or Email",
+            passwordPlaceholder: "Password",
+            passwordHint: "👉 Enter your password", 
+            loginButton: "🚀 Login",
+            forgotPassword: "❓ Forgot Password?"
+        }
+    };
+
+    // TTS and audio handling
+    const currentAudios = new Set();
+    let isMuted = (localStorage.getItem('boony.muted') === 'true');
+    
+    window.addEventListener('boony:mute', (e) => { 
+        isMuted = !!(e.detail && e.detail.muted); 
+        if (isMuted) stopAllAudio(); 
+    });
+
+    // Use global getPrefs function from base.html
+    // window.getPrefs is available globally
+
+    function mapToMsVoice(p) { 
+        if (p.accent === 'en-US') return p.voice === 'female' ? 'en-US-JennyNeural' : 'en-US-GuyNeural'; 
+        return p.voice === 'female' ? 'en-IN-KavyaNeural' : 'hi-IN-PrabhatNeural'; 
+    }
+
+    function TTS_ENDPOINT(text) { 
+        const p = window.getPrefs && window.getPrefs() || {}; 
+        const qs = new URLSearchParams({
+            text, 
+            voice: p.voice, 
+            accent: p.accent, 
+            lang: p.lang, 
+            voice_name: mapToMsVoice(p), 
+            mode: p.mode
+        }); 
+        return `/tts?${qs.toString()}`; 
+    }
+
+    function stopAllAudio() { 
+        currentAudios.forEach(a => {
+            try { a.pause(); a.src = ''; } catch (e) {} 
+            currentAudios.delete(a); 
+        }); 
+        try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: false } })); } catch (e) {} 
+    }
+
+    async function speak(text) { 
+        if (!text || isMuted) return; 
+        stopAllAudio(); 
+        try { 
+            const a = new Audio(TTS_ENDPOINT(text)); 
+            currentAudios.add(a); 
+            a.addEventListener('ended', () => currentAudios.delete(a), { once: true }); 
+            a.addEventListener('error', () => currentAudios.delete(a), { once: true }); 
+            try { window.dispatchEvent(new CustomEvent('boony:audio', { detail: { playing: true } })); } catch (e) {} 
+            await a.play(); 
+        } catch (e) {} 
+    }
+
+    // Update UI based on language preference
+    function updateLoginUI() {
+        const lang = (window.getPrefs && window.getPrefs().lang) || 'hinglish';
+        const texts = loginTexts[lang] || loginTexts.hinglish;
+        
+        // Update text elements
+        const titleEl = document.getElementById('loginTitle');
+        const usernameInput = document.getElementById('usernameInput');
+        const usernameHint = document.getElementById('usernameHint');
+        const passwordInput = document.getElementById('passwordInput');
+        const passwordHint = document.getElementById('passwordHint');
+        const loginButton = document.getElementById('loginButton');
+        const forgotLink = document.getElementById('forgotPasswordLink');
+        
+        if (titleEl) titleEl.textContent = texts.title;
+        if (usernameInput) usernameInput.placeholder = texts.usernamePlaceholder;
+        if (usernameHint) usernameHint.textContent = texts.usernameHint;
+        if (passwordInput) passwordInput.placeholder = texts.passwordPlaceholder;
+        if (passwordHint) passwordHint.textContent = texts.passwordHint;
+        if (loginButton) loginButton.textContent = texts.loginButton;
+        if (forgotLink) forgotLink.textContent = texts.forgotPassword;
+    }
+
+    // Add click handlers for TTS
+    function addTTSHandlers() {
+        const titleEl = document.getElementById('loginTitle');
+        const usernameHint = document.getElementById('usernameHint');
+        const passwordHint = document.getElementById('passwordHint');
+        const loginButton = document.getElementById('loginButton');
+        const forgotLink = document.getElementById('forgotPasswordLink');
+
+        if (titleEl) {
+            titleEl.style.cursor = 'pointer';
+            titleEl.addEventListener('click', () => speak(titleEl.textContent));
+        }
+        
+        if (usernameHint) {
+            usernameHint.style.cursor = 'pointer';
+            usernameHint.addEventListener('click', () => speak(usernameHint.textContent));
+        }
+        
+        if (passwordHint) {
+            passwordHint.style.cursor = 'pointer';
+            passwordHint.addEventListener('click', () => speak(passwordHint.textContent));
+        }
+        
+        if (loginButton) {
+            loginButton.addEventListener('click', () => speak(loginButton.textContent));
+        }
+        
+        if (forgotLink) {
+            forgotLink.addEventListener('click', () => speak(forgotLink.textContent));
+        }
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', () => {
+        updateLoginUI();
+        addTTSHandlers();
+    });
+
+    // Setup guide message TTS
+    function setupGuideMessageTTS() {
+        const guideMessage = document.querySelector('.guide-message');
+        if (guideMessage) {
+            guideMessage.style.cursor = 'pointer';
+            guideMessage.addEventListener('click', () => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            });
+            
+            // Auto-speak guide message on page load
+            setTimeout(() => {
+                const text = guideMessage.querySelector('div:last-child').textContent;
+                speak(text);
+            }, 1000);
+        }
+    }
+
+    // Initialize guide TTS on page load
+    window.addEventListener('load', () => {
+        setupGuideMessageTTS();
+    });
+
+    // React to preference changes from base template
+    window.addEventListener('boony:prefs', (e) => {
+        const { lang } = e.detail || {};
+        if (lang) {
+            updateLoginUI();
+            addTTSHandlers(); // Re-add handlers with new text
+            setupGuideMessageTTS(); // Re-setup guide message TTS
+        }
+    });
+</script>
+
+{% endblock %}

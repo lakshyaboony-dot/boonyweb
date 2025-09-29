@@ -1,0 +1,1340 @@
+{% extends "base.html" %}
+{% block title %}Topic Speaker - Boony{% endblock %}
+{% block content %}
+
+<style>
+/* Topic Speaker Styles */
+.topic-speaker-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: var(--bg-primary);
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif;
+}
+
+.header-section {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--text-primary);
+}
+
+.header-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.header-section p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+    align-items: start;
+}
+
+/* Avatar Section */
+.avatar-section {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.avatar-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.avatar-gif {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.avatar-status {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    margin-top: 15px;
+    display: inline-block;
+}
+
+/* Controls Section */
+.controls-section {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.current-topic-display {
+    margin-bottom: 25px;
+}
+
+.current-topic-display label {
+    display: block;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.topic-display {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+    text-transform: capitalize;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.topic-selector select {
+    width: 100%;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    cursor: pointer;
+}
+
+.level-selector {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.level-btn {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 2px solid transparent;
+}
+
+.level-btn:hover {
+    background: var(--bg-primary);
+    transform: translateY(-2px);
+}
+
+.level-btn.active {
+    background: var(--accent-color);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.level-btn.beginner.active {
+    background: var(--accent-color);
+}
+
+.level-btn.pro.active {
+    background: var(--accent-color);
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.action-btn {
+    min-width: 200px;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.speak-btn {
+    background: var(--accent-color);
+}
+
+.speak-btn:hover {
+    background: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.speak-btn:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.stop-btn {
+    background: var(--accent-color);
+}
+
+.stop-btn:hover {
+    background: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.stop-btn:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+
+/* Speech Content */
+.speech-content {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 20px;
+    color: #333;
+    line-height: 1.8;
+    font-size: 1.3rem;
+    min-height: 150px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.speech-content h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.speech-content p {
+    margin-bottom: 15px;
+}
+
+
+
+.speech-features {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: white;
+}
+
+.speech-features h4 {
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.speech-features ul {
+    list-style: none;
+    padding: 0;
+}
+
+.speech-features li {
+    padding: 5px 0;
+    padding-left: 20px;
+    position: relative;
+}
+
+.speech-features li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+/* Features Comparison Table Styles */
+.features-comparison {
+    margin-top: 15px;
+}
+
+.comparison-table {
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.comparison-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    background: rgba(255, 255, 255, 0.1);
+    font-weight: bold;
+    text-align: center;
+}
+
+.comparison-header > div {
+    padding: 12px 8px;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.comparison-header > div:last-child {
+    border-right: none;
+}
+
+.feature-category {
+    background: rgba(33, 150, 243, 0.3);
+    color: #fff;
+}
+
+.beginner-column {
+    background: rgba(76, 175, 80, 0.3);
+    color: #fff;
+}
+
+.professional-column {
+    background: rgba(255, 152, 0, 0.3);
+    color: #fff;
+}
+
+.feature-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.feature-row:last-child {
+    border-bottom: none;
+}
+
+.feature-row > div {
+    padding: 10px 8px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.feature-row > div:last-child {
+    border-right: none;
+}
+
+.feature-name {
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+    color: #e3f2fd;
+}
+
+.beginner-feature {
+    color: #c8e6c9;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.professional-feature {
+    color: #ffe0b2;
+    background: rgba(255, 152, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .avatar-container {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .level-selector {
+        flex-direction: column;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    /* Responsive comparison table */
+    .comparison-header {
+        grid-template-columns: 1fr;
+        text-align: left;
+    }
+    
+    .comparison-header > div {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .feature-row {
+        grid-template-columns: 1fr;
+        margin-bottom: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .feature-row > div {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .feature-row > div:last-child {
+        border-bottom: none;
+    }
+    
+    .feature-name {
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+    }
+    
+    .beginner-feature:before {
+        content: "🌱 Beginner: ";
+        font-weight: bold;
+    }
+    
+    .professional-feature:before {
+        content: "🏆 Professional: ";
+        font-weight: bold;
+    }
+}
+
+/* Animation Classes */
+.speaking {
+    animation: pulse 1.5s infinite;
+}
+
+.thinking {
+    animation: rotate 2s linear infinite;
+}
+
+/* Level-specific animations */
+.beginner-mode.speaking {
+    animation: beginnerSpeak 2s ease-in-out infinite;
+}
+
+.pro-mode.speaking {
+    animation: proSpeak 1.2s ease-in-out infinite;
+}
+
+.beginner-mode {
+    filter: brightness(1.1) saturate(1.2);
+    transition: all 0.3s ease;
+}
+
+.pro-mode {
+    filter: brightness(0.95) contrast(1.1) saturate(0.9);
+    transition: all 0.3s ease;
+}
+
+/* Keyframe animations */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes beginnerSpeak {
+    0%, 100% { 
+        transform: scale(1) rotate(0deg);
+        filter: brightness(1.1) saturate(1.2) hue-rotate(0deg);
+    }
+    25% { 
+        transform: scale(1.03) rotate(-1deg);
+        filter: brightness(1.15) saturate(1.3) hue-rotate(5deg);
+    }
+    50% { 
+        transform: scale(1.06) rotate(0deg);
+        filter: brightness(1.2) saturate(1.4) hue-rotate(10deg);
+    }
+    75% { 
+        transform: scale(1.03) rotate(1deg);
+        filter: brightness(1.15) saturate(1.3) hue-rotate(5deg);
+    }
+}
+
+@keyframes proSpeak {
+    0%, 100% { 
+        transform: scale(1) translateY(0px);
+        filter: brightness(0.95) contrast(1.1) saturate(0.9);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    50% { 
+        transform: scale(1.02) translateY(-2px);
+        filter: brightness(1.0) contrast(1.15) saturate(1.0);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    }
+}
+</style>
+
+<div class="topic-speaker-container">
+    <!-- Header -->
+    <div class="header-section">
+        <h1>🎯 Topic Speaker with Boony - {{ day }}</h1>
+        <p>Journey beginner to professional - Boony will speak accordingly!</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Avatar Section -->
+        <div class="avatar-section">
+            <div class="avatar-container">
+                <img id="avatar-gif" class="avatar-gif" src="/static/gifs/boony_female.gif" alt="Boony Female Avatar">
+            </div>
+            <div id="avatar-status" class="avatar-status">Ready to Speak 🎤</div>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="controls-section">
+            <!-- Current Topic Display -->
+            <div class="current-topic-display">
+                <label>🎯 Today's Topic:</label>
+                <div id="current-topic-name" class="topic-display">
+                    Loading...
+                </div>
+            </div>
+
+            <!-- Level Selector -->
+            <div class="level-selector">
+                <button id="beginner-btn" class="level-btn beginner active" onclick="selectLevel('beginner')">
+                    🌱 Beginner
+                </button>
+                <button id="pro-btn" class="level-btn pro" onclick="selectLevel('pro')">
+                    🏆 Professional
+                </button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button id="toggle-speak-btn" class="action-btn speak-btn" onclick="toggleSpeaking()">
+                    🎤 Start Speaking
+                </button>
+            </div>
+
+            <!-- Speech Content -->
+            <div id="speech-content" class="speech-content">
+                <h3>Select a topic and level to see the speech content</h3>
+                <p>Boony will demonstrate how to speak about the chosen topic at your selected level.</p>
+            </div>
+
+            <!-- Speech Features Comparison -->
+            <div id="speech-features" class="speech-features" style="display: none;">
+                <h4>🎯 Speech Features Comparison:</h4>
+                <div class="features-comparison">
+                    <div class="comparison-table">
+                        <div class="comparison-header">
+                            <div class="feature-category">Feature</div>
+                            <div class="beginner-column">🌱 Beginner Level</div>
+                            <div class="professional-column">🏆 Professional Level</div>
+                        </div>
+                        <div id="features-rows">
+                            <!-- Feature rows will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global variables
+let currentTopic = 'daily routine'; // Will be set from current day
+let currentTopicContent = null; // Will store fetched content
+let currentLevel = 'beginner';
+let isSpeaking = false;
+let speechSynthesis = window.speechSynthesis;
+let currentUtterance = null;
+
+// Base.html integration variables
+let currentVoiceGender = 'female'; // Default
+let currentAccent = 'hi-IN'; // Default
+let currentMode = 'auto'; // Default
+let isMuted = false;
+
+// Current day info
+let currentDay = '{{ day }}'; // Passed from template
+
+// Topic content database
+const topicContent = {
+    introduction: {
+        beginner: {
+            text: "Hello! Umm... my name is Boony. I am... aii... I am from India. I vake up at six o'clock in ze morning. Hmm... I brush my teet and... and take shower. Zen I eat breakfast vith my family. Aii... I go to vork by bus. In ze evening, I vatch TV and... hmm... I eat dinner. I go to bed at ten o'clock. Zis is my daily routine.",
+
+            features: ["Simple sentences", "Basic vocabulary", "Slow pace", "Natural hesitations", "Indian accent patterns"],
+            tone: "friendly and encouraging with hesitations",
+            speed: 0.6
+        },
+        pro: {
+            text: "Greetings! I'm Boony, a distinguished AI language consultant with extensive expertise in English communication mastery. My specialization encompasses transformative linguistic development, spanning foundational grammar structures to advanced rhetorical techniques. I'm dedicated to cultivating linguistic excellence through revolutionary, adaptive learning frameworks that maximize individual potential and accelerate proficiency acquisition.",
+
+            features: ["Complex sentences", "Advanced vocabulary", "Professional tone", "Confident delivery", "Technical terms"],
+            tone: "professional and confident",
+            speed: 1.0
+        }
+    },
+    family: {
+        beginner: {
+            text: "I have a... umm... small family. My father... he works in an office. My mother is a teacher. Aii... I have one brother. We live together in a house. We... we love each other very much. Hmm... we eat dinner together every day.",
+            features: ["Simple family words", "Present tense", "Basic relationships", "Natural pauses", "Warm tone"],
+            tone: "warm and loving with hesitations",
+            speed: 0.6
+        },
+        pro: {
+            text: "Our family constellation embodies a modern paradigm of interconnected professionals pursuing excellence across varied domains. My father orchestrates strategic initiatives within the corporate hierarchy, while my mother champions educational innovation and administrative leadership. Our relational framework prioritizes authentic dialogue, reciprocal understanding, and synergistic growth through meaningful engagement and shared aspirational pursuits.",
+            features: ["Sophisticated vocabulary", "Complex family dynamics", "Professional descriptions", "Analytical tone", "Detailed explanations"],
+            tone: "sophisticated and analytical",
+            speed: 1.0
+        }
+    },
+    hobbies: {
+        beginner: {
+            text: "I like to... umm... read books. I also enjoy... aii... watching movies. Sometimes I play games with... with friends. I love listening to music. On weekends, I... hmm... I go for walks in the park. These activities make me... make me happy.",
+            features: ["Simple hobby words", "Basic activities", "Present tense", "Natural hesitations", "Happy tone"],
+            tone: "enthusiastic and joyful with pauses",
+            speed: 0.6
+        },
+        pro: {
+            text: "My leisure portfolio encompasses multifaceted intellectual pursuits that stimulate cognitive enhancement and creative expression. I gravitate toward sophisticated literary critique, cinematographic artistry evaluation, and complex strategic challenges. My auditory preferences traverse baroque masterpieces through avant-garde compositions, demonstrating refined aesthetic sensibilities that foster continuous personal enrichment and holistic well-being optimization.",
+            features: ["Advanced hobby vocabulary", "Intellectual pursuits", "Analytical descriptions", "Cultural references", "Sophisticated expression"],
+            tone: "intellectual and refined",
+            speed: 1.0
+        }
+    },
+    career: {
+        beginner: {
+            text: "I vant to... umm... get a good job. I am studying wery hard for... for zis. I hope to vork in a... aii... nice company. I vant to help people trough my vork. I vill... hmm... try my best to succeed. My dream is to... to be successful in life.",
+
+            features: ["Simple career goals", "Basic future plans", "Hopeful language", "Natural pauses", "Indian accent patterns"],
+            tone: "hopeful and determined with hesitations",
+            speed: 0.6
+        },
+        pro: {
+            text: "My professional trajectory exemplifies strategic positioning within disruptive market ecosystems and technological paradigm shifts. I'm cultivating elite competencies through rigorous certification pathways, establishing myself as an influential industry visionary. My executive aspirations encompass spearheading transformational initiatives, nurturing high-potential talent pipelines, and architecting sustainable value creation through analytical intelligence and innovative leadership methodologies.",
+
+            features: ["Professional jargon", "Strategic thinking", "Leadership concepts", "Business terminology", "Executive tone"],
+            tone: "authoritative and strategic",
+            speed: 1.0
+        }
+    },
+    travel: {
+        beginner: {
+            text: "I like to... umm... travel to new places. Last year, I vent to ze... aii... mountains. Ze veather vas nice and... and cool. I took many fotos. I met... hmm... friendly people zere. I vant to wisit more places in ze... in ze future.",
+
+            features: ["Simple travel words", "Past experiences", "Basic descriptions", "Natural hesitations", "Indian accent patterns"],
+            tone: "excited and adventurous with pauses",
+            speed: 0.6
+        },
+        pro: {
+            text: "My wanderlust philosophy champions immersive cultural anthropology and transformative experiential learning beyond superficial touristic encounters. I've traversed extraordinary geographical tapestries, from pristine Himalayan sanctuaries to vibrant cosmopolitan epicenters, each odyssey enriching my worldview sophistication. These explorations have amplified my intercultural fluency and cultivated profound reverence for global heritage conservation and sociocultural authenticity.",
+
+            features: ["Travel expertise", "Cultural awareness", "Geographic knowledge", "Philosophical approach", "Worldly tone"],
+            tone: "worldly and philosophical",
+            speed: 1.0
+        }
+    },
+    food: {
+        beginner: {
+            text: "I love... umm... Indian food wery much. My favorite dish is... aii... rice and curry. I also like bread and... and wegetables. Sometimes I eat sveets after... after dinner. My mother cooks wery... hmm... tasty food. I enjoy eating vith my... my family.",
+
+            features: ["Simple food words", "Personal preferences", "Family connections", "Natural pauses", "Indian accent patterns"],
+            tone: "appreciative and warm with hesitations",
+            speed: 0.6
+        },
+        pro: {
+            text: "My gastronomic sensibilities embody refined epicurean appreciation spanning indigenous culinary heritage and global cuisine mastery. I'm captivated by intricate flavor architectures orchestrated through ancestral spice symphonies and artisanal preparation methodologies. My dining philosophy prioritizes holistic nutritional optimization, cultural preservation authenticity, and the profound communal significance of shared culinary experiences in fostering meaningful social bonds.",
+
+            features: ["Culinary vocabulary", "Sophisticated descriptions", "Cultural analysis", "Nutritional awareness", "Gourmet tone"],
+            tone: "sophisticated and knowledgeable",
+            speed: 1.0
+        }
+    },
+    education: {
+        beginner: {
+            text: "I am a... umm... student. I go to school ewery... ewery day. I study many subjects like... aii... math and science. My teachers are wery... wery helpful. I have good friends in my... hmm... class. I vork hard to get... to get good marks.",
+
+            features: ["School vocabulary", "Student life", "Simple subjects", "Natural hesitations", "Indian accent patterns"],
+            tone: "studious and positive with pauses",
+            speed: 0.6
+        },
+        pro: {
+            text: "My scholastic odyssey encompasses comprehensive intellectual exploration across interdisciplinary academic frontiers. I'm devoted to perpetual knowledge acquisition through prestigious institutional frameworks and autonomous research initiatives. My pedagogical approach emphasizes sophisticated critical analysis, advanced reasoning methodologies, and innovative theoretical application. I actively participate in elite academic discourse while contributing groundbreaking insights to specialized knowledge domains.",
+
+            features: ["Academic vocabulary", "Scholarly approach", "Research orientation", "Intellectual discourse", "Academic tone"],
+            tone: "scholarly and intellectual",
+            speed: 1.0
+        }
+    },
+    technology: {
+        beginner: {
+            text: "I use my... umm... phone and computer ewery day. I like to... aii... chat vith friends online. I vatch wideos on ze... ze internet. Technology helps me learn... hmm... new zings. Sometimes I play games on my... my phone. Technology makes life... makes life easier.",
+
+            features: ["Basic tech words", "Daily usage", "Simple benefits", "Natural hesitations", "Indian accent patterns"],
+            tone: "casual and friendly with pauses",
+            speed: 0.6
+        },
+        pro: {
+            text: "Technology constitutes the fundamental catalyst driving unprecedented innovation acceleration and operational efficiency optimization across multifaceted professional and personal ecosystems. I strategically leverage sophisticated digital platforms encompassing advanced analytics frameworks, collaborative project orchestration systems, and continuous competency enhancement methodologies. My comprehensive technology adoption philosophy emphasizes robust cybersecurity protocols, privacy governance frameworks, and sustainable digital transformation practices that align with emerging industry paradigms and regulatory compliance standards.",
+
+            features: ["Advanced technical terminology", "Strategic applications", "Industry expertise", "Complex frameworks", "Authoritative tone"],
+            tone: "expert and sophisticated",
+            speed: 1.0
+        }
+    }
+};
+
+// Fetch current day and topic from server
+async function fetchCurrentDayAndTopic() {
+    try {
+        // Use day passed from template (already set in currentDay variable)
+        // No need to fetch from session as it's passed from backend
+        
+        // Fetch topic for current day from syllabus
+        const topicResponse = await fetch(`/api/get_day_topic?day=${currentDay}`);
+        if (topicResponse.ok) {
+            const topicData = await topicResponse.json();
+            currentTopic = topicData.topic || 'daily routine';
+            currentTopicContent = topicData.content || null;
+            
+            // Update topic display
+            document.getElementById('current-topic-name').textContent = currentTopic;
+        }
+        
+        // Generate content based on fetched topic
+        generateTopicContent();
+        updateContent();
+        
+    } catch (error) {
+        console.error('Error fetching day/topic:', error);
+        // Fallback to default
+        currentTopic = 'daily routine';
+        document.getElementById('current-topic-name').textContent = currentTopic;
+        generateTopicContent();
+        updateContent();
+    }
+}
+
+// Generate topic content based on current topic and syllabus data
+function generateTopicContent() {
+    if (!topicContent[currentTopic]) {
+        // Create dynamic content based on topic name and syllabus data
+        topicContent[currentTopic] = {
+            beginner: {
+                text: generateBeginnerText(currentTopic, currentTopicContent),
+                features: ["Simple sentences", "Basic vocabulary", "Slow pace", "Clear pronunciation", "Friendly tone"],
+                tone: "friendly and encouraging",
+                speed: 0.7
+            },
+            pro: {
+                text: generateProfessionalText(currentTopic, currentTopicContent),
+                features: ["Complex sentences", "Advanced vocabulary", "Professional tone", "Confident delivery", "Technical terms"],
+                tone: "professional and confident",
+                speed: 1.0
+            }
+        };
+    }
+}
+
+// Generate beginner level text (7-8 lines)
+function generateBeginnerText(topic, content) {
+    if (content && content.length > 0) {
+        // Use more statements from syllabus for beginner level (7-8 lines)
+        const statements = content.slice(0, 8).map(item => item.text).join('. ');
+        return statements + '.' || getDefaultBeginnerText(topic);
+    }
+    return getDefaultBeginnerText(topic);
+}
+
+// Generate professional level text (10-15 lines)
+function generateProfessionalText(topic, content) {
+    if (content && content.length > 0) {
+        // Use more statements and make them complex for professional level (10-15 lines)
+        const statements = content.slice(0, 15).map(item => {
+            // Make sentences more complex and professional
+            return enhanceForProfessional(item.text);
+        }).join('. ');
+        return statements + '.' || getDefaultProfessionalText(topic);
+    }
+    return getDefaultProfessionalText(topic);
+}
+
+// Enhance text for professional level
+function enhanceForProfessional(text) {
+    // Add more sophisticated vocabulary and structure without repetitive words
+    return text.replace(/I am /g, 'I represent ')
+               .replace(/I have /g, 'I possess ')
+               .replace(/I work /g, 'I operate ')
+               .replace(/I like /g, 'I prefer ')
+               .replace(/I want /g, 'I aspire ')
+               .replace(/My /g, 'My comprehensive ')
+               .replace(/We /g, 'We systematically ')
+               .replace(/This /g, 'This strategic approach ');
+}
+
+// Default texts for fallback (7-8 lines for beginner)
+function getDefaultBeginnerText(topic) {
+    const defaults = {
+        'daily routine': 'I wake up early every morning at six o\'clock. I brush my teeth and take a shower to feel fresh. I have breakfast with my family and we talk together. I go to work by bus and it takes thirty minutes. I work hard all day and help my colleagues. I come back home in the evening and have dinner. We watch TV together and share our day. I go to bed early to rest well.',
+        'family': 'I have a loving family with four members. My parents are very caring and supportive always. We spend time together every day after work. We help each other in everything we do. My father works in a bank and is very kind. My mother cooks delicious food for all of us. We celebrate festivals together with great joy. Our family bond is very strong and special.',
+        'work': 'I work in an office with many good people. I have good colleagues who help me always. I enjoy my job very much every single day. I learn new things and skills regularly here. My boss is understanding and guides me well. We have team meetings every week to discuss. I complete my tasks on time always. This job helps me grow as a person.',
+        'education': 'I am studying English to improve my communication. I practice speaking every day with my friends. My teachers are very helpful and patient always. I want to improve my communication skills quickly. I read English books and watch English movies. I write in my diary every night. I attend classes regularly without missing any. Learning English opens many opportunities for me.'
+    };
+    return defaults[topic.toLowerCase()] || `I want to talk about ${topic} today. This is an important topic for me to discuss. I practice speaking about it regularly with others. It helps me improve my English skills greatly. I learn new words related to this topic. I feel confident when I speak about it. This topic is interesting and useful for me. I enjoy sharing my thoughts about this subject.`;
+}
+
+function getDefaultProfessionalText(topic) {
+    const defaults = {
+        'daily routine': 'My daily routine encompasses a structured approach to personal and professional development that maximizes efficiency and productivity. I maintain consistent morning rituals that optimize my cognitive performance and well-being throughout the day. My schedule incorporates strategic time blocks for focused work, continuous learning, and relationship building. I prioritize high-impact activities that align with my long-term objectives and career advancement goals. Regular exercise and mindfulness practices enhance my mental clarity and decision-making capabilities. I leverage technology and automation tools to streamline routine tasks and minimize time wastage. Evening reflection sessions allow me to evaluate progress and adjust strategies for continuous improvement. This systematic approach ensures sustainable growth and maintains work-life balance effectively. My routine adapts dynamically to changing priorities while maintaining core productivity principles. The integration of personal development activities creates a holistic framework for success.',
+        'family': 'My family structure represents a dynamic support system that facilitates mutual growth and collaborative achievement through strategic relationship management. We maintain strong interpersonal relationships through effective communication strategies and shared value systems. Our family governance model emphasizes democratic decision-making processes and individual autonomy within collective responsibility frameworks. We invest in each member\'s personal and professional development through targeted resource allocation and mentorship programs. Regular family meetings ensure alignment on goals, expectations, and conflict resolution mechanisms. We celebrate achievements collectively while providing support during challenging periods through structured assistance protocols. Our financial planning incorporates long-term wealth building strategies and educational investment priorities. Technology integration enhances our communication efficiency and maintains connections across geographical distances. We actively contribute to community development initiatives that reflect our shared values and social responsibility commitments. This comprehensive approach strengthens family bonds while promoting individual excellence and collective prosperity.',
+        'work': 'My professional environment provides opportunities for strategic thinking and innovative problem-solving that drive organizational transformation and competitive advantage. I engage in collaborative projects that enhance organizational efficiency and drive sustainable growth through data-driven decision making. My role encompasses cross-functional leadership responsibilities that require advanced analytical skills and stakeholder management expertise. I continuously develop industry-specific competencies through professional development programs and strategic networking initiatives. My contribution to organizational success includes process optimization, team development, and strategic planning activities. I leverage emerging technologies and best practices to improve operational effectiveness and customer satisfaction metrics. Regular performance evaluations and feedback mechanisms ensure continuous improvement and career progression alignment. My professional network spans multiple industries and provides valuable insights for strategic decision making. I actively mentor junior colleagues and contribute to knowledge sharing initiatives within the organization. This comprehensive approach positions me as a valuable asset while advancing my career objectives systematically.',
+        'education': 'My educational journey emphasizes continuous learning and skill enhancement through diverse methodologies that align with contemporary industry requirements and global standards. I pursue advanced competencies through formal academic programs, professional certifications, and self-directed learning initiatives. My learning strategy incorporates multiple modalities including online courses, workshops, conferences, and peer collaboration networks. I maintain a portfolio of credentials that demonstrate expertise across various domains and emerging technologies. Regular assessment of market trends and skill gaps informs my educational investment decisions and career development planning. I actively participate in academic research projects and contribute to knowledge creation within my field of expertise. My educational philosophy emphasizes practical application of theoretical concepts through real-world projects and case studies. I leverage educational technology platforms and digital resources to optimize learning efficiency and accessibility. Mentorship relationships with industry experts provide valuable guidance and accelerate professional development outcomes. This systematic approach to education ensures continuous relevance and competitive advantage in dynamic market conditions.'
+    };
+    return defaults[topic.toLowerCase()] || `My comprehensive understanding of ${topic} encompasses multiple dimensions and strategic considerations that require systematic analysis and practical application. This topic represents a significant area of expertise that I continue to develop through rigorous research and professional practice. The complexity of this subject demands interdisciplinary knowledge and advanced analytical capabilities. I regularly engage with industry experts and thought leaders to deepen my understanding and stay current with emerging trends. My approach integrates theoretical frameworks with practical implementation strategies to achieve optimal outcomes. I contribute to professional discourse through publications, presentations, and collaborative research initiatives. The strategic importance of this topic extends beyond individual expertise to organizational and societal impact. I continuously evaluate and refine my methodologies based on empirical evidence and best practices. This commitment to excellence ensures that my expertise remains relevant and valuable in dynamic professional environments. My ongoing development in this area reflects dedication to continuous improvement and thought leadership.`;
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    fetchCurrentDayAndTopic();
+});
+
+// Select level function
+function selectLevel(level) {
+    currentLevel = level;
+    
+    // Update button states
+    document.getElementById('beginner-btn').classList.toggle('active', level === 'beginner');
+    document.getElementById('pro-btn').classList.toggle('active', level === 'pro');
+    
+    updateContent();
+}
+
+// Update content based on selection
+function updateContent() {
+    // Ensure topic content exists
+    if (!topicContent[currentTopic]) {
+        generateTopicContent();
+    }
+    
+    const content = topicContent[currentTopic][currentLevel];
+    
+    // Update avatar GIF based on level
+    updateAvatarForLevel();
+    
+    // Update speech content
+    const speechContentDiv = document.getElementById('speech-content');
+    speechContentDiv.innerHTML = `
+        <h3>${currentLevel === 'beginner' ? '🌱 Beginner Level' : '🏆 Professional Level'} - ${currentTopic.charAt(0).toUpperCase() + currentTopic.slice(1)}</h3>
+        <p><strong>Day:</strong> ${currentDay}</p>
+        <p><strong>Speech Content:</strong></p>
+        <p>${content.text}</p>
+        <p><strong>Tone:</strong> ${content.tone}</p>
+    `;
+    
+    // Update features comparison table
+    const featuresDiv = document.getElementById('speech-features');
+    const featuresRows = document.getElementById('features-rows');
+    
+    // Get both beginner and professional content for comparison
+    const beginnerContent = topicContent[currentTopic]?.beginner || topicContent['introduction'].beginner;
+    const proContent = topicContent[currentTopic]?.pro || topicContent['introduction'].pro;
+    
+    // Create feature comparison data
+    const featureComparisons = [
+        {
+            category: 'Vocabulary',
+            beginner: 'Simple, everyday words',
+            professional: 'Advanced, technical terms'
+        },
+        {
+            category: 'Sentence Structure',
+            beginner: 'Short, simple sentences',
+            professional: 'Complex, compound sentences'
+        },
+        {
+            category: 'Speaking Pace',
+            beginner: 'Slow, thoughtful pace',
+            professional: 'Confident, faster pace'
+        },
+        {
+            category: 'Hesitations',
+            beginner: 'Natural pauses and "umm"',
+            professional: 'Smooth, fluent delivery'
+        },
+        {
+            category: 'Tone',
+            beginner: beginnerContent.tone,
+            professional: proContent.tone
+        }
+    ];
+    
+    featuresRows.innerHTML = '';
+    featureComparisons.forEach(comparison => {
+        const row = document.createElement('div');
+        row.className = 'feature-row';
+        row.innerHTML = `
+            <div class="feature-name">${comparison.category}</div>
+            <div class="beginner-feature">${comparison.beginner}</div>
+            <div class="professional-feature">${comparison.professional}</div>
+        `;
+        featuresRows.appendChild(row);
+    });
+    
+    featuresDiv.style.display = 'block';
+}
+
+// Update avatar GIF based on current level and gender
+function updateAvatarForLevel() {
+    const avatarGif = document.getElementById('avatar-gif');
+    const avatarContainer = document.querySelector('.avatar-container');
+    
+    // Remove existing level classes
+    avatarContainer.classList.remove('beginner-mode', 'pro-mode');
+    
+    // Set avatar based on gender
+    const genderPrefix = currentVoiceGender === 'male' ? 'boony_male' : 'boony_female';
+    avatarGif.src = `/static/gifs/${genderPrefix}.gif`;
+    
+    if (currentLevel === 'beginner') {
+        // Beginner: Friendly, casual appearance
+        avatarContainer.classList.add('beginner-mode');
+        avatarContainer.style.borderColor = 'rgba(33, 150, 243, 0.5)'; // Blue border
+    } else {
+        // Professional: More formal appearance
+        avatarContainer.classList.add('pro-mode');
+        avatarContainer.style.borderColor = 'rgba(255, 152, 0, 0.5)'; // Orange border
+    }
+}
+
+// Function to ensure voices are loaded
+function ensureVoicesLoaded(callback) {
+    const voices = speechSynthesis.getVoices();
+    if (voices.length > 0) {
+        callback();
+    } else {
+        // Wait for voices to load
+        speechSynthesis.addEventListener('voiceschanged', function() {
+            callback();
+        }, { once: true });
+        
+        // Fallback timeout
+        setTimeout(() => {
+            console.warn('Voices loading timeout, proceeding anyway');
+            callback();
+        }, 2000);
+    }
+}
+
+// Toggle speaking function
+function toggleSpeaking() {
+    try {
+        if (isSpeaking) {
+            console.log('Stopping speech...');
+            stopSpeaking();
+        } else {
+            console.log('Starting speech...');
+            startSpeaking();
+        }
+    } catch (error) {
+        console.error('Error in toggleSpeaking:', error);
+        // Reset state in case of error
+        isSpeaking = false;
+        const toggleBtn = document.getElementById('toggle-speak-btn');
+        if (toggleBtn) {
+            toggleBtn.textContent = '🎤 Start Speaking';
+            toggleBtn.classList.remove('stop-btn');
+            toggleBtn.classList.add('speak-btn');
+        }
+    }
+}
+
+// Start speaking function
+function startSpeaking() {
+    if (isSpeaking || isMuted) return;
+    
+    // Directly proceed with speech synthesis
+    proceedWithSpeaking();
+}
+
+// Separate function for actual speaking logic
+function proceedWithSpeaking() {
+    ensureVoicesLoaded(() => {
+        const content = topicContent[currentTopic][currentLevel];
+        
+        // Broadcast audio start event to base.html
+        window.dispatchEvent(new CustomEvent('boony:audio', { 
+            detail: { playing: true } 
+        }));
+        
+        // Update UI
+        isSpeaking = true;
+        const toggleBtn = document.getElementById('toggle-speak-btn');
+        toggleBtn.textContent = '⏹️ Stop Speaking';
+        toggleBtn.classList.remove('speak-btn');
+        toggleBtn.classList.add('stop-btn');
+        document.getElementById('avatar-status').textContent = `Speaking ${currentLevel === 'beginner' ? '(Beginner Mode)' : '(Professional Mode)'} 🗣️`;
+        
+        // Add level-specific speaking animation
+        const avatarGif = document.getElementById('avatar-gif');
+        const avatarContainer = document.querySelector('.avatar-container');
+        avatarGif.classList.add('speaking');
+        
+        // Add visual feedback based on level
+        if (currentLevel === 'beginner') {
+            avatarContainer.style.boxShadow = '0 0 20px rgba(33, 150, 243, 0.6)';
+        } else {
+            avatarContainer.style.boxShadow = '0 0 20px rgba(255, 152, 0, 0.6)';
+        }
+        
+        // Create speech utterance with level-specific characteristics
+        currentUtterance = new SpeechSynthesisUtterance(content.text);
+        
+        // Set voice characteristics based on level
+        if (currentLevel === 'beginner') {
+            // Beginner: Very slow, thoughtful pace with pauses, higher pitch, more friendly
+            currentUtterance.rate = 0.5; // Much slower for thoughtful speaking
+            currentUtterance.pitch = 1.2;
+            currentUtterance.volume = 1.0;
+        } else {
+            // Professional: Faster, confident pace, lower pitch, more authoritative
+            currentUtterance.rate = 1.2; // Faster for professional confidence
+            currentUtterance.pitch = 0.8;
+            currentUtterance.volume = 0.95;
+        }
+        
+        // Set voice based on gender, level, accent and availability
+        const voices = speechSynthesis.getVoices();
+    let selectedVoice = null;
+    
+    // Determine language code based on accent
+    const langCode = currentAccent === 'hi-IN' ? 'hi-IN' : 'en-US';
+    
+    // Filter voices by gender and accent
+    let genderVoices = [];
+    
+    console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+    console.log('Current settings:', { currentVoiceGender, langCode, currentAccent });
+    
+    if (currentVoiceGender === 'male') {
+        genderVoices = voices.filter(voice => {
+            const voiceName = voice.name.toLowerCase();
+            const isCorrectLang = voice.lang.startsWith(langCode.split('-')[0]) || voice.lang === langCode;
+            const isMaleVoice = voiceName.includes('david') ||
+                               voiceName.includes('mark') ||
+                               voiceName.includes('male') ||
+                               voiceName.includes('ravi') ||
+                               voiceName.includes('hemant') ||
+                               voiceName.includes('guy') ||
+                               voiceName.includes('james');
+            return isMaleVoice && isCorrectLang;
+        });
+    } else {
+        // Female voice selection
+        genderVoices = voices.filter(voice => {
+            const voiceName = voice.name.toLowerCase();
+            const isCorrectLang = voice.lang.startsWith(langCode.split('-')[0]) || voice.lang === langCode;
+            const isFemaleVoice = voiceName.includes('zira') ||
+                                 voiceName.includes('hazel') ||
+                                 voiceName.includes('female') ||
+                                 voiceName.includes('susan') ||
+                                 voiceName.includes('helen') ||
+                                 voiceName.includes('heera') ||
+                                 voiceName.includes('kalpana') ||
+                                 voiceName.includes('kavya') ||
+                                 voiceName.includes('swara') ||
+                                 voiceName.includes('neerja') ||
+                                 voiceName.includes('aria') ||
+                                 voiceName.includes('jenny') ||
+                                 voiceName.includes('michelle') ||
+                                 voiceName.includes('eva') ||
+                                 (!voiceName.includes('male') && !voiceName.includes('david') && !voiceName.includes('mark') && !voiceName.includes('ravi') && !voiceName.includes('hemant') && !voiceName.includes('guy') && !voiceName.includes('james'));
+            return isFemaleVoice && isCorrectLang;
+        });
+    }
+    
+    console.log('Filtered gender voices:', genderVoices.map(v => `${v.name} (${v.lang})`));
+    
+    // Select voice based on level preference
+    if (currentLevel === 'beginner') {
+        // For beginners: Look for friendly, clear voices
+        if (currentVoiceGender === 'female') {
+            selectedVoice = genderVoices.find(v => 
+                v.name.toLowerCase().includes('kavya') || 
+                v.name.toLowerCase().includes('swara') ||
+                v.name.toLowerCase().includes('neerja') ||
+                v.name.toLowerCase().includes('zira') || 
+                v.name.toLowerCase().includes('hazel') ||
+                v.name.toLowerCase().includes('aria') ||
+                v.name.toLowerCase().includes('jenny')
+            ) || genderVoices[0];
+        } else {
+            selectedVoice = genderVoices.find(v => 
+                v.name.toLowerCase().includes('david') ||
+                v.name.toLowerCase().includes('guy')
+            ) || genderVoices[0];
+        }
+    } else {
+        // For professionals: Look for more formal, authoritative voices
+        if (currentVoiceGender === 'female') {
+            selectedVoice = genderVoices.find(v => 
+                v.name.toLowerCase().includes('kavya') || 
+                v.name.toLowerCase().includes('swara') ||
+                v.name.toLowerCase().includes('neerja') ||
+                v.name.toLowerCase().includes('helen') || 
+                v.name.toLowerCase().includes('susan') ||
+                v.name.toLowerCase().includes('michelle')
+            ) || genderVoices[0];
+        } else {
+            selectedVoice = genderVoices.find(v => 
+                v.name.toLowerCase().includes('mark') ||
+                v.name.toLowerCase().includes('james')
+            ) || genderVoices[0];
+        }
+    }
+    
+    // Fallback strategies if no gender-specific voice found
+    if (!selectedVoice) {
+        console.log('No gender-specific voice found, trying language fallback');
+        // Try to find any voice with correct language
+        const langVoices = voices.filter(v => v.lang.startsWith(langCode.split('-')[0]));
+        
+        if (currentVoiceGender === 'female') {
+            // For female, avoid obviously male voices
+            selectedVoice = langVoices.find(v => 
+                !v.name.toLowerCase().includes('david') &&
+                !v.name.toLowerCase().includes('mark') &&
+                !v.name.toLowerCase().includes('male')
+            ) || langVoices[0];
+        } else {
+            // For male, prefer male voices or neutral
+            selectedVoice = langVoices.find(v => 
+                v.name.toLowerCase().includes('male') ||
+                v.name.toLowerCase().includes('david') ||
+                v.name.toLowerCase().includes('mark')
+            ) || langVoices[0];
+        }
+        
+        // Final fallback to any available voice
+        if (!selectedVoice) {
+            selectedVoice = voices[0];
+        }
+    }
+    
+    if (selectedVoice) {
+        currentUtterance.voice = selectedVoice;
+        console.log(`Selected voice: ${selectedVoice.name} (${selectedVoice.lang}) for ${currentVoiceGender} ${currentLevel} level`);
+    } else {
+        console.warn('No voice selected! Using default voice.');
+    }
+    
+    // Speech event handlers
+        currentUtterance.onend = function() {
+            console.log('Speech synthesis completed normally');
+            stopSpeaking();
+        };
+        
+        currentUtterance.onerror = function(event) {
+            console.error('Speech synthesis error:', event.error);
+            stopSpeaking();
+            
+            // Show user-friendly error message
+            const errorMsg = event.error === 'interrupted' ? 
+                'Speech was interrupted' : 
+                'Speech synthesis error occurred. Please try again.';
+            
+            // Use a less intrusive notification instead of alert
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #ff4444;
+                color: white;
+                padding: 10px 15px;
+                border-radius: 5px;
+                z-index: 1000;
+                font-size: 14px;
+            `;
+            errorDiv.textContent = errorMsg;
+            document.body.appendChild(errorDiv);
+            
+            // Remove error message after 3 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 3000);
+        };
+        
+        // Start speaking with error handling
+        try {
+            speechSynthesis.speak(currentUtterance);
+            console.log('Speech synthesis started');
+        } catch (error) {
+            console.error('Failed to start speech synthesis:', error);
+            stopSpeaking();
+        }
+    });
+}
+
+// Stop speaking function
+function stopSpeaking() {
+    try {
+        // Cancel current utterance if exists
+        if (currentUtterance) {
+            speechSynthesis.cancel();
+            currentUtterance = null;
+        }
+        
+        // Additional safety check - force cancel if still speaking
+        if (speechSynthesis.speaking) {
+            speechSynthesis.cancel();
+        }
+        
+        // Wait a bit and force cancel again if needed
+        setTimeout(() => {
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+            }
+        }, 100);
+        
+    } catch (error) {
+        console.error('Error stopping speech synthesis:', error);
+        // Force reset even if cancel fails
+        currentUtterance = null;
+        // Force stop speech synthesis
+        try {
+            speechSynthesis.cancel();
+        } catch (e) {
+            console.error('Failed to force cancel speech:', e);
+        }
+    }
+    
+    // Broadcast audio stop event to base.html
+    window.dispatchEvent(new CustomEvent('boony:audio', { 
+        detail: { playing: false } 
+    }));
+    
+    // Update UI
+    isSpeaking = false;
+    const toggleBtn = document.getElementById('toggle-speak-btn');
+    toggleBtn.textContent = '🎤 Start Speaking';
+    toggleBtn.classList.remove('stop-btn');
+    toggleBtn.classList.add('speak-btn');
+    document.getElementById('avatar-status').textContent = 'Ready to Speak 🎤';
+    
+    // Add credits for listening to topic
+    fetch('/api/use-topic-speaker', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update credits display on dashboard if available
+            const topicSpeakerCredits = document.querySelector('.topic-speaker-credits');
+            if (topicSpeakerCredits) {
+                topicSpeakerCredits.textContent = data.remaining_credits;
+            }
+            console.log('Credits added for topic listening:', data.remaining_credits);
+        }
+    })
+    .catch(error => {
+        console.error('Error adding credits:', error);
+    });
+    
+    // Remove speaking animation and reset visual effects
+    const avatarGif = document.getElementById('avatar-gif');
+    const avatarContainer = document.querySelector('.avatar-container');
+    avatarGif.classList.remove('speaking');
+    
+    // Reset box shadow to default level-specific border
+    if (currentLevel === 'beginner') {
+        avatarContainer.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
+    } else {
+        avatarContainer.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
+    }
+}
+
+
+
+// Topic is now automatically set based on current day
+// No manual topic selection needed
+
+// Base.html integration - Listen for preference changes
+window.addEventListener('boony:prefs', function(e) {
+    const prefs = e.detail;
+    currentVoiceGender = prefs.voice || 'female';
+    currentAccent = prefs.accent || 'hi-IN';
+    currentMode = prefs.mode || 'auto';
+    
+    // Update avatar when gender changes
+    updateAvatarForLevel();
+    
+    console.log('Voice preferences updated:', prefs);
+});
+
+// Listen for mute changes
+window.addEventListener('boony:mute', function(e) {
+    isMuted = e.detail.muted;
+    
+    // Stop speaking if muted
+    if (isMuted && isSpeaking) {
+        stopSpeaking();
+    }
+});
+
+// Initialize preferences from base.html on page load
+function initializePreferences() {
+    // Get preferences from localStorage (same as base.html)
+    const store = window.localStorage;
+    currentVoiceGender = store.getItem('boony.voice') || 'female';
+    currentAccent = store.getItem('boony.accent') || 'hi-IN';
+    currentMode = store.getItem('boony.mode') || 'auto';
+    isMuted = store.getItem('boony.muted') === 'true';
+    
+    // Update avatar based on initial preferences
+    updateAvatarForLevel();
+    
+    console.log('Initial preferences loaded:', {
+        gender: currentVoiceGender,
+        accent: currentAccent,
+        mode: currentMode,
+        muted: isMuted
+    });
+}
+
+// Initialize preferences when page loads
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializePreferences);
+} else {
+    initializePreferences();
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (isSpeaking) {
+        speechSynthesis.cancel();
+    }
+});
+</script>
+
+{% endblock content %}

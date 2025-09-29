@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Comprehensive Dashboard Test</title>
+</head>
+<body>
+    <h1>Testing Dashboard JavaScript Comprehensively</h1>
+    <div id="output"></div>
+    
+    <script>
+        console.log('Starting comprehensive dashboard test...');
+        
+        // Test all template variables first
+        const isPracticeMode = {{ ('true' if is_practice_mode else 'false')|tojson|safe }};
+        const currentDay = {{ day|tojson|safe }};
+        const currentUserId = {{ current_user.user_id|tojson|safe }};
+        const starOfDayUserId = {{ star_of_day_user_id|tojson|safe }};
+        const starOfWeekUserId = {{ star_of_week_user_id|tojson|safe }};
+        const credits = {
+            listen: {{ credits.listen|tojson|safe }},
+            speak: {{ credits.speak|tojson|safe }},
+            vocabulary: {{ credits.vocabulary|tojson|safe }},
+            revision: {{ credits.revision|tojson|safe }}
+        };
+        
+        console.log('Template variables loaded:', {
+            isPracticeMode,
+            currentDay,
+            currentUserId,
+            starOfDayUserId,
+            starOfWeekUserId,
+            credits
+        });
+        
+        // Test getUserLanguage function
+        function getUserLanguage() {
+            if (typeof window.getPrefs === 'function') {
+                return window.getPrefs().lang || 'hinglish';
+            }
+            return 'hinglish';
+        }
+        
+        // Test dashboardTexts object
+        const dashboardTexts = {
+            hinglish: {
+                upload: 'Upload Photo',
+                uploading: 'Uploading...',
+                uploadSuccess: 'Photo uploaded successfully!',
+                uploadError: 'Error uploading photo. Please try again.'
+            },
+            english: {
+                upload: 'Upload Photo',
+                uploading: 'Uploading...',
+                uploadSuccess: 'Photo uploaded successfully!',
+                uploadError: 'Error uploading photo. Please try again.'
+            }
+        };
+        
+        // Test populateDaySelector function
+        function populateDaySelector() {
+            console.log('populateDaySelector called');
+            const selector = document.getElementById('daySelector');
+            const currentDay = {{ day|tojson|safe }};
+            
+            if (!selector) {
+                console.log('daySelector not found');
+                return;
+            }
+            
+            selector.innerHTML = '<option value="">Select Previous Day</option>';
+            console.log('populateDaySelector completed');
+        }
+        
+        // Test checkStarStatus function
+        function checkStarStatus() {
+            console.log('checkStarStatus called');
+            const currentUserId = {{ current_user.user_id|tojson|safe }};
+            const starOfDayUserId = {{ star_of_day_user_id|tojson|safe }};
+            const starOfWeekUserId = {{ star_of_week_user_id|tojson|safe }};
+            
+            let currentLang = 'hinglish';
+            try {
+                currentLang = getUserLanguage();
+            } catch (error) {
+                console.log('getUserLanguage not available yet, using default');
+            }
+            
+            let isStarOfDay = false;
+            let isStarOfWeek = false;
+            
+            if (starOfDayUserId && starOfDayUserId !== 'None' && currentUserId === starOfDayUserId) {
+                isStarOfDay = true;
+            }
+            
+            if (starOfWeekUserId && starOfWeekUserId !== 'None' && currentUserId === starOfWeekUserId) {
+                isStarOfWeek = true;
+            }
+            
+            console.log('checkStarStatus completed:', { isStarOfDay, isStarOfWeek });
+        }
+        
+        // Test checkDayCompletion function
+        function checkDayCompletion() {
+            console.log('checkDayCompletion called');
+            const currentDay = {{ day|tojson|safe }};
+            const credits = {
+                listen: {{ credits.listen|tojson|safe }},
+                speak: {{ credits.speak|tojson|safe }},
+                vocabulary: {{ credits.vocabulary|tojson|safe }},
+                revision: {{ credits.revision|tojson|safe }}
+            };
+            
+            const dayNum = parseInt(currentDay.split('-')[1]);
+            let isCompleted = credits.revision >= 20;
+            
+            if (dayNum >= 7) {
+                isCompleted = isCompleted && credits.vocabulary > 0;
+            }
+            
+            const congratsShown = localStorage.getItem(`congrats_shown_${currentDay}`);
+            console.log('checkDayCompletion completed:', { isCompleted, congratsShown });
+        }
+        
+        // Test closeStarNotification function
+        function closeStarNotification() {
+            console.log('closeStarNotification called');
+            const notification = document.getElementById('starNotification');
+            if (notification) {
+                notification.style.display = 'none';
+            }
+        }
+        
+        // Test closeCongratulationsModal function
+        function closeCongratulationsModal() {
+            console.log('closeCongratulationsModal called');
+            const modal = document.getElementById('congratulationsModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Test progressToNextDay function
+        function progressToNextDay() {
+            console.log('progressToNextDay called');
+            const currentDay = {{ day|tojson|safe }};
+            const currentDayNum = parseInt(currentDay.split('-')[1]);
+            const nextDay = `Day-${currentDayNum + 1}`;
+            console.log('progressToNextDay completed:', { currentDay, nextDay });
+        }
+        
+        // Test DOMContentLoaded event
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, testing functions...');
+            
+            try {
+                populateDaySelector();
+                console.log('✓ populateDaySelector works');
+            } catch (e) {
+                console.error('✗ populateDaySelector failed:', e);
+            }
+            
+            try {
+                checkStarStatus();
+                console.log('✓ checkStarStatus works');
+            } catch (e) {
+                console.error('✗ checkStarStatus failed:', e);
+            }
+            
+            try {
+                if (!isPracticeMode) {
+                    setTimeout(() => {
+                        checkDayCompletion();
+                        console.log('✓ checkDayCompletion works');
+                    }, 1000);
+                }
+            } catch (e) {
+                console.error('✗ checkDayCompletion failed:', e);
+            }
+            
+            console.log('All tests completed successfully!');
+        });
+        
+        console.log('Script loaded successfully');
+    </script>
+</body>
+</html>

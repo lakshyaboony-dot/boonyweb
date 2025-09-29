@@ -1,0 +1,1038 @@
+{% extends "base.html" %}
+
+{% block title %}Speaking Practice - Boony{% endblock %}
+
+{% block content %}
+<div class="speak-container">
+    <!-- Header Section -->
+    <div class="speak-header">
+        <div class="header-content">
+            <div class="speak-title">
+                <div class="speak-icon">
+                    <i class="fas fa-microphone"></i>
+                </div>
+                <span>Speaking Practice</span>
+            </div>
+            <div class="header-controls">
+                <div class="credits-display">
+                    <i class="fas fa-coins"></i>
+                    <span>Speaking Credits: <span id="speak-credits">0</span></span>
+                </div>
+                <div class="auto-mode-toggle">
+                    <button class="toggle-btn" id="auto-control-btn" onclick="toggleAutoControl()">
+                        <i class="fas fa-pause"></i>
+                        <span>Stop Auto</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Section -->
+    <div class="progress-section">
+        <div class="progress-info">
+            <div class="progress-stats">
+                <div class="progress-label">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Progress: <span id="current-sentence">1</span> / {{ statements|length }}</span>
+                </div>
+                <div class="timer-label">
+                    <i class="fas fa-clock"></i>
+                    <span id="session-timer">00:00</span>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="speak-content">
+        <div class="sentences-container" id="sentences-list">
+            {% for sentence in statements %}
+            <div class="sentence-card{% if loop.index0 == 0 %} active{% endif %}" id="sentence-row-{{ loop.index0 }}">
+                <!-- Sentence Header -->
+                <div class="card-header">
+                    <div class="sentence-number">{{ loop.index }}</div>
+                    <div class="sentence-status" id="activity-{{ loop.index0 }}">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Ready to Listen</span>
+                    </div>
+                </div>
+                
+                <!-- Sentence Content -->
+                <div class="sentence-content">
+                    <div class="sentence-text">
+                        <div class="sentence-en">{{ sentence.text }}</div>
+                        <div class="sentence-hi">{{ sentence.hindi }}</div>
+                    </div>
+                    
+                    <div class="sentence-image">
+                        <div class="ai-generated-image" id="ai-image-{{ loop.index0 }}" style="display: none;"></div>
+                        <div class="default-media" id="default-media-{{ loop.index0 }}">
+                            {% if sentence.image %}
+                            <img src="{{ sentence.image }}" alt="Visual aid" class="practice-image">
+                            {% else %}
+                            <div class="placeholder-image">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Practice Controls -->
+                <div class="practice-controls">
+                    <!-- Listen Button -->
+                    <button class="control-btn listen-btn" id="listen-btn-{{ loop.index0 }}" onclick="playSentence({{ loop.index0 }})" {% if loop.index0 != 0 %}disabled{% endif %}>
+                        <i class="fas fa-volume-up"></i>
+                        <span>Listen</span>
+                    </button>
+                    
+                    <!-- Record Button -->
+                    <button class="control-btn record-btn" id="record-btn-{{ loop.index0 }}" onclick="toggleRecording({{ loop.index0 }})">
+                        <i class="fas fa-microphone"></i>
+                        <span>Start Recording</span>
+                    </button>
+                    
+                    <!-- Audio Waves Visualization -->
+                    <div class="audio-waves-container" id="waves-container-{{ loop.index0 }}" style="display:none;">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                    </div>
+                </div>
+                
+                <!-- Results Section -->
+                <div class="results-section" id="results-{{ loop.index0 }}" style="display:none;">
+                    <div class="transcription-box">
+                        <div class="transcription-label">
+                            <i class="fas fa-microphone-alt"></i>
+                            <span>Your Speech:</span>
+                        </div>
+                        <div class="transcription-text" id="transcription-{{ loop.index0 }}">Ready to record...</div>
+                    </div>
+                    
+                    <div class="analysis-box" id="analysis-box-{{ loop.index0 }}" style="display:none;">
+                        <div class="analysis-header">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Analysis Results</span>
+                        </div>
+                        <div class="analysis-content" id="analysis-content-{{ loop.index0 }}"></div>
+                    </div>
+                    
+                    <div class="feedback-box" id="feedback-box-{{ loop.index0 }}" style="display:none;">
+                        <div class="feedback-header">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>AI Feedback</span>
+                        </div>
+                        <div class="feedback-content" id="feedback-content-{{ loop.index0 }}"></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Audio element for TTS -->
+<audio id="tts-audio" preload="auto"></audio>
+
+<style>
+/* Modern Speaking Practice Styles */
+.speak-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.speak-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    color: white;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.speak-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.speak-icon {
+    background: rgba(255,255,255,0.2);
+    padding: 12px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.header-controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.credits-display {
+    background: rgba(255,255,255,0.15);
+    padding: 10px 20px;
+    border-radius: 25px;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toggle-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+}
+
+.progress-section {
+    background: var(--bg-secondary);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.progress-stats {
+    display: flex;
+    gap: 30px;
+}
+
+.progress-label, .timer-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.sentences-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sentence-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.sentence-card.active {
+    opacity: 1;
+    border-color: #667eea;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sentence-number {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.sentence-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-weight: 500;
+}
+
+.sentence-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.sentence-text {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sentence-en {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.sentence-hi {
+    font-size: 1.1rem;
+    color: #666;
+    font-style: italic;
+}
+
+.sentence-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.practice-image {
+    max-width: 100%;
+    max-height: 150px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.placeholder-image {
+    width: 120px;
+    height: 120px;
+    background: var(--bg-primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ccc;
+    font-size: 2rem;
+}
+
+.practice-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.control-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.control-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.control-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.record-btn.recording {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+}
+
+.audio-waves-container {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    padding: 0 15px;
+}
+
+.wave {
+    width: 4px;
+    height: 20px;
+    background: #667eea;
+    border-radius: 2px;
+    animation: wave 1.2s ease-in-out infinite;
+}
+
+.wave:nth-child(2) { animation-delay: 0.1s; }
+.wave:nth-child(3) { animation-delay: 0.2s; }
+.wave:nth-child(4) { animation-delay: 0.3s; }
+.wave:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes wave {
+    0%, 100% { height: 20px; }
+    50% { height: 40px; }
+}
+
+.results-section {
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.transcription-box, .analysis-box, .feedback-box {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.transcription-label, .analysis-header, .feedback-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.transcription-text {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.analysis-content, .feedback-content {
+    color: #555;
+    line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .speak-container {
+        padding: 15px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .sentence-content {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .practice-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .control-btn {
+        min-width: 120px;
+        padding: 10px 20px;
+    }
+}
+</style>
+
+<script>
+console.log('🔥 JAVASCRIPT IS WORKING - Script loaded successfully!');
+
+// Global Variables
+let sentences = {{ statements|tojson }};
+let currentIndex = 0;
+let isRecording = false;
+let speakMediaRecorder = null;
+let recordedChunks = [];
+let recordedAudioBlobs = {};
+let speakAudioContext = null;
+let isAutoMode = true;
+let sessionStartTime = Date.now();
+let timerInterval = null;
+
+// Silence detection variables
+let speakSilenceAudioContext = null;
+let speakAnalyser = null;
+let silenceStartTime = null;
+let recordingStartTime = null;
+const silenceThreshold = 0.01; // Adjust as needed
+const silenceDuration = 3000; // 3 seconds
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Speaking Practice initialized');
+    console.log('📝 Total sentences:', sentences.length);
+    
+    // Load user credits
+    loadUserCredits();
+    
+    // Start session timer
+    startSessionTimer();
+    
+    // Update progress
+    updateProgress();
+    
+    // Auto-play first sentence after a short delay
+    setTimeout(() => {
+        console.log('🎵 Auto-playing first sentence...');
+        playSentence(0);
+    }, 1000);
+    
+    console.log('✅ Page initialization complete');
+});
+
+// Session Timer
+function startSessionTimer() {
+    timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        document.getElementById('session-timer').textContent = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+
+// Load User Credits
+function loadUserCredits() {
+    // For now, show unlimited credits since endpoint doesn't exist
+    document.getElementById('speak-credits').textContent = '∞';
+    console.log('Credits set to unlimited (endpoint not implemented)');
+}
+
+// Update Progress
+function updateProgress() {
+    const progress = ((currentIndex + 1) / sentences.length) * 100;
+    document.getElementById('progress-fill').style.width = `${progress}%`;
+    document.getElementById('current-sentence').textContent = currentIndex + 1;
+}
+
+// Set Activity Status
+function setActivity(index, status) {
+    const activityEl = document.getElementById(`activity-${index}`);
+    const statusMap = {
+        'Ready to Listen': { icon: 'fas fa-play-circle', text: 'Ready to Listen' },
+        'Playing': { icon: 'fas fa-volume-up', text: 'Playing Audio' },
+        'Ready to Record': { icon: 'fas fa-microphone', text: 'Ready to Record' },
+        'Recording': { icon: 'fas fa-microphone', text: 'Recording...' },
+        'Processing': { icon: 'fas fa-spinner fa-spin', text: 'Processing...' },
+        'Completed': { icon: 'fas fa-check-circle', text: 'Completed' }
+    };
+    
+    const statusInfo = statusMap[status] || statusMap['Ready to Listen'];
+    activityEl.innerHTML = `<i class="${statusInfo.icon}"></i><span>${statusInfo.text}</span>`;
+}
+
+// Play Sentence Audio
+function playSentence(index) {
+    console.log('🔊 Playing sentence:', index);
+    setActivity(index, 'Playing');
+    
+    const sentence = sentences[index];
+    const audioUrl = `/tts?text=${encodeURIComponent(sentence.text)}&voice=male&lang=english&accent=indian`;
+    
+    const audio = document.getElementById('tts-audio');
+    audio.src = audioUrl;
+    
+    audio.onloadeddata = () => {
+        console.log('✅ Audio loaded, playing...');
+        audio.play();
+    };
+    
+    audio.onended = () => {
+        console.log('✅ Audio playback completed');
+        setActivity(index, 'Ready to Record');
+        
+        // Show record button
+        const recordBtn = document.getElementById(`record-btn-${index}`);
+        recordBtn.style.display = 'flex';
+        
+        // Auto-start recording if in auto mode
+        if (isAutoMode) {
+            setTimeout(() => {
+                console.log('🤖 Auto-starting recording...');
+                toggleRecording(index);
+            }, 1000);
+        }
+        
+        // Disable listen button
+        document.getElementById(`listen-btn-${index}`).disabled = true;
+    };
+    
+    audio.onerror = (error) => {
+        console.error('❌ Audio playback error:', error);
+        setActivity(index, 'Ready to Record');
+        document.getElementById(`record-btn-${index}`).style.display = 'flex';
+        document.getElementById(`listen-btn-${index}`).disabled = true;
+    };
+}
+
+// Toggle Recording with Auto Button Text Change
+function toggleRecording(index) {
+    console.log('🔄 toggleRecording called - index:', index, 'isRecording:', isRecording);
+    const recordBtn = document.getElementById(`record-btn-${index}`);
+    
+    if (!isRecording) {
+        console.log('▶️ Starting recording...');
+        // Update button to show "Stop Recording" before starting
+        recordBtn.innerHTML = '<i class="fas fa-stop"></i><span>Stop Recording</span>';
+        recordBtn.classList.add('recording');
+        startRecording(index);
+    } else {
+        console.log('⏹️ Stopping recording...');
+        // Update button to show "Start Recording" before stopping
+        recordBtn.innerHTML = '<i class="fas fa-microphone"></i><span>Start Recording</span>';
+        recordBtn.classList.remove('recording');
+        stopRecording(index);
+    }
+}
+
+// Start Recording
+function startRecording(index) {
+    console.log('🎤 Starting recording for sentence:', index);
+    console.log('🔍 Checking microphone access...');
+    
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            console.log('✅ Microphone access granted');
+            console.log('🎵 Stream tracks:', stream.getTracks().length);
+            console.log('🎵 Audio track active:', stream.getAudioTracks()[0]?.enabled);
+            
+            if (speakMediaRecorder && speakMediaRecorder.state !== 'inactive') {
+                speakMediaRecorder.stop();
+            }
+            
+            speakMediaRecorder = new MediaRecorder(stream);
+            recordedChunks = [];
+            recordingStartTime = Date.now();
+            silenceStartTime = null;
+            
+            speakMediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+            
+            speakMediaRecorder.onstop = () => {
+                const audioBlob = new Blob(recordedChunks, { type: 'audio/wav' });
+                recordedAudioBlobs[index] = audioBlob;
+                processRecording(index, audioBlob);
+                
+                // Stop all tracks and cleanup
+                stream.getTracks().forEach(track => track.stop());
+                cleanupSilenceDetection();
+            };
+            
+            speakMediaRecorder.start();
+            isRecording = true;
+            console.log('✅ isRecording set to true, mediaRecorder started');
+            
+            // Setup silence detection
+            setupSilenceDetection(stream, index);
+            
+            // Clear previous retry messages
+            const existingRetryMessages = document.querySelectorAll(`#analysis-box-${index} .retry-words-message`);
+            existingRetryMessages.forEach(msg => msg.remove());
+            
+            // Update UI
+            setActivity(index, 'Recording');
+            
+            // Show audio waves visualization
+            const wavesContainer = document.getElementById(`waves-container-${index}`);
+            if (wavesContainer) {
+                wavesContainer.style.display = 'flex';
+            }
+            
+            // Show results section
+            document.getElementById(`results-${index}`).style.display = 'block';
+            document.getElementById(`transcription-${index}`).textContent = 'Recording... आप बोलिए';
+            
+            console.log('🎤 Recording started successfully');
+        })
+        .catch(error => {
+            console.error('❌ Microphone access error:', error);
+            
+            let errorMessage = '';
+            if (error.name === 'NotAllowedError') {
+                errorMessage = '🚫 Microphone Permission Denied!\n\nPlease:\n1. Click the microphone icon in address bar\n2. Select "Allow" for microphone access\n3. Refresh the page and try again';
+            } else if (error.name === 'NotFoundError') {
+                errorMessage = '🎤 No Microphone Found!\n\nPlease connect a microphone and try again.';
+            } else {
+                errorMessage = `❌ Microphone Error: ${error.message}`;
+            }
+            
+            alert(errorMessage);
+            
+            // Reset button state
+            const recordBtn = document.getElementById(`record-btn-${index}`);
+            recordBtn.innerHTML = '<i class="fas fa-microphone"></i><span>Start Recording</span>';
+            recordBtn.classList.remove('recording');
+            
+            // Show helpful message in transcription area
+            document.getElementById(`transcription-${index}`).textContent = 
+                'Microphone access required. Please allow permission and try again.';
+        });
+}
+
+// Stop Recording
+function stopRecording(index) {
+    console.log('🛑 stopRecording called - index:', index, 'isRecording:', isRecording, 'mediaRecorder state:', speakMediaRecorder ? speakMediaRecorder.state : 'null');
+    
+    if (speakMediaRecorder && isRecording) {
+        console.log('✅ Valid recording state, stopping...');
+        // Set isRecording to false first to stop silence monitoring
+        isRecording = false;
+        
+        // Stop the media recorder
+        speakMediaRecorder.stop();
+        
+        // Update UI
+        setActivity(index, 'Processing');
+        
+        const recordBtn = document.getElementById(`record-btn-${index}`);
+        recordBtn.innerHTML = '<i class="fas fa-microphone"></i><span>Start Recording</span>';
+        recordBtn.classList.remove('recording');
+        recordBtn.style.display = 'none';
+        
+        // Hide audio waves visualization
+        const wavesContainer = document.getElementById(`waves-container-${index}`);
+        if (wavesContainer) {
+            wavesContainer.style.display = 'none';
+        }
+        
+        document.getElementById(`transcription-${index}`).textContent = 'Processing your speech...';
+        console.log('🔄 Recording stopped and UI updated');
+    } else {
+        console.log('❌ No active recording to stop');
+    }
+}
+
+// Process Recording
+function processRecording(index, audioBlob) {
+    console.log('📊 Processing recording for sentence:', index);
+    console.log('🎵 Audio blob size:', audioBlob.size, 'bytes');
+    
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.wav');
+    formData.append('sentence', sentences[index].text);
+    formData.append('expected_text', sentences[index].text);
+    
+    fetch('/api/analyze_speech', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('📊 Analysis response:', data);
+        
+        if (data.ok) {
+            // Display transcription
+            document.getElementById(`transcription-${index}`).textContent = 
+                data.user_text || 'No speech detected';
+            
+            // Display analysis
+            if (data.feedback) {
+                const analysisBox = document.getElementById(`analysis-box-${index}`);
+                const analysisContent = document.getElementById(`analysis-content-${index}`);
+                analysisContent.innerHTML = formatAnalysis(data);
+                analysisBox.style.display = 'block';
+            }
+            
+            // Display feedback
+            if (data.encouragement) {
+                const feedbackBox = document.getElementById(`feedback-box-${index}`);
+                const feedbackContent = document.getElementById(`feedback-content-${index}`);
+                feedbackContent.textContent = data.encouragement;
+                feedbackBox.style.display = 'block';
+            }
+            
+            // Check if retry is required
+            if (data.retry_required || !data.can_proceed) {
+                // Show retry message and keep record button visible
+                setActivity(index, 'Retry Required');
+                
+                // Show mispronounced words if available
+                if (data.mispronounced_words && data.mispronounced_words.length > 0) {
+                    const wordsToRetry = data.mispronounced_words.join(', ');
+                    const retryMessage = document.createElement('div');
+                    retryMessage.className = 'retry-words-message';
+                    retryMessage.innerHTML = `<strong>इन words को फिर से बोलें:</strong> ${wordsToRetry}`;
+                    retryMessage.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 5px; color: #856404;';
+                    
+                    const analysisBox = document.getElementById(`analysis-box-${index}`);
+                    if (analysisBox) {
+                        analysisBox.appendChild(retryMessage);
+                    }
+                }
+                
+                // Show record button again for retry
+                const recordBtn = document.getElementById(`record-btn-${index}`);
+                recordBtn.style.display = 'flex';
+                recordBtn.innerHTML = '<i class="fas fa-microphone"></i><span>Try Again</span>';
+                recordBtn.classList.remove('recording');
+                
+                // Don't move to next sentence
+                return;
+            }
+            
+            // Only mark as completed if can proceed
+            setActivity(index, 'Completed');
+            
+            // Move to next sentence if in auto mode and can proceed
+            if (isAutoMode && index < sentences.length - 1 && data.can_proceed) {
+                setTimeout(() => {
+                    moveToNextSentence(index + 1);
+                }, 2000);
+            }
+        } else {
+            console.error('❌ Analysis failed:', data.error);
+            document.getElementById(`transcription-${index}`).textContent = 
+                'Analysis failed: ' + (data.error || 'Unknown error');
+            setActivity(index, 'Ready to Record');
+            
+            // Show record button again
+            const recordBtn = document.getElementById(`record-btn-${index}`);
+            recordBtn.style.display = 'flex';
+            recordBtn.innerHTML = '<i class="fas fa-microphone"></i><span>Start Recording</span>';
+            recordBtn.classList.remove('recording');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Processing error:', error);
+        document.getElementById(`transcription-${index}`).textContent = 
+            'Processing failed. Please try again.';
+        setActivity(index, 'Ready to Record');
+        
+        // Show record button again
+        const recordBtn = document.getElementById(`record-btn-${index}`);
+        recordBtn.style.display = 'flex';
+        recordBtn.innerHTML = '<i class="fas fa-microphone"></i><span>Start Recording</span>';
+        recordBtn.classList.remove('recording');
+    });
+}
+
+// Format Analysis Results
+function formatAnalysis(data) {
+    let html = '';
+    
+    if (data.feedback) {
+        html += `<div class="feedback-item"><strong>Feedback:</strong> ${data.feedback}</div>`;
+    }
+    
+    if (data.pronunciation_score !== undefined) {
+        html += `<div class="score-item"><strong>Pronunciation Score:</strong> ${data.pronunciation_score}/100</div>`;
+    }
+    
+    if (data.similarity_score !== undefined) {
+        html += `<div class="score-item"><strong>Similarity Score:</strong> ${data.similarity_score}/100</div>`;
+    }
+    
+    return html || '<div>Analysis completed successfully!</div>';
+}
+
+// Move to Next Sentence
+function moveToNextSentence(nextIndex) {
+    if (nextIndex >= sentences.length) {
+        console.log('🎉 All sentences completed!');
+        return;
+    }
+    
+    // Update current index
+    currentIndex = nextIndex;
+    
+    // Update active card
+    document.querySelectorAll('.sentence-card').forEach((card, index) => {
+        card.classList.toggle('active', index === nextIndex);
+    });
+    
+    // Enable listen button for next sentence
+    document.getElementById(`listen-btn-${nextIndex}`).disabled = false;
+    
+    // Update progress
+    updateProgress();
+    
+    // Scroll to active sentence
+    document.getElementById(`sentence-row-${nextIndex}`).scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+    });
+    
+    console.log('➡️ Moved to sentence:', nextIndex + 1);
+}
+
+// Toggle Auto Control
+function toggleAutoControl() {
+    isAutoMode = !isAutoMode;
+    const btn = document.getElementById('auto-control-btn');
+    
+    if (isAutoMode) {
+        btn.innerHTML = '<i class="fas fa-pause"></i><span>Stop Auto</span>';
+        console.log('🤖 Auto mode enabled');
+    } else {
+        btn.innerHTML = '<i class="fas fa-play"></i><span>Start Auto</span>';
+        console.log('✋ Auto mode disabled');
+    }
+}
+
+// Setup Silence Detection
+function setupSilenceDetection(stream, index) {
+    try {
+        // Clean up existing audio context if any
+        if (speakSilenceAudioContext) {
+            speakSilenceAudioContext.close();
+        }
+        
+        speakSilenceAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        speakAnalyser = speakSilenceAudioContext.createAnalyser();
+        const microphone = speakSilenceAudioContext.createMediaStreamSource(stream);
+        
+        speakAnalyser.fftSize = 512;
+        speakAnalyser.minDecibels = -90;
+        speakAnalyser.maxDecibels = -10;
+        speakAnalyser.smoothingTimeConstant = 0.85;
+        
+        microphone.connect(speakAnalyser);
+        
+        // Start monitoring silence
+        monitorSilence(index);
+        
+        console.log('🔇 Silence detection setup complete');
+    } catch (error) {
+        console.error('❌ Silence detection setup failed:', error);
+    }
+}
+
+// Monitor Silence
+function monitorSilence(index) {
+    if (!isRecording || !speakAnalyser) {
+        console.log('🛑 Stopping silence monitoring - not recording or no analyser');
+        return;
+    }
+    
+    const bufferLength = speakAnalyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    speakAnalyser.getByteFrequencyData(dataArray);
+    
+    // Calculate average volume
+    let sum = 0;
+    for (let i = 0; i < bufferLength; i++) {
+        sum += dataArray[i];
+    }
+    const average = sum / bufferLength / 255; // Normalize to 0-1
+    
+    const currentTime = Date.now();
+    
+    if (average < silenceThreshold) {
+        // Silence detected
+        if (silenceStartTime === null) {
+            silenceStartTime = currentTime;
+            console.log('🔇 Silence started');
+        } else if (currentTime - silenceStartTime >= silenceDuration) {
+            // Silence duration exceeded, stop recording
+            console.log('🔇 Silence duration exceeded, auto-stopping recording');
+            
+            // Only auto-stop if we've been recording for at least 2 seconds
+            if (currentTime - recordingStartTime >= 2000) {
+                // Auto-stop recording
+                toggleRecording(index);
+                return;
+            }
+        }
+    } else {
+        // Sound detected, reset silence timer
+        if (silenceStartTime !== null) {
+            console.log('🔊 Sound detected, resetting silence timer');
+            silenceStartTime = null;
+        }
+    }
+    
+    // Continue monitoring only if still recording
+    if (isRecording) {
+        requestAnimationFrame(() => monitorSilence(index));
+    }
+}
+
+// Cleanup Silence Detection
+function cleanupSilenceDetection() {
+    if (speakSilenceAudioContext) {
+        speakSilenceAudioContext.close();
+        speakSilenceAudioContext = null;
+    }
+    speakAnalyser = null;
+    silenceStartTime = null;
+    recordingStartTime = null;
+    console.log('🧹 Silence detection cleaned up');
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+    
+    if (speakMediaRecorder && speakMediaRecorder.state !== 'inactive') {
+        speakMediaRecorder.stop();
+    }
+    
+    cleanupSilenceDetection();
+});
+
+console.log('✅ Speaking Practice script loaded successfully');
+</script>
+{% endblock %}
